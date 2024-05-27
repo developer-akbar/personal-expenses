@@ -1,0 +1,70 @@
+.search-container {
+    /* width: 60%; */
+    margin: auto;
+}
+
+form.search-form {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.total-types {
+    display: flex;
+    justify-content: space-between;
+    width: 50%;
+    margin: auto;
+}
+
+.total-types *:empty {
+    display: none;
+}
+
+.total-types * {
+    padding: 1rem;
+}
+
+.selected-total-wrapper {
+    padding-block: 1rem;
+}
+
+#searchResults td:has(.select-checkbox) {
+    text-align: center;
+}
+
+#searchResults td.date {
+    width: 120px;
+}
+
+.filter-wrapper {
+    display: none;
+    width: 20%;
+    flex-direction: column;
+    gap: 1rem;
+    margin-inline: 1rem;
+}
+
+.search-results.mb-16 {
+    display: flex;
+    gap: 1rem;
+    align-items: start;
+}
+
+.filter-name {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#searchResults {
+    flex: 1;
+    margin-inline: 1rem;
+}
+
+.account-category {
+    width: max-content;
+    opacity: 0.7;
+    font-size: 11px;
+    margin-block: .5rem;
+}

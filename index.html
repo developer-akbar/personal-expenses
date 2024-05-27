@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker</title>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script> -->
+    <link rel="stylesheet" href="styles/common.css">
+    <link rel="stylesheet" href="styles/search.css">
+</head>
+
+<body>
+    <header>
+        <h1>Personal Finance Tracker</h1>
+    </header>
+    <div class="overlay"></div>
+    <main>
+        <div class="search-container">
+            <form class="search-form">
+                <div class="search-input-field">
+                    <input type="text" id="searchInput" placeholder="Search..." autocomplete="off" />
+                    <div id="suggestions"></div>
+                </div>
+                <button type="submit" id="searchButton">Search</button>
+            </form>
+            <div class="search-results-wrapper">
+                <div class="total-types">
+                    <span id="total-income"></span>
+                    <span id="total-expenses"></span>
+                    <span id="total-transfers"></span>
+                </div>
+                <div class="selected-total-wrapper mb-16">
+                    <span id="selected-total"></span>
+                </div>
+
+                <div class="search-results mb-16">
+
+                    <!-- Filters Section Starts -->
+                    <div class="filter-wrapper">
+                        <div class="filter-name">
+                            <label for="period">Period</label>
+                            <select id="period">
+                                <option value="all">All</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="annually">Annually</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                            <input type="date" id="custom-start" style="display:none;">
+                            <input type="date" id="custom-end" style="display:none;">
+                        </div>
+
+                        <div class="filter-name">
+                            <label for="account">Account</label>
+                            <select id="account">
+                                <option value="all">All</option>
+                                <!-- Populate dynamically with accounts -->
+                            </select>
+                        </div>
+
+                        <div class="filter-name">
+                            <label for="category">Category</label>
+                            <select id="category">
+                                <option value="all">All</option>
+                                <!-- Populate dynamically with categories -->
+                            </select>
+                        </div>
+
+                        <div class="filter-name">
+                            <label for="incomeExpense">Type</label>
+                            <select id="incomeExpense">
+                                <option value="all">All</option>
+                                <option value="Income">Income</option>
+                                <option value="Expense">Expense</option>
+                                <option value="Transfer-Out">Transfer-Out</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Filters Section Ends -->
+                    
+                    <div id="searchResults"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div id="reports">
+            <div id="expenses-table"></div>
+        </div>
+    </main>
+    <footer>
+        <!-- Add footer content if necessary -->
+    </footer>
+    <script src="scripts/common.js"></script>
+    <script src="scripts/search.js"></script>
+</body>
+
+</html>
