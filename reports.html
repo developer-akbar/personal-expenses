@@ -7,7 +7,7 @@
     <title>Personal Finance Tracker</title>
     <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/login.css">
-    <link rel="stylesheet" href="styles/search.css">
+    <link rel="stylesheet" href="styles/reports.css">
 </head>
 
 <body>
@@ -30,7 +30,12 @@
     </nav>
     <div class="overlay"></div>
     <main style="display: none;">
-        <h2 class="heading">Dashboard</h2>
+        <h2 class="heading">Reports</h2>
+
+        <div id="reports-section">
+            <div id="expenses-table"></div>
+        </div>
+
     </main>
     <footer style="display: none;">
         <p>&copy; 2024 Personal Finance Manager</p>
@@ -56,6 +61,7 @@
 
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>
+    <script src="scripts/reports.js"></script>
 </body>
 
 </html>

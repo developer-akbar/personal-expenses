@@ -1,0 +1,298 @@
+// accounts.js
+
+document.addEventListener('DOMContentLoaded', () => {
+    const accountsLink = document.getElementById('accounts-link');
+    const accountsSection = document.getElementById('accounts-section');
+    const dailyTransactionsSection = document.getElementById('daily-transactions-section');
+    const selectedAccountDisplay = document.getElementById('selected-account');
+    const currentPeriod = document.getElementById('current-period');
+    const backButton = document.getElementById('back-button');
+
+    let currentDailyDate = new Date();
+    let selectedAccount = null;
+
+    function formatDate(date) {
+        return `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
+    }
+
+    function formatIndianCurrency(amount) {
+        return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function calculateAccountBalance(account, date) {
+        return masterExpenses.reduce((acc, expense) => {
+            const expenseDate = new Date(convertDateFormat(expense.Date));
+            if (expenseDate > date) return acc;
+
+            const amount = parseFloat(expense.INR);
+            if (expense.Account === account) {
+                if (expense["Income/Expense"] === "Income") {
+                    acc += amount;
+                } else if (expense["Income/Expense"] === "Expense") {
+                    acc -= amount;
+                } else if (expense["Income/Expense"] === "Transfer-Out") {
+                    acc -= amount;
+                }
+            }
+            if (expense.Category === account && expense["Income/Expense"] === "Transfer-Out") {
+                acc += amount;
+            }
+            return acc;
+        }, 0);
+    }
+
+    function updateAccountBalances() {
+        const accountsBalancesContainer = document.getElementById('accounts-balances');
+        accountsBalancesContainer.innerHTML = ''; // Clear previous balances
+
+        // Calculate account balances
+        const accountBalances = masterExpenses.reduce((acc, expense) => {
+            const account = expense.Account;
+            const amount = parseFloat(expense.INR);
+            if (!acc[account]) {
+                acc[account] = 0;
+            }
+            if (expense["Income/Expense"] === "Income") {
+                acc[account] += amount;
+            } else if (expense["Income/Expense"] === "Expense") {
+                acc[account] -= amount;
+            } else if (expense["Income/Expense"] === "Transfer-Out") {
+                acc[account] -= amount;
+                const targetAccount = expense.Category;
+                if (!acc[targetAccount]) {
+                    acc[targetAccount] = 0;
+                }
+                acc[targetAccount] += amount;
+            }
+            return acc;
+        }, {});
+
+        let assets = 0;
+        let liabilities = 0;
+
+        // Display account balances
+        for (const [account, balance] of Object.entries(accountBalances)) {
+            const accountContainer = document.createElement('div');
+            accountContainer.className = 'account-row';
+            accountContainer.dataset.account = account;
+
+            const accountName = document.createElement('span');
+            accountName.textContent = account;
+
+            const accountBalance = document.createElement('span');
+            accountBalance.className = 'amount';
+            accountBalance.textContent = formatIndianCurrency(balance);
+            if (balance >= 0) {
+                accountBalance.classList.add('positive');
+                assets += balance;
+            } else {
+                accountBalance.classList.add('negative');
+                liabilities += Math.abs(balance);
+            }
+
+            accountContainer.appendChild(accountName);
+            accountContainer.appendChild(accountBalance);
+
+            accountsBalancesContainer.appendChild(accountContainer);
+        }
+
+        const balance = assets - liabilities;
+
+        document.getElementById('assets').textContent = `Assets: ${formatIndianCurrency(assets)}`;
+        document.getElementById('liabilities').textContent = `Liabilities: ${formatIndianCurrency(liabilities)}`;
+        document.getElementById('balance').textContent = `Balance: ${formatIndianCurrency(balance)}`;
+
+        // Add click event listener for each account row to switch to Daily tab with filtered transactions
+        const accountRows = document.querySelectorAll('.account-row');
+        accountRows.forEach(row => {
+            row.addEventListener('click', () => {
+                selectedAccount = row.dataset.account;
+                selectedAccountDisplay.textContent = `Transactions for ${selectedAccount}`;
+                localStorage.setItem('selectedAccount', selectedAccount);
+                currentDailyDate = new Date(); // Reset to current month
+                updateAccountTransactions();
+                accountsSection.style.display = 'none';
+                dailyTransactionsSection.style.display = 'block';
+            });
+        });
+    }
+
+    function updateAccountTransactions() {
+        const accountTransactionsContainer = document.getElementById('account-transactions');
+        accountTransactionsContainer.innerHTML = ''; // Clear previous transactions
+
+        // Filter transactions for the current month and year for the selected account
+        const filteredTransactions = masterExpenses.filter(expense => {
+            const expenseDate = new Date(convertDateFormat(expense.Date));
+            const matchesDate = expenseDate.getMonth() === currentDailyDate.getMonth() && expenseDate.getFullYear() === currentDailyDate.getFullYear();
+            const matchesAccount = expense.Account === selectedAccount || (expense["Income/Expense"] === "Transfer-Out" && expense.Category === selectedAccount);
+            return matchesDate && matchesAccount;
+        });
+
+        // Group transactions by day
+        const transactionsByDay = filteredTransactions.reduce((acc, expense) => {
+            const date = new Date(convertDateFormat(expense.Date)).toDateString();
+            if (!acc[date]) {
+                acc[date] = [];
+            }
+            acc[date].push(expense);
+            return acc;
+        }, {});
+
+        const tableElement = document.createElement('table');
+        const tableBodyElement = document.createElement('tbody');
+
+        // Display transactions grouped by day
+        for (const [date, transactions] of Object.entries(transactionsByDay)) {
+            const dayContainer = document.createElement('tr');
+            dayContainer.className = 'transaction-day';
+
+            const dayHeader = dayContainer.insertCell();
+            dayHeader.classList.add('day-header');
+            dayHeader.setAttribute('colspan', '5');
+
+            const dayContent = document.createElement('h3');
+            dayContent.classList.add('day-content');
+            dayContent.textContent = date;
+
+            const totals = calculateAccountTotals(transactions);
+            const dayTotals = document.createElement('span');
+            dayTotals.innerHTML = `Deposits: ${formatIndianCurrency(totals.deposits)} Withdrawal: ${formatIndianCurrency(totals.withdrawal)}`;
+            dayContent.appendChild(dayTotals);
+            dayHeader.appendChild(dayContent);
+            dayContainer.appendChild(dayHeader);
+            tableBodyElement.appendChild(dayContainer);
+
+            transactions.forEach(expense => {
+                const row = createTransactionRow(expense);
+                tableBodyElement.appendChild(row);
+            });
+        }
+
+        tableElement.appendChild(tableBodyElement);
+        accountTransactionsContainer.appendChild(tableElement);
+
+        const monthlyTotals = calculateAccountTotals(filteredTransactions);
+        document.getElementById('account-deposits').textContent = `Deposits: ${formatIndianCurrency(monthlyTotals.deposits)}`;
+        document.getElementById('account-withdrawal').textContent = `Withdrawal: ${formatIndianCurrency(monthlyTotals.withdrawal)}`;
+        document.getElementById('account-total').textContent = `Total: ${formatIndianCurrency(monthlyTotals.deposits - monthlyTotals.withdrawal)}`;
+        document.getElementById('account-balance').textContent = `Balance: ${formatIndianCurrency(calculateMonthEndBalance(selectedAccount, currentDailyDate))}`;
+
+        selectedAccountDisplay.textContent = `${selectedAccount}`;
+    }
+
+    function calculateMonthEndBalance(account, date) {
+        const transactions = masterExpenses.filter(expense => {
+            const expenseDate = new Date(convertDateFormat(expense.Date));
+            return expenseDate <= date && (expense.Account === account || (expense["Income/Expense"] === "Transfer-Out" && expense.Category === account));
+        });
+
+        return transactions.reduce((acc, expense) => {
+            const amount = parseFloat(expense.INR);
+            if (expense.Account === account) {
+                if (expense["Income/Expense"] === "Income") {
+                    acc += amount;
+                } else if (expense["Income/Expense"] === "Expense") {
+                    acc -= amount;
+                } else if (expense["Income/Expense"] === "Transfer-Out") {
+                    acc -= amount;
+                }
+            }
+            if (expense.Category === account && expense["Income/Expense"] === "Transfer-Out") {
+                acc += amount;
+            }
+            return acc;
+        }, 0);
+    }
+
+    function calculateAccountTotals(transactions) {
+        return transactions.reduce((acc, expense) => {
+            const amount = parseFloat(expense.INR);
+            if (expense["Income/Expense"] === "Income") {
+                acc.deposits += amount;
+            } else if (expense["Income/Expense"] === "Expense") {
+                acc.withdrawal += amount;
+            } else if (expense["Income/Expense"] === "Transfer-Out") {
+                if (expense.Account === selectedAccount) {
+                    acc.withdrawal += amount;
+                }
+                if (expense.Category === selectedAccount) {
+                    acc.deposits += amount;
+                }
+            }
+            return acc;
+        }, { deposits: 0, withdrawal: 0 });
+    }
+
+    function createTransactionRow(expense) {
+        const row = document.createElement('tr');
+        row.className = 'transaction-row';
+
+        const inputTd = row.insertCell();
+        const checkboxCell = document.createElement('input');
+        checkboxCell.type = 'checkbox';
+        checkboxCell.className = 'select-checkbox';
+        inputTd.appendChild(checkboxCell);
+
+        const rowCell = row.insertCell();
+        const dateCell = document.createElement('p');
+        dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
+        dateCell.className = 'date';
+        const accountCategoryElement = document.createElement('p');
+        accountCategoryElement.classList.add('account-category');
+        accountCategoryElement.textContent = `${expense.Account} - ${expense.Category}`;
+        rowCell.appendChild(dateCell);
+        rowCell.appendChild(accountCategoryElement);
+
+        const amountCell = row.insertCell();
+        amountCell.textContent = formatIndianCurrency(parseFloat(expense.INR));
+        amountCell.className = `amount ${expense['Income/Expense'].toLowerCase()}`;
+
+        const noteCell = row.insertCell();
+        noteCell.textContent = expense.Note;
+        noteCell.className = 'note';
+
+        const descriptionCell = row.insertCell();
+        descriptionCell.textContent = expense.Description;
+        descriptionCell.className = 'description';
+
+        row.appendChild(inputTd);
+        row.appendChild(rowCell);
+        row.appendChild(amountCell);
+        row.appendChild(noteCell);
+        row.appendChild(descriptionCell);
+
+        return row;
+    }
+
+    // Event listeners for period navigation
+    document.getElementById('prev-period').addEventListener('click', () => {
+        currentDailyDate.setMonth(currentDailyDate.getMonth() - 1);
+        updateAccountTransactions();
+        currentPeriod.textContent = formatDate(currentDailyDate);
+    });
+
+    document.getElementById('next-period').addEventListener('click', () => {
+        currentDailyDate.setMonth(currentDailyDate.getMonth() + 1);
+        updateAccountTransactions();
+        currentPeriod.textContent = formatDate(currentDailyDate);
+    });
+
+    // Back button event listener
+    backButton.addEventListener('click', () => {
+        accountsSection.style.display = 'block';
+        dailyTransactionsSection.style.display = 'none';
+    });
+
+    // Wait for masterExpenses to be loaded
+    document.addEventListener('masterExpensesLoaded', () => {
+        currentPeriod.textContent = formatDate(currentDailyDate);
+        updateAccountBalances();
+    });
+});
+
+function convertDateFormat(dateString) {
+    const parts = dateString.includes('/') ? dateString.split("/") : dateString.split("-");
+    const convertedDate = `${parts[1]}/${parts[0]}/${parts[2]}`;
+    return convertedDate;
+}

@@ -1,3 +1,5 @@
+/* filters.css */
+
 /* General layout */
 body {
     display: flex;
@@ -50,6 +52,9 @@ body {
 #price-range input[type="number"] {
     width: 70px;
     margin-left: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
 #searchResults {
@@ -89,4 +94,36 @@ th, td {
 #selected-total {
     margin-top: 10px;
     font-weight: bold;
+}
+
+/* Filter container */
+.filter-container {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Filter labels */
+.filter-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Filter inputs */
+.filter-container input[type="text"],
+.filter-container select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+
+.filter-container input[type="text"]:focus,
+.filter-container select:focus {
+    border-color: #004080;
 }

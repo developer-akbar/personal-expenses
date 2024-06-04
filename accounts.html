@@ -1,3 +1,4 @@
+<!-- accounts.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,7 +8,7 @@
     <title>Personal Finance Tracker</title>
     <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/login.css">
-    <link rel="stylesheet" href="styles/search.css">
+    <link rel="stylesheet" href="styles/accounts.css">
 </head>
 
 <body>
@@ -29,10 +30,38 @@
         </div>
     </nav>
     <div class="overlay"></div>
-    <main style="display: none;">
-        <h2 class="heading">Dashboard</h2>
+    <main>
+        <h2 class="heading">Accounts</h2>
+
+        <!-- Accounts Section -->
+        <div id="accounts-section">
+            <div class="accounts-summary">
+                <span id="assets" class="amount positive">Assets: 0.00</span>
+                <span id="liabilities" class="amount negative">Liabilities: 0.00</span>
+                <span id="balance" class="amount">Balance: 0.00</span>
+            </div>
+            <div id="accounts-balances"></div>
+        </div>
+
+        <!-- Daily Transactions Section -->
+        <div id="daily-transactions-section" style="display: none;">
+            <button id="back-button">&larr;</button>
+            <span id="selected-account" class="selected-account"></span>
+            <div class="period-navigation">
+                <button id="prev-period">&lt;</button>
+                <span id="current-period" class="period-display"></span>
+                <button id="next-period">&gt;</button>
+            </div>
+            <div class="totals">
+                <span id="account-deposits">Deposits: 0.00</span>
+                <span id="account-withdrawal">Withdrawal: 0.00</span>
+                <span id="account-total">Total: 0.00</span>
+                <span id="account-balance">Balance: 0.00</span>
+            </div>
+            <div id="account-transactions" class="transaction-list"></div>
+        </div>
     </main>
-    <footer style="display: none;">
+    <footer>
         <p>&copy; 2024 Personal Finance Manager</p>
     </footer>
 
@@ -53,9 +82,9 @@
             </form>
         </div>
     </div>
-
+    
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>
+    <script src="scripts/accounts.js"></script>
 </body>
-
 </html>

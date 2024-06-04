@@ -1,0 +1,148 @@
+/* accounts.css */
+
+.period-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.period-navigation button {
+    background: #004080;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 0 5px;
+}
+
+.period-navigation button:hover {
+    background: #003366;
+}
+
+.period-display {
+    font-weight: bold;
+    margin: 0 10px;
+}
+
+.totals {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.totals .amount {
+    font-weight: bold;
+}
+
+.positive {
+    color: blue;
+}
+
+.negative {
+    color: red;
+}
+
+.transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.transaction-day {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.transaction-day h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    background-color: #e0e0e0;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.day-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.transaction-row:last-child {
+    border-bottom: none;
+}
+
+.transaction-row .amount {
+    text-align: right;
+}
+
+.amount.income {
+    color: green;
+}
+
+.amount.expense {
+    color: red;
+}
+
+.selected-account {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Specific styles for accounts page */
+.accounts-summary {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+#accounts-balances {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.account-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 15%;
+    margin: auto;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.account-row:hover {
+    background-color: #e0e0e0;
+}
+
+.account-row span:first-child {
+    font-weight: bold;
+}
+
+#back-button {
+    background: #004080;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+#back-button:hover {
+    background: #003366;
+}

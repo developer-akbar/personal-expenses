@@ -23,7 +23,15 @@ async function convertToCSV(file) {
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const csv = XLSX.utils.sheet_to_csv(worksheet);
+
+        // Convert worksheet to CSV and replace commas within cell data
+        const csv = XLSX.utils.sheet_to_csv(worksheet, { FS: ',', RS: '\n', strip: false })
+            .split('\n')
+            .map(row =>
+                transformString(row).split(',')
+                    .map(cell => `${cell.replace(/,/g, ';')}`) // replace commas within cell data and quote the cell
+                    .join(',')
+            ).join('\n');
 
         // Save the CSV file using the File System Access API
         try {
@@ -42,8 +50,21 @@ async function convertToCSV(file) {
             await writable.close();
             alert('File successfully saved as CSV.');
         } catch (err) {
-            console.error('Error saving file:', err);
+            alert('Error saving file:', err.message);
         }
     };
     reader.readAsArrayBuffer(file);
+}
+
+// this function helps to replace commas(,) which are delimiter in csv conversion.
+// Not to break the excel file structure when converting to csv
+function transformString(inputString) {
+    // Find all quoted texts after commas and replace them accordingly
+    const outputString = inputString.replace(/,"([^"]*)"/g, function (match, p1) {
+        // Replace commas with semicolons inside the quoted text
+        let transformedText = p1.replace(/,/g, ';');
+        return ',' + transformedText;
+    });
+
+    return outputString;
 }

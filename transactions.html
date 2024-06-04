@@ -1,0 +1,113 @@
+<!-- transactions.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker</title>
+    <link rel="stylesheet" href="styles/common.css">
+    <link rel="stylesheet" href="styles/login.css">
+    <link rel="stylesheet" href="styles/transactions.css">
+</head>
+
+<body>
+    <header>
+        <h1>Personal Finance Manager</h1>
+    </header>
+    <nav>
+        <div class="navigation">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="transactions.html">Transactions</a></li>
+                <li><a href="accounts.html" id="accounts-link">Accounts</a></li>
+                <li><a href="#">Expenses</a></li>
+                <li><a href="reports.html" id="reports-link">Reports</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="search.html" id="search-link">Search</a></li>
+                <li><a href="#" id="logoutButton" style="display: none;">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="overlay"></div>
+    <main style="display: none;">
+        <h2 class="heading">Transactions</h2>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="daily">Daily</button>
+            <button class="tab-button" data-tab="monthly">Monthly</button>
+            <button class="tab-button" data-tab="total">Total</button>
+        </div>
+        <!-- Transactions Display Starts -->
+        <div id="transactions" class="transactions">
+            <!-- Daily Transactions -->
+            <div id="daily" class="tab-content active">
+                <div class="period-navigation">
+                    <button id="prev-period">&lt;</button>
+                    <span id="current-period" class="period-display"></span>
+                    <button id="next-period">&gt;</button>
+                </div>
+                <div class="totals">
+                    <span id="daily-income">Income: 0.00</span>
+                    <span id="daily-expenses">Expenses: 0.00</span>
+                    <span id="daily-balance">Balance: 0.00</span>
+                </div>
+                <div id="daily-transactions" class="transaction-list"></div>
+            </div>
+
+            <!-- Monthly Transactions -->
+            <div id="monthly" class="tab-content">
+                <div class="period-navigation">
+                    <button id="prev-year">&lt;</button>
+                    <span id="current-year" class="period-display"></span>
+                    <button id="next-year">&gt;</button>
+                </div>
+                <div class="totals">
+                    <span id="monthly-income">Income: 0.00</span>
+                    <span id="monthly-expenses">Expenses: 0.00</span>
+                    <span id="monthly-balance">Balance: 0.00</span>
+                </div>
+                <div id="monthly-transactions" class="transaction-list"></div>
+            </div>
+
+            <!-- Total Transactions -->
+            <div id="total" class="tab-content">
+                <div class="totals">
+                    <span id="total-income">Income: 0.00</span>
+                    <span id="total-expenses">Expenses: 0.00</span>
+                    <span id="total-balance">Balance: 0.00</span>
+                </div>
+                <div id="total-transactions" class="transaction-list"></div>
+            </div>
+        </div>
+        <!-- Transactions Display Ends -->
+    </main>
+    <footer style="display: none;">
+        <p>&copy; 2024 Personal Finance Manager</p>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="scripts/common.js"></script>
+    <script src="scripts/auth.js"></script>
+    <script src="scripts/transactions.js"></script>
+</body>
+
+</html>
