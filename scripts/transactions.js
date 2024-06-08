@@ -1,10 +1,9 @@
-// transactions.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const tabs = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
     const currentPeriod = document.getElementById('current-period');
     const currentYear = document.getElementById('current-year');
+    const rowDetails = document.querySelector('.row-details');
 
     let currentDate = new Date();
     let currentDailyDate = new Date();
@@ -20,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function formatDate(date) {
-        return `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
+        return `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
     }
 
     function formatYear(date) {
@@ -32,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDailyTransactions() {
+        document.querySelector('.selected-total-wrapper').style.display = 'none';
+
         const dailyTransactionsContainer = document.getElementById('daily-transactions');
         dailyTransactionsContainer.innerHTML = ''; // Clear previous transactions
 
@@ -61,23 +62,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dayHeader = dayContainer.insertCell();
             dayHeader.classList.add('day-header');
-            dayHeader.setAttribute('colspan', '5');
+            dayHeader.setAttribute('colspan', '5'); // Adjusted for mobile view
 
             const dayContent = document.createElement('h3');
             dayContent.classList.add('day-content');
             dayContent.textContent = date;
 
             const totals = calculateTotals(transactions);
-            const dayTotals = document.createElement('span');
-            dayTotals.innerHTML = `Income: ${formatIndianCurrency(totals.income)} Expenses: ${formatIndianCurrency(totals.expenses)}`;
+            const dayTotals = document.createElement('div');
+            dayTotals.classList.add('day-totals');
+            dayTotals.innerHTML = `<p class="income">${formatIndianCurrency(totals.income)}</p><p class="expense">${formatIndianCurrency(totals.expenses)}</p>`;
             dayContent.appendChild(dayTotals);
             dayHeader.appendChild(dayContent);
             dayContainer.appendChild(dayHeader);
             tableBodyElement.appendChild(dayContainer);
 
             transactions.forEach(expense => {
-                const row = createTransactionRow(expense);
-                tableBodyElement.appendChild(row);
+                const transactionRow = createTransactionRow(expense);
+                tableBodyElement.appendChild(transactionRow);
             });
         }
 
@@ -85,9 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
         dailyTransactionsContainer.appendChild(tableElement);
 
         const monthlyTotals = calculateTotals(filteredTransactions);
-        document.getElementById('daily-income').textContent = `Income: ${formatIndianCurrency(monthlyTotals.income)}`;
-        document.getElementById('daily-expenses').textContent = `Expenses: ${formatIndianCurrency(monthlyTotals.expenses)}`;
-        document.getElementById('daily-balance').textContent = `Balance: ${formatIndianCurrency(monthlyTotals.income - monthlyTotals.expenses)}`;
+        document.getElementById('daily-income').innerHTML = `<p>Income</p> <p>${formatIndianCurrency(monthlyTotals.income)}</p>`;
+        document.getElementById('daily-expenses').innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(monthlyTotals.expenses)}</p>`;
+        document.getElementById('daily-balance').innerHTML = `<p>Balance</p> <p>${formatIndianCurrency(monthlyTotals.income - monthlyTotals.expenses)}</p>`;
     }
 
     function updateMonthlyTransactions() {
@@ -139,10 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const yearlyTotals = calculateTotals(filteredTransactions);
-        document.getElementById('monthly-income').textContent = `Income: ${formatIndianCurrency(yearlyTotals.income)}`;
-        document.getElementById('monthly-expenses').textContent = `Expenses: ${formatIndianCurrency(yearlyTotals.expenses)}`;
-        document.getElementById('monthly-balance').textContent = `Balance: ${formatIndianCurrency(yearlyTotals.income - yearlyTotals.expenses)}`;
-
+        document.getElementById('monthly-income').innerHTML = `<p>Income</p> <p>${formatIndianCurrency(yearlyTotals.income)}</p>`;
+        document.getElementById('monthly-expenses').innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(yearlyTotals.expenses)}</p>`;
+        document.getElementById('monthly-balance').innerHTML = `<p>Balance</p> <p>${formatIndianCurrency(yearlyTotals.income - yearlyTotals.expenses)}</p>`;
         // Add click event listener for each month row to switch to Daily tab
         const monthRows = document.querySelectorAll('#monthly-transactions .transaction-row');
         monthRows.forEach(row => {
@@ -198,9 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const totalTotals = calculateTotals(masterExpenses);
-        document.getElementById('total-income').textContent = `Income: ${formatIndianCurrency(totalTotals.income)}`;
-        document.getElementById('total-expenses').textContent = `Expenses: ${formatIndianCurrency(totalTotals.expenses)}`;
-        document.getElementById('total-balance').textContent = `Balance: ${formatIndianCurrency(totalTotals.income - totalTotals.expenses)}`;
+        document.getElementById('total-income').innerHTML = `<p>Income</p> <p>${formatIndianCurrency(totalTotals.income)}</p>`;
+        document.getElementById('total-expenses').innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(totalTotals.expenses)}</p>`;
+        document.getElementById('total-balance').innerHTML = `<p>Balance</p> <p>${formatIndianCurrency(totalTotals.income - totalTotals.expenses)}</p>`;
 
         // Add click event listener for each year row to switch to Monthly tab
         const yearRows = document.querySelectorAll('#total-transactions .transaction-row');
@@ -229,21 +230,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = document.createElement('tr');
         row.className = 'transaction-row';
 
-        const inputTd = row.insertCell();
-        const checkboxCell = document.createElement('input');
-        checkboxCell.type = 'checkbox';
-        checkboxCell.className = 'select-checkbox';
-        inputTd.appendChild(checkboxCell);
+        const checkboxCell = row.insertCell();
+        const inputElement = document.createElement('input');
+        inputElement.type = 'checkbox';
+        inputElement.className = 'select-checkbox';
+        inputElement.addEventListener('change', updateSelectedTotal);
+        checkboxCell.appendChild(inputElement);
 
-        const rowCell = row.insertCell();
+        const dateElement = row.insertCell();
         const dateCell = document.createElement('p');
         dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
         dateCell.className = 'date';
-        const accountCategoryElement = document.createElement('p');
-        accountCategoryElement.classList.add('account-category');
-        accountCategoryElement.textContent = `${expense.Account} - ${expense.Category}`;
-        rowCell.appendChild(dateCell);
-        rowCell.appendChild(accountCategoryElement);
+        const categoryElement = document.createElement('p');
+        categoryElement.classList.add('transaction-category');
+        categoryElement.textContent = `${expense.Category}`;
+        dateElement.appendChild(dateCell);
+        dateElement.appendChild(categoryElement);
 
         const amountCell = row.insertCell();
         amountCell.textContent = formatIndianCurrency(parseFloat(expense.INR));
@@ -252,16 +254,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const noteCell = row.insertCell();
         noteCell.textContent = expense.Note;
         noteCell.className = 'note';
-
         const descriptionCell = row.insertCell();
         descriptionCell.textContent = expense.Description;
         descriptionCell.className = 'description';
 
-        row.appendChild(inputTd);
-        row.appendChild(rowCell);
-        row.appendChild(amountCell);
+        row.appendChild(checkboxCell);
+        row.appendChild(dateElement);
         row.appendChild(noteCell);
+        row.appendChild(amountCell);
         row.appendChild(descriptionCell);
+
+        // Only include note and description in the popup for mobile view
+        noteCell.addEventListener('click', () => {
+            if (window.innerWidth <= 768) { // Mobile view
+                rowDetails.innerHTML = `
+                <p>Date: ${new Date(convertDateFormat(expense.Date)).toDateString()}</p>
+                <p>Amount: ${formatIndianCurrency(parseFloat(expense.INR))}</p>
+                <p>Note: ${expense.Note}</p>
+                <p>Description: ${expense.Description}</p>
+            `;
+                rowPopup.style.display = 'block';
+            }
+        });
 
         return row;
     }

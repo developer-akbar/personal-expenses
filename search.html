@@ -1,3 +1,4 @@
+<!-- search.js -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,6 +32,7 @@
     <div class="overlay"></div>
     <main style="display: none;">
         <h2 class="heading">Search</h2>
+        <!-- <div class="search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></div> -->
 
         <!-- Search Section -->
         <div id="search-section" class="search-section">
@@ -40,10 +42,13 @@
                     <div id="suggestions"></div>
                 </div>
                 <button type="submit" id="searchButton">Search</button>
+
+                <!-- Filter Toggle Icon -->
+                <span class="filter-toggle" id="filter-toggle" style="display: none;">&#9776;</span>
             </form>
 
             <div class="search-results-wrapper">
-                <div class="total-types">
+                <div class="totals">
                     <span id="total-income" class="income"></span>
                     <span id="total-expenses" class="expense"></span>
                     <span id="total-transfers" class="transfer-out"></span>
@@ -53,9 +58,6 @@
                 </div>
 
                 <div class="search-results-container">
-
-                    <!-- Filter Toggle Icon -->
-                    <span class="filter-toggle" id="filter-toggle" style="display: none;">&#9776;</span>
 
                     <!-- Filters Section Starts -->
                     <div class="filter-wrapper" id="filter-wrapper">
@@ -168,6 +170,22 @@
                 <button type="submit">Login</button>
             </form>
         </div>
+    </div>
+
+    <!-- Popup for row details -->
+    <div id="rowPopup" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div class="row-details"></div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-nav" style="display: none;">
+        <button class="mobile-nav-button active" data-page="transactions.html">Transactions</button>
+        <button class="mobile-nav-button" data-page="reports.html">Reports</button>
+        <button class="mobile-nav-button" data-page="accounts.html">Accounts</button>
+        <button class="mobile-nav-button" data-page="more.html">More</button>
     </div>
 
     <script src="scripts/common.js"></script>

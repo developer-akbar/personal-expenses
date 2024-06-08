@@ -1,3 +1,4 @@
+/* reports.css */
 .monthlyReports {
     display: none;
     padding-left: 20px;
@@ -243,7 +244,7 @@ td.category-name {
     background-color: #f0f0f0;
 }
 
-.account-category {
+.transaction-category {
     width: max-content;
     opacity: 0.7;
     font-size: 11px;

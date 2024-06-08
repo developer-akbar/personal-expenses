@@ -35,10 +35,19 @@
 
         <!-- Accounts Section -->
         <div id="accounts-section">
-            <div class="accounts-summary">
-                <span id="assets" class="amount positive">Assets: 0.00</span>
-                <span id="liabilities" class="amount negative">Liabilities: 0.00</span>
-                <span id="balance" class="amount">Balance: 0.00</span>
+            <div class="totals">
+                <div id="assets" class="positive">
+                    <p>Assets</p>
+                    <p>0.00</p>
+                </div>
+                <div id="liabilities" class="negative">
+                    <p>Liabilities</p>
+                    <p>0.00</p>
+                </div>
+                <div id="balance" class="positive">
+                    <p>Balance</p>
+                    <p>0.00</p>
+                </div>
             </div>
             <div id="accounts-balances"></div>
         </div>
@@ -53,10 +62,25 @@
                 <button id="next-period">&gt;</button>
             </div>
             <div class="totals">
-                <span id="account-deposits">Deposits: 0.00</span>
-                <span id="account-withdrawal">Withdrawal: 0.00</span>
-                <span id="account-total">Total: 0.00</span>
-                <span id="account-balance">Balance: 0.00</span>
+                <div id="account-deposits" class="positive">
+                    <p>Deposits</p>
+                    <p>0.00</p>
+                </div>
+                <div id="account-withdrawal" class="negative">
+                    <p>Withdrawal</p>
+                    <p>0.00</p>
+                </div>
+                <div id="account-total">
+                    <p>Total</p>
+                    <p>0.00</p>
+                </div>
+                <div id="account-balance" class="positive">
+                    <p>Balance</p>
+                    <p>0.00</p>
+                </div>
+            </div>
+            <div class="selected-total-wrapper mb-16" style="display: none;">
+                <span id="selected-total"></span>
             </div>
             <div id="account-transactions" class="transaction-list"></div>
         </div>
@@ -82,9 +106,26 @@
             </form>
         </div>
     </div>
-    
+
+    <!-- Popup for row details -->
+    <div id="rowPopup" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div class="row-details"></div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-nav" style="display: none;">
+        <button class="mobile-nav-button active" data-page="transactions.html">Transactions</button>
+        <button class="mobile-nav-button" data-page="reports.html">Reports</button>
+        <button class="mobile-nav-button" data-page="accounts.html">Accounts</button>
+        <button class="mobile-nav-button" data-page="more.html">More</button>
+    </div>
+
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>
     <script src="scripts/accounts.js"></script>
 </body>
+
 </html>

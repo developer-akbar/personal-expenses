@@ -1,3 +1,4 @@
+// search.js
 document.addEventListener('DOMContentLoaded', () => {
     const searchLink = document.getElementById('search-link');
     const searchSection = document.getElementById('search-section');
@@ -12,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterWrapper = document.getElementById('filter-wrapper');
 
     document.getElementById('searchInput').focus();
-    
+
     let periodType = 'all';
     let currentDate = new Date();
 
@@ -294,9 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // clear previous results
-        document.getElementById('total-income').textContent = `Income: 0.00`;
-        document.getElementById('total-expenses').textContent = `Expenses: 0.00`;
-        document.getElementById('total-transfers').textContent = `Transfer: 0.00`;
+        document.getElementById('total-income').innerHTML = `<p>Income</p> <p>0.00</p>`;
+        document.getElementById('total-expenses').innerHTML = `<p>Expenses</p> <p>0.00</p>`;
+        document.getElementById('total-transfers').innerHTML = `<p>Transfer</p> <p>0.00</p>`;
 
         const searchResultsDiv = document.getElementById('searchResults');
         searchResultsDiv.innerHTML = ''; // Clear previous results
@@ -313,11 +314,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const table = document.createElement('table');
         const headerRow = table.insertRow();
-        ['Select', 'Date', 'Amount', 'Note', 'Description'].forEach(headerText => {
+        headerRow.classList.add('transaction-row');
+        ['Select', 'Category', 'Amount', 'Note', 'Description'].forEach(headerText => {
             const th = document.createElement('th');
             th.textContent = headerText;
             th.classList.add(headerText.toLowerCase());
-            headerRow.appendChild(th);
+            // headerRow.appendChild(th);
         });
 
         let totalIncome = results.filter(expense => expense["Income/Expense"] === "Income")
@@ -327,38 +329,54 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalTransfer = results.filter(expense => expense["Income/Expense"] === "Transfer-Out")
             .reduce((total, expense) => total + parseFloat(expense.INR), 0).toFixed(2);
 
-        document.getElementById('total-income').textContent = `Income: ${totalIncome}`;
-        document.getElementById('total-expenses').textContent = `Expenses: ${totalExpenses}`;
-        document.getElementById('total-transfers').textContent = `Transfer: ${totalTransfer}`;
+        document.getElementById('total-income').innerHTML = `<p>Income</p> <p>${totalIncome}</p>`;
+        document.getElementById('total-expenses').innerHTML = `<p>Expenses</p> <p>${totalExpenses}</p>`;
+        document.getElementById('total-transfers').innerHTML = `<p>Transfer</p> <p>${totalTransfer}</p>`;
 
         results.forEach(result => {
+            const dayContainer = table.insertRow();
+            dayContainer.className = 'transaction-day';
+    
+            const dayHeader = dayContainer.insertCell();
+            dayHeader.classList.add('day-header');
+            dayHeader.setAttribute('colspan', '5'); // Adjusted for mobile view
+    
+            const dayContent = document.createElement('h3');
+            dayContent.classList.add('day-content');
+            dayContent.textContent = new Date(convertDateFormat(result.Date)).toDateString();;
+            dayHeader.appendChild(dayContent);
+            dayContainer.appendChild(dayHeader);
+            table.appendChild(dayContainer);
+            
             const row = table.insertRow();
+            row.classList.add('transaction-row');
 
-            // Add a checkbox for each row
-            const selectCell = row.insertCell();
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'select-checkbox';
-            checkbox.addEventListener('change', updateSelectedTotal);
-            selectCell.appendChild(checkbox);
+            const checkboxCell = row.insertCell();
+            const inputElement = document.createElement('input');
+            inputElement.type = 'checkbox';
+            inputElement.className = 'select-checkbox';
+            inputElement.addEventListener('change', updateSelectedTotal);
+            checkboxCell.appendChild(inputElement);
+    
+            const dateElement = row.insertCell();
+            const dateCell = document.createElement('p');
+            dateCell.textContent = new Date(convertDateFormat(result.Date)).toDateString();
+            dateCell.className = 'date';
+            const categoryElement = document.createElement('p');
+            categoryElement.classList.add('transaction-category');
+            categoryElement.textContent = `${result.Category}`;
+            dateElement.appendChild(dateCell);
+            dateElement.appendChild(categoryElement);
 
-            const rowCell = row.insertCell();
-            const dateElement = document.createElement('p');
-            dateElement.textContent = new Date(convertDateFormat(result.Date)).toDateString();
-            dateElement.classList.add('date');
-            const accountCategoryElement = document.createElement('p');
-            accountCategoryElement.classList.add('account-category');
-            accountCategoryElement.textContent = `${result.Account} - ${result.Category}`;
-            rowCell.appendChild(dateElement);
-            rowCell.appendChild(accountCategoryElement);
+            const noteCell = row.insertCell();
+            noteCell.textContent = result.Note;
+            noteCell.classList.add('note');
 
             const amountCell = row.insertCell();
             amountCell.textContent = result.INR;
             const type = result['Income/Expense'] === 'Expense' ? 'expense' : result['Income/Expense'] === 'Income' ? 'income' : 'transfer-out';
             amountCell.classList.add('amount', type);
-            const noteCell = row.insertCell();
-            noteCell.textContent = result.Note;
-            noteCell.classList.add('note');
+            
             const descriptionCell = row.insertCell();
             descriptionCell.textContent = result.Description;
             descriptionCell.classList.add('description');

@@ -97,7 +97,7 @@ form.search-form {
 
 .search-results-wrapper {
     flex: 1;
-    margin-inline: 1rem;
+    /* margin-inline: 1rem; */
 }
 
 .custom-select-wrapper {
@@ -328,4 +328,19 @@ form.search-form {
 .suggestions li:hover,
 .suggestions li.selected {
     background: #f0f0f0;
+}
+
+#searchResults .transaction-day {
+    display: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    #searchResults .transaction-row .date {
+        display: block;
+    }
+    
+    .filter-wrapper {
+        width: 30%;
+    }
 }

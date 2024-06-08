@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
             accountContainer.dataset.account = account;
 
             const accountName = document.createElement('span');
+            accountName.title = account;
             accountName.textContent = account;
 
             const accountBalance = document.createElement('span');
@@ -98,9 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const balance = assets - liabilities;
 
-        document.getElementById('assets').textContent = `Assets: ${formatIndianCurrency(assets)}`;
-        document.getElementById('liabilities').textContent = `Liabilities: ${formatIndianCurrency(liabilities)}`;
-        document.getElementById('balance').textContent = `Balance: ${formatIndianCurrency(balance)}`;
+        document.getElementById('assets').innerHTML = `<p>Assets</p><p>${formatIndianCurrency(assets)}</p>`;
+        document.getElementById('liabilities').innerHTML = `<p>Liabilities</p><p>${formatIndianCurrency(liabilities)}</p>`;
+        document.getElementById('balance').innerHTML = `<p>Liabilities</p><p>${formatIndianCurrency(balance)}</p>`;
 
         // Add click event listener for each account row to switch to Daily tab with filtered transactions
         const accountRows = document.querySelectorAll('.account-row');
@@ -118,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateAccountTransactions() {
+        document.querySelector('.selected-total-wrapper').style.display = 'none';
+
         const accountTransactionsContainer = document.getElementById('account-transactions');
         accountTransactionsContainer.innerHTML = ''; // Clear previous transactions
 
@@ -156,8 +159,9 @@ document.addEventListener('DOMContentLoaded', () => {
             dayContent.textContent = date;
 
             const totals = calculateAccountTotals(transactions);
-            const dayTotals = document.createElement('span');
-            dayTotals.innerHTML = `Deposits: ${formatIndianCurrency(totals.deposits)} Withdrawal: ${formatIndianCurrency(totals.withdrawal)}`;
+            const dayTotals = document.createElement('div');
+            dayTotals.classList.add('day-totals');
+            dayTotals.innerHTML = `<p class="deposits">${formatIndianCurrency(totals.deposits)}</p> <p class="withdrawal">${formatIndianCurrency(totals.withdrawal)}</p>`;
             dayContent.appendChild(dayTotals);
             dayHeader.appendChild(dayContent);
             dayContainer.appendChild(dayHeader);
@@ -173,10 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
         accountTransactionsContainer.appendChild(tableElement);
 
         const monthlyTotals = calculateAccountTotals(filteredTransactions);
-        document.getElementById('account-deposits').textContent = `Deposits: ${formatIndianCurrency(monthlyTotals.deposits)}`;
-        document.getElementById('account-withdrawal').textContent = `Withdrawal: ${formatIndianCurrency(monthlyTotals.withdrawal)}`;
-        document.getElementById('account-total').textContent = `Total: ${formatIndianCurrency(monthlyTotals.deposits - monthlyTotals.withdrawal)}`;
-        document.getElementById('account-balance').textContent = `Balance: ${formatIndianCurrency(calculateMonthEndBalance(selectedAccount, currentDailyDate))}`;
+        document.getElementById('account-deposits').innerHTML = `<p>Deposits</p><p>${formatIndianCurrency(monthlyTotals.deposits)}</p>`;
+        document.getElementById('account-withdrawal').innerHTML = `<p>Withdrawal</p><p>${formatIndianCurrency(monthlyTotals.withdrawal)}</p>`;
+        document.getElementById('account-total').innerHTML = `<p>Total</p><p>${formatIndianCurrency(monthlyTotals.deposits - monthlyTotals.withdrawal)}</p>`;
+        document.getElementById('account-balance').innerHTML = `<p>Balance</p><p>${formatIndianCurrency(calculateMonthEndBalance(selectedAccount, currentDailyDate))}</p>`;
 
         selectedAccountDisplay.textContent = `${selectedAccount}`;
     }
@@ -224,29 +228,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { deposits: 0, withdrawal: 0 });
     }
 
+    function calculateAccountTotals(transactions) {
+        return transactions.reduce((acc, expense) => {
+            const amount = parseFloat(expense.INR);
+            if (expense["Income/Expense"] === "Expense") {
+                acc.withdrawal += amount;
+            } else {
+                acc.deposits += amount;
+            }
+            return acc;
+        }, { deposits: 0, withdrawal: 0 });
+    }
+
     function createTransactionRow(expense) {
         const row = document.createElement('tr');
         row.className = 'transaction-row';
 
-        const inputTd = row.insertCell();
-        const checkboxCell = document.createElement('input');
-        checkboxCell.type = 'checkbox';
-        checkboxCell.className = 'select-checkbox';
-        inputTd.appendChild(checkboxCell);
+        const checkboxCell = row.insertCell();
+        const inputElement = document.createElement('input');
+        inputElement.type = 'checkbox';
+        inputElement.className = 'select-checkbox';
+        inputElement.addEventListener('change', updateSelectedTotal);
+        checkboxCell.appendChild(inputElement);
 
-        const rowCell = row.insertCell();
+        const dateElement = row.insertCell();
         const dateCell = document.createElement('p');
         dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
         dateCell.className = 'date';
-        const accountCategoryElement = document.createElement('p');
-        accountCategoryElement.classList.add('account-category');
-        accountCategoryElement.textContent = `${expense.Account} - ${expense.Category}`;
-        rowCell.appendChild(dateCell);
-        rowCell.appendChild(accountCategoryElement);
+        const categoryElement = document.createElement('p');
+        categoryElement.classList.add('transaction-category');
+        categoryElement.textContent = `${expense.Category}`;
+        dateElement.appendChild(dateCell);
+        dateElement.appendChild(categoryElement);
 
         const amountCell = row.insertCell();
         amountCell.textContent = formatIndianCurrency(parseFloat(expense.INR));
-        amountCell.className = `amount ${expense['Income/Expense'].toLowerCase()}`;
+        amountCell.className = `amount ${expense['Income/Expense'].toLowerCase() === 'transfer-out' ? 'income' : 'expense'}`;
 
         const noteCell = row.insertCell();
         noteCell.textContent = expense.Note;
@@ -256,10 +273,10 @@ document.addEventListener('DOMContentLoaded', () => {
         descriptionCell.textContent = expense.Description;
         descriptionCell.className = 'description';
 
-        row.appendChild(inputTd);
-        row.appendChild(rowCell);
-        row.appendChild(amountCell);
+        row.appendChild(checkboxCell);
+        row.appendChild(dateElement);
         row.appendChild(noteCell);
+        row.appendChild(amountCell);
         row.appendChild(descriptionCell);
 
         return row;
