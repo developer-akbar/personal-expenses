@@ -1,20 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     const categoriesContainer = document.getElementById('categories-container');
-    const transactionsContainer = document.getElementById('category-transactions-container');
+    const selectedCategoryContainer = document.getElementById('selected-category-container');
     const backButton = document.querySelector('.back-button');
     const categoryHeading = document.querySelector('.category-heading');
     const tabs = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
     const currentPeriod = document.getElementById('current-period');
-    const currentYear = document.getElementById('current-year');
-    const dailyTotal = document.getElementById('daily-total');
-    const monthlyTotal = document.getElementById('monthly-total');
-    const yearlyTotal = document.getElementById('yearly-total');
-
-    let currentDailyDate = new Date();
+    const totalAmount = document.getElementById('total-amount');
     let currentMonthlyDate = new Date();
+    let currentYearDate = new Date().getFullYear();
     let selectedCategory = null;
     let selectedSubcategory = null;
+    let currentTab = 'monthly';
 
     function formatIndianCurrency(amount) {
         return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -22,15 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setActiveTab(tabName) {
         tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === tabName));
-        tabContents.forEach(content => content.classList.toggle('active', content.id === tabName));
+        currentTab = tabName;
+        updateCategoryTotals();
     }
 
     function formatDate(date) {
         return `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
-    }
-
-    function formatYear(date) {
-        return date.getFullYear().toString();
     }
 
     function updateCategoryTotals() {
@@ -39,24 +32,49 @@ document.addEventListener('DOMContentLoaded', () => {
         masterExpenses.forEach(expense => {
             if (expense["Income/Expense"] === "Expense") {
                 const { Category, Subcategory, INR } = expense;
-                if (!categories[Category]) {
-                    categories[Category] = { total: 0, subcategories: {} };
-                }
-                categories[Category].total += parseFloat(INR);
-                if (Subcategory) {
-                    if (!categories[Category].subcategories[Subcategory]) {
-                        categories[Category].subcategories[Subcategory] = 0;
+                const expenseDate = new Date(convertDateFormat(expense.Date));
+
+                if (currentTab === 'monthly' && expenseDate.getMonth() === currentMonthlyDate.getMonth() && expenseDate.getFullYear() === currentMonthlyDate.getFullYear()) {
+                    if (!categories[Category]) {
+                        categories[Category] = { total: 0, subcategories: {} };
                     }
-                    categories[Category].subcategories[Subcategory] += parseFloat(INR);
+                    categories[Category].total += parseFloat(INR);
+                    if (Subcategory) {
+                        if (!categories[Category].subcategories[Subcategory]) {
+                            categories[Category].subcategories[Subcategory] = 0;
+                        }
+                        categories[Category].subcategories[Subcategory] += parseFloat(INR);
+                    }
+                } else if (currentTab === 'yearly' && expenseDate.getFullYear() === currentYearDate) {
+                    if (!categories[Category]) {
+                        categories[Category] = { total: 0, subcategories: {} };
+                    }
+                    categories[Category].total += parseFloat(INR);
+                    if (Subcategory) {
+                        if (!categories[Category].subcategories[Subcategory]) {
+                            categories[Category].subcategories[Subcategory] = 0;
+                        }
+                        categories[Category].subcategories[Subcategory] += parseFloat(INR);
+                    }
+                } else if (currentTab === 'total') {
+                    if (!categories[Category]) {
+                        categories[Category] = { total: 0, subcategories: {} };
+                    }
+                    categories[Category].total += parseFloat(INR);
+                    if (Subcategory) {
+                        if (!categories[Category].subcategories[Subcategory]) {
+                            categories[Category].subcategories[Subcategory] = 0;
+                        }
+                        categories[Category].subcategories[Subcategory] += parseFloat(INR);
+                    }
                 }
             }
         });
 
-        return categories;
+        populateCategories(categories);
     }
 
-    function populateCategories() {
-        const categories = updateCategoryTotals();
+    function populateCategories(categories) {
         categoriesContainer.innerHTML = '';
 
         Object.keys(categories).forEach(categoryName => {
@@ -96,8 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Array.from(categoriesContainer.children).forEach(child => {
                         if (child !== categoryElement) child.style.display = 'none';
                     });
-                    transactionsContainer.style.display = 'block';
-                    // categoryHeading.textContent = categoryName;
+                    selectedCategoryContainer.style.display = 'block';
                     selectedCategory = categoryName;
                     selectedSubcategory = null;
                     updateTransactions();
@@ -105,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Array.from(categoriesContainer.children).forEach(child => {
                         child.style.display = 'block';
                     });
-                    transactionsContainer.style.display = 'none';
+                    selectedCategoryContainer.style.display = 'none';
                     document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
                 }
             };
@@ -121,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         selectedSubcategory = subcategoryElement.dataset.subcategory;
                     }
-                    // categoryHeading.textContent = `${categoryName} - ${selectedSubcategory}`;
                     document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
                     subcategoryElement.classList.add('active');
                     updateTransactions();
@@ -133,23 +149,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateTransactions() {
-        updateDailyTransactions();
-        updateMonthlyTransactions();
-        updateYearlyTransactions();
+        if (currentTab === 'monthly') {
+            updateMonthlyTransactions();
+        } else if (currentTab === 'yearly') {
+            updateYearlyTransactions();
+        } else if (currentTab === 'total') {
+            updateTotalTransactions();
+        }
     }
 
-    function updateDailyTransactions() {
-        document.querySelector('.selected-total-wrapper').style.display = 'none';
-
-        const dailyTransactionsContainer = document.getElementById('daily-transactions');
-        dailyTransactionsContainer.innerHTML = ''; // Clear previous transactions
+    function updateMonthlyTransactions() {
+        const transactionsContainer = document.getElementById('transactions');
+        transactionsContainer.innerHTML = '';
 
         const filteredTransactions = masterExpenses.filter(expense => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             return expense.Category === selectedCategory &&
                 (!selectedSubcategory || expense.Subcategory === selectedSubcategory) &&
-                expenseDate.getMonth() === currentDailyDate.getMonth() &&
-                expenseDate.getFullYear() === currentDailyDate.getFullYear();
+                expenseDate.getMonth() === currentMonthlyDate.getMonth() &&
+                expenseDate.getFullYear() === currentMonthlyDate.getFullYear();
         });
 
         const transactionsByDay = filteredTransactions.reduce((acc, expense) => {
@@ -170,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const dayHeader = dayContainer.insertCell();
             dayHeader.classList.add('day-header');
-            dayHeader.setAttribute('colspan', '5'); // Adjusted for mobile view
+            dayHeader.setAttribute('colspan', '5');
 
             const dayContent = document.createElement('h3');
             dayContent.classList.add('day-content');
@@ -192,21 +210,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tableElement.appendChild(tableBodyElement);
-        dailyTransactionsContainer.appendChild(tableElement);
+        transactionsContainer.appendChild(tableElement);
 
         const monthlyTotals = calculateTotals(filteredTransactions);
-        document.getElementById('daily-total').innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(monthlyTotals.expenses)}</p>`;
+        totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(monthlyTotals.expenses)}</p>`;
     }
 
-    function updateMonthlyTransactions() {
-        const monthlyTransactionsContainer = document.getElementById('monthly-transactions');
-        monthlyTransactionsContainer.innerHTML = ''; // Clear previous transactions
+    function updateYearlyTransactions() {
+        const transactionsContainer = document.getElementById('transactions');
+        transactionsContainer.innerHTML = '';
 
         const filteredTransactions = masterExpenses.filter(expense => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             return expense.Category === selectedCategory &&
                 (!selectedSubcategory || expense.Subcategory === selectedSubcategory) &&
-                expenseDate.getFullYear() === currentMonthlyDate.getFullYear();
+                expenseDate.getFullYear() === currentYearDate;
         });
 
         const transactionsByMonth = filteredTransactions.reduce((acc, expense) => {
@@ -249,30 +267,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tableElement.appendChild(tableBodyElement);
-        monthlyTransactionsContainer.appendChild(tableElement);
+        transactionsContainer.appendChild(tableElement);
 
         const yearlyTotals = calculateTotals(filteredTransactions);
-        document.getElementById('monthly-total').innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(yearlyTotals.expenses)}</p>`;
-
-        const monthRows = document.querySelectorAll('#monthly-transactions .transaction-row');
-        monthRows.forEach(row => {
-            row.addEventListener('click', () => {
-                currentDailyDate = new Date(currentMonthlyDate.getFullYear(), row.dataset.month);
-                setActiveTab('daily');
-                currentPeriod.textContent = formatDate(currentDailyDate);
-                updateDailyTransactions();
-            });
-        });
+        totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(yearlyTotals.expenses)}</p>`;
     }
 
-    function updateYearlyTransactions() {
-        const totalTransactionsContainer = document.getElementById('total-transactions');
-        totalTransactionsContainer.innerHTML = ''; // Clear previous transactions
+    function updateTotalTransactions() {
+        const transactionsContainer = document.getElementById('transactions');
+        transactionsContainer.innerHTML = '';
 
-        const filteredYearlyTransactions = masterExpenses.filter(expense => expense.Category === selectedCategory &&
-            (!selectedSubcategory || expense.Subcategory === selectedSubcategory));
+        const filteredTransactions = masterExpenses.filter(expense => {
+            return expense.Category === selectedCategory && (!selectedSubcategory || expense.Subcategory === selectedSubcategory);
+        });
 
-        const transactionsByYear = filteredYearlyTransactions.reduce((acc, expense) => {
+        const transactionsByYear = filteredTransactions.reduce((acc, expense) => {
             const year = new Date(convertDateFormat(expense.Date)).getFullYear();
             if (!acc[year]) {
                 acc[year] = [];
@@ -312,20 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tableElement.appendChild(tableBodyElement);
-        totalTransactionsContainer.appendChild(tableElement);
+        transactionsContainer.appendChild(tableElement);
 
-        const totalTotals = calculateTotals(filteredYearlyTransactions);
-        document.getElementById('yearly-total').innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(totalTotals.expenses)}</p>`;
-
-        const yearRows = document.querySelectorAll('#total-transactions .transaction-row');
-        yearRows.forEach(row => {
-            row.addEventListener('click', () => {
-                currentMonthlyDate = new Date(row.dataset.year);
-                setActiveTab('monthly');
-                currentYear.textContent = formatYear(currentMonthlyDate);
-                updateMonthlyTransactions();
-            });
-        });
+        const totalTotals = calculateTotals(filteredTransactions);
+        totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(totalTotals.expenses)}</p>`;
     }
 
     function calculateTotals(transactions) {
@@ -401,46 +400,52 @@ document.addEventListener('DOMContentLoaded', () => {
         tab.addEventListener('click', () => {
             const tabName = tab.dataset.tab;
             setActiveTab(tabName);
-            if (tabName === 'daily') {
-                currentPeriod.textContent = `${new Date(currentDailyDate).toLocaleString('default', { month: 'long' })} ${currentDailyDate.getFullYear()}`;
-                updateDailyTransactions();
-            } else if (tabName === 'monthly') {
-                currentYear.textContent = currentMonthlyDate.getFullYear();
+            if (tabName === 'monthly') {
+                currentPeriod.textContent = formatDate(currentMonthlyDate);
                 updateMonthlyTransactions();
-            } else if (tabName === 'total') {
+            } else if (tabName === 'yearly') {
+                currentPeriod.textContent = currentYearDate;
                 updateYearlyTransactions();
+            } else if (tabName === 'total') {
+                updateTotalTransactions();
             }
         });
     });
 
     document.getElementById('prev-period').addEventListener('click', () => {
-        currentDailyDate.setMonth(currentDailyDate.getMonth() - 1);
-        updateDailyTransactions();
-        currentPeriod.textContent = `${new Date(currentDailyDate).toLocaleString('default', { month: 'long' })} ${currentDailyDate.getFullYear()}`;
+        if (currentTab === 'monthly') {
+            currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() - 1);
+            currentPeriod.textContent = formatDate(currentMonthlyDate);
+            updateMonthlyTransactions();
+        } else if (currentTab === 'yearly') {
+            currentYearDate -= 1;
+            currentPeriod.textContent = currentYearDate;
+            updateYearlyTransactions();
+        }
     });
 
     document.getElementById('next-period').addEventListener('click', () => {
-        currentDailyDate.setMonth(currentDailyDate.getMonth() + 1);
-        updateDailyTransactions();
-        currentPeriod.textContent = `${new Date(currentDailyDate).toLocaleString('default', { month: 'long' })} ${currentDailyDate.getFullYear()}`;
+        if (currentTab === 'monthly') {
+            currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() + 1);
+            currentPeriod.textContent = formatDate(currentMonthlyDate);
+            updateMonthlyTransactions();
+        } else if (currentTab === 'yearly') {
+            currentYearDate += 1;
+            currentPeriod.textContent = currentYearDate;
+            updateYearlyTransactions();
+        }
     });
 
-    document.getElementById('prev-year').addEventListener('click', () => {
-        currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() - 1);
-        updateMonthlyTransactions();
-        currentYear.textContent = currentMonthlyDate.getFullYear();
-    });
-
-    document.getElementById('next-year').addEventListener('click', () => {
-        currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() + 1);
-        updateMonthlyTransactions();
-        currentYear.textContent = currentMonthlyDate.getFullYear();
-    });
+    // backButton.addEventListener('click', () => {
+    //     selectedCategoryContainer.style.display = 'none';
+    //     categoriesContainer.style.display = 'block';
+    // });
 
     document.addEventListener('masterExpensesLoaded', () => {
-        currentPeriod.textContent = `${new Date(currentDailyDate).toLocaleString('default', { month: 'long' })} ${currentDailyDate.getFullYear()}`;
-        currentYear.textContent = currentMonthlyDate.getFullYear();
-        populateCategories();
+        currentPeriod.textContent = formatDate(currentMonthlyDate);
+        updateCategoryTotals();
+
+        // Initial setup
+        setActiveTab('monthly');
     });
 });
-
