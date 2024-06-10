@@ -5,6 +5,7 @@ const AMOUNT_COLUMN_NAME = "INR";
 const rowPopup = document.getElementById('rowPopup');
 const closeButton = document.querySelector('.close-button');
 const mobileNavButtons = document.querySelectorAll('.mobile-nav-button');
+const rowDetails = document.querySelector('.row-details');
 
 // Close the popup
 closeButton.addEventListener('click', () => {

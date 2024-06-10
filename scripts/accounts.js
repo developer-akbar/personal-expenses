@@ -269,6 +269,18 @@ document.addEventListener('DOMContentLoaded', () => {
         noteCell.textContent = expense.Note;
         noteCell.className = 'note';
 
+        noteCell.addEventListener('click', () => {
+            if (window.innerWidth <= 768) { // Mobile view
+                rowDetails.innerHTML = `
+                <p>Date: ${new Date(convertDateFormat(expense.Date)).toDateString()}</p>
+                <p>Amount: ${formatIndianCurrency(parseFloat(expense.INR))}</p>
+                <p>Note: ${expense.Note}</p>
+                <p>Description: ${expense.Description}</p>
+            `;
+                rowPopup.style.display = 'block';
+            }
+        });
+
         const descriptionCell = row.insertCell();
         descriptionCell.textContent = expense.Description;
         descriptionCell.className = 'description';
