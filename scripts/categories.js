@@ -1,16 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
     const categoriesContainer = document.getElementById('categories-container');
     const selectedCategoryContainer = document.getElementById('selected-category-container');
-    const backButton = document.querySelector('.back-button');
     const categoryHeading = document.querySelector('.category-heading');
     const tabs = document.querySelectorAll('.tab-button');
     const currentPeriod = document.getElementById('current-period');
     const totalAmount = document.getElementById('total-amount');
+    const backButton = document.createElement('button');
+    backButton.classList.add('back-button');
+    backButton.textContent = '← Back';
     let currentMonthlyDate = new Date();
     let currentYearDate = new Date().getFullYear();
     let selectedCategory = null;
     let selectedSubcategory = null;
     let currentTab = 'monthly';
+    let isSubcategoryView = false;
 
     function formatIndianCurrency(amount) {
         return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -75,6 +78,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function populateCategories(categories) {
+        let totalSum = 0;
+
+        for (let category in categories) {
+            if (categories.hasOwnProperty(category)) {
+                totalSum += categories[category].total;
+            }
+        }
+        totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(totalSum)}</p>`;
+
         categoriesContainer.innerHTML = '';
 
         Object.keys(categories).forEach(categoryName => {
@@ -101,12 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const categoryDiv = categoryElement.querySelector('.category');
             const subcategoryList = categoryElement.querySelector('.subcategory-list');
-            const backButton = categoryElement.querySelector('.back-button');
 
             const toggleDisplay = () => {
                 const isSubcategoryListVisible = subcategoryList.style.display === 'block';
                 subcategoryList.style.display = isSubcategoryListVisible ? 'none' : 'block';
-                backButton.style.display = isSubcategoryListVisible ? 'none' : 'block';
                 categoryElement.classList.toggle('full-width', !isSubcategoryListVisible);
                 categoryDiv.style.justifyContent = !isSubcategoryListVisible ? 'flex-start' : 'space-between';
 
@@ -117,12 +127,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectedCategoryContainer.style.display = 'block';
                     selectedCategory = categoryName;
                     selectedSubcategory = null;
+                    isSubcategoryView = true;
                     updateTransactions();
                 } else {
                     Array.from(categoriesContainer.children).forEach(child => {
                         child.style.display = 'block';
                     });
                     selectedCategoryContainer.style.display = 'none';
+                    isSubcategoryView = false;
                     document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
                 }
             };
@@ -146,6 +158,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
             categoriesContainer.appendChild(categoryElement);
         });
+
+        // Ensure the selected category is expanded if in subcategory view
+        if (isSubcategoryView && selectedCategory) {
+            const selectedCategoryElement = Array.from(categoriesContainer.children).find(child =>
+                child.querySelector('.category span[title="categoryName"]').textContent === selectedCategory);
+            if (selectedCategoryElement) {
+                const subcategoryList = selectedCategoryElement.querySelector('.subcategory-list');
+                subcategoryList.style.display = 'block';
+                selectedCategoryElement.classList.add('full-width');
+                selectedCategoryElement.querySelector('.category').style.justifyContent = 'space-between';
+                Array.from(categoriesContainer.children).forEach(child => {
+                    if (child !== selectedCategoryElement) child.style.display = 'none';
+                });
+                selectedCategoryContainer.style.display = 'block';
+                if (selectedSubcategory) {
+                    const selectedSubcategoryElement = selectedCategoryElement.querySelector(`.subcategory[data-subcategory="${selectedSubcategory}"]`);
+                    if (selectedSubcategoryElement) {
+                        selectedSubcategoryElement.classList.add('active');
+                    }
+                }
+            }
+        }
     }
 
     function updateTransactions() {
@@ -159,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateMonthlyTransactions() {
+        document.getElementById('period-navigation').style.display = 'flex';
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
 
@@ -217,6 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateYearlyTransactions() {
+        document.getElementById('period-navigation').style.display = 'flex';
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
 
@@ -271,9 +307,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const yearlyTotals = calculateTotals(filteredTransactions);
         totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(yearlyTotals.expenses)}</p>`;
+
+        // Add click event listener for each month row to switch to Monthly tab
+        const monthRows = document.querySelectorAll('#transactions .transaction-row');
+        monthRows.forEach(row => {
+            row.addEventListener('click', () => {
+                if (document.querySelector('.tabs .active').dataset.tab === 'yearly') {
+                    currentDailyDate = new Date(currentMonthlyDate.getFullYear(), row.dataset.month);
+                    setActiveTab('monthly');
+                    currentMonthlyDate.setMonth(currentDailyDate.getMonth());
+                    currentPeriod.textContent = formatDate(currentDailyDate);
+                    updateMonthlyTransactions();
+                }
+            });
+        });
     }
 
     function updateTotalTransactions() {
+        document.getElementById('period-navigation').style.display = 'none';
+
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
 
@@ -325,6 +377,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalTotals = calculateTotals(filteredTransactions);
         totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(totalTotals.expenses)}</p>`;
+
+        // Add click event listener for each year row to switch to Yearly tab
+        const monthRows = document.querySelectorAll('#transactions .transaction-row');
+        monthRows.forEach(row => {
+            row.addEventListener('click', () => {
+                if (document.querySelector('.tabs .active').dataset.tab === 'total') {
+                    currentMonthlyDate = new Date(row.dataset.year);
+                    setActiveTab('yearly');
+                    // currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear());
+                    currentPeriod.textContent = formatYear(currentMonthlyDate);
+                    updateYearlyTransactions();
+                }
+            });
+        });
+    }
+
+    function formatYear(date) {
+        return date.getFullYear().toString();
     }
 
     function calculateTotals(transactions) {
@@ -416,10 +486,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentTab === 'monthly') {
             currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() - 1);
             currentPeriod.textContent = formatDate(currentMonthlyDate);
+            updateCategoryTotals();
             updateMonthlyTransactions();
         } else if (currentTab === 'yearly') {
             currentYearDate -= 1;
             currentPeriod.textContent = currentYearDate;
+            updateCategoryTotals();
             updateYearlyTransactions();
         }
     });
@@ -428,18 +500,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentTab === 'monthly') {
             currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() + 1);
             currentPeriod.textContent = formatDate(currentMonthlyDate);
+            updateCategoryTotals();
             updateMonthlyTransactions();
         } else if (currentTab === 'yearly') {
             currentYearDate += 1;
             currentPeriod.textContent = currentYearDate;
+            updateCategoryTotals();
             updateYearlyTransactions();
         }
     });
-
-    // backButton.addEventListener('click', () => {
-    //     selectedCategoryContainer.style.display = 'none';
-    //     categoriesContainer.style.display = 'block';
-    // });
 
     document.addEventListener('masterExpensesLoaded', () => {
         currentPeriod.textContent = formatDate(currentMonthlyDate);
@@ -448,4 +517,4 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initial setup
         setActiveTab('monthly');
     });
-});
+});    
