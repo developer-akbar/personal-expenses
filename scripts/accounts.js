@@ -272,11 +272,13 @@ document.addEventListener('DOMContentLoaded', () => {
         noteCell.addEventListener('click', () => {
             if (window.innerWidth <= 768) { // Mobile view
                 rowDetails.innerHTML = `
-                <p>Date: ${new Date(convertDateFormat(expense.Date)).toDateString()}</p>
-                <p>Amount: ${formatIndianCurrency(parseFloat(expense.INR))}</p>
-                <p>Note: ${expense.Note}</p>
-                <p>Description: ${expense.Description}</p>
-            `;
+                    <table>
+                        <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
+                        <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
+                        <tr><td>Note</td> <td>${expense.Note}</td></tr>
+                        <tr><td>Description</td> <td>${expense.Description}</td></tr>
+                    </table>
+                `;
                 rowPopup.style.display = 'block';
             }
         });

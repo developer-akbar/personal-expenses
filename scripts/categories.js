@@ -74,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        populateCategories(categories);
+        if (selectedCategory == null) populateCategories(categories);
+        else if (selectedCategory != null && categories.hasOwnProperty(selectedCategory)) populateCategories(categories);
     }
 
     function populateCategories(categories) {
@@ -115,8 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const subcategoryList = categoryElement.querySelector('.subcategory-list');
 
             const toggleDisplay = () => {
+                // currentPeriod.textContent = formatDate(new Date());
                 const isSubcategoryListVisible = subcategoryList.style.display === 'block';
                 subcategoryList.style.display = isSubcategoryListVisible ? 'none' : 'block';
+                categoryElement.querySelector('.back-button').style.display = isSubcategoryListVisible ? 'none' : 'block';
                 categoryElement.classList.toggle('full-width', !isSubcategoryListVisible);
                 categoryDiv.style.justifyContent = !isSubcategoryListVisible ? 'flex-start' : 'space-between';
 
@@ -134,8 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         child.style.display = 'block';
                     });
                     selectedCategoryContainer.style.display = 'none';
+                    selectedCategory = null;
                     isSubcategoryView = false;
                     document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
+                    updateCategoryTotals(); // think about this change
                 }
             };
 
@@ -166,8 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (selectedCategoryElement) {
                 const subcategoryList = selectedCategoryElement.querySelector('.subcategory-list');
                 subcategoryList.style.display = 'block';
+                selectedCategoryElement.querySelector('.back-button').style.display = 'block';
                 selectedCategoryElement.classList.add('full-width');
-                selectedCategoryElement.querySelector('.category').style.justifyContent = 'space-between';
+                selectedCategoryElement.querySelector('.category').style.justifyContent = 'flex-start';
                 Array.from(categoriesContainer.children).forEach(child => {
                     if (child !== selectedCategoryElement) child.style.display = 'none';
                 });
@@ -217,31 +223,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableElement = document.createElement('table');
         const tableBodyElement = document.createElement('tbody');
 
-        for (const [date, transactions] of Object.entries(transactionsByDay)) {
-            const dayContainer = tableElement.insertRow();
-            dayContainer.className = 'transaction-day';
+        if (Object.entries(transactionsByDay).length > 0) {
+            for (const [date, transactions] of Object.entries(transactionsByDay)) {
+                const dayContainer = tableElement.insertRow();
+                dayContainer.className = 'transaction-day';
 
-            const dayHeader = dayContainer.insertCell();
-            dayHeader.classList.add('day-header');
-            dayHeader.setAttribute('colspan', '5');
+                const dayHeader = dayContainer.insertCell();
+                dayHeader.classList.add('day-header');
+                dayHeader.setAttribute('colspan', '5');
 
-            const dayContent = document.createElement('h3');
-            dayContent.classList.add('day-content');
-            dayContent.textContent = date;
+                const dayContent = document.createElement('h3');
+                dayContent.classList.add('day-content');
+                dayContent.textContent = date;
 
-            const totals = calculateTotals(transactions);
-            const dayTotals = document.createElement('div');
-            dayTotals.classList.add('day-totals');
-            dayTotals.innerHTML = `<p class="expense">${formatIndianCurrency(totals.expenses)}</p>`;
-            dayContent.appendChild(dayTotals);
-            dayHeader.appendChild(dayContent);
-            dayContainer.appendChild(dayHeader);
-            tableBodyElement.appendChild(dayContainer);
+                const totals = calculateTotals(transactions);
+                const dayTotals = document.createElement('div');
+                dayTotals.classList.add('day-totals');
+                dayTotals.innerHTML = `<p class="expense">${formatIndianCurrency(totals.expenses)}</p>`;
+                dayContent.appendChild(dayTotals);
+                dayHeader.appendChild(dayContent);
+                dayContainer.appendChild(dayHeader);
+                tableBodyElement.appendChild(dayContainer);
 
-            transactions.forEach(expense => {
-                const transactionRow = createTransactionRow(expense);
-                tableBodyElement.appendChild(transactionRow);
-            });
+                transactions.forEach(expense => {
+                    const transactionRow = createTransactionRow(expense);
+                    tableBodyElement.appendChild(transactionRow);
+                });
+            }
+        } else {
+            tableBodyElement.innerHTML = `<tr>No transactions for <b>${selectedCategory} ${selectedSubcategory != null ? '- ' + selectedSubcategory : ''}</b></tr>`;
         }
 
         tableElement.appendChild(tableBodyElement);
@@ -275,31 +285,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableElement = document.createElement('table');
         const tableBodyElement = document.createElement('tbody');
 
-        for (let i = 0; i < 12; i++) {
-            const monthContainer = document.createElement('tr');
-            monthContainer.className = 'transaction-row';
-            monthContainer.dataset.month = i;
+        if (Object.entries(transactionsByMonth).length > 0) {
+            for (let i = 0; i < 12; i++) {
+                const monthContainer = document.createElement('tr');
+                monthContainer.className = 'transaction-row';
+                monthContainer.dataset.month = i;
 
-            const monthName = document.createElement('td');
-            monthName.textContent = new Date(2024, i).toLocaleString('default', { month: 'short' });
+                const monthName = document.createElement('td');
+                monthName.textContent = new Date(2024, i).toLocaleString('default', { month: 'short' });
 
-            const totals = transactionsByMonth[i] ? calculateTotals(transactionsByMonth[i]) : { income: 0, expenses: 0 };
-            const income = document.createElement('td');
-            income.className = 'amount income';
-            income.textContent = formatIndianCurrency(totals.income);
-            const expenses = document.createElement('td');
-            expenses.className = 'amount expense';
-            expenses.textContent = formatIndianCurrency(totals.expenses);
-            const balance = document.createElement('td');
-            balance.className = 'amount balance';
-            balance.textContent = formatIndianCurrency(totals.income - totals.expenses);
+                const totals = transactionsByMonth[i] ? calculateTotals(transactionsByMonth[i]) : { income: 0, expenses: 0 };
+                const expenses = document.createElement('td');
+                expenses.className = 'amount expense';
+                expenses.textContent = formatIndianCurrency(totals.expenses);
 
-            monthContainer.appendChild(monthName);
-            monthContainer.appendChild(income);
-            monthContainer.appendChild(expenses);
-            monthContainer.appendChild(balance);
+                monthContainer.appendChild(monthName);
+                monthContainer.appendChild(expenses);
 
-            tableBodyElement.appendChild(monthContainer);
+                tableBodyElement.appendChild(monthContainer);
+            }
+        } else {
+            tableBodyElement.innerHTML = `<tr>No transactions for <b>${selectedCategory}</b> in <b>${currentYearDate}</b></tr>`;
         }
 
         tableElement.appendChild(tableBodyElement);
@@ -354,20 +360,12 @@ document.addEventListener('DOMContentLoaded', () => {
             yearName.textContent = year;
 
             const totals = calculateTotals(transactions);
-            const income = document.createElement('td');
-            income.className = 'amount income';
-            income.textContent = formatIndianCurrency(totals.income);
             const expenses = document.createElement('td');
             expenses.className = 'amount expense';
             expenses.textContent = formatIndianCurrency(totals.expenses);
-            const balance = document.createElement('td');
-            balance.className = 'amount balance';
-            balance.textContent = formatIndianCurrency(totals.income - totals.expenses);
 
             yearContainer.appendChild(yearName);
-            yearContainer.appendChild(income);
             yearContainer.appendChild(expenses);
-            yearContainer.appendChild(balance);
 
             tableBodyElement.appendChild(yearContainer);
         }
@@ -449,10 +447,12 @@ document.addEventListener('DOMContentLoaded', () => {
         noteCell.addEventListener('click', () => {
             if (window.innerWidth <= 768) { // Mobile view
                 rowDetails.innerHTML = `
-                    <div><p>Date</p> <p>${new Date(convertDateFormat(expense.Date)).toDateString()}</p></div>
-                    <div><p>Amount</p> <p>${formatIndianCurrency(parseFloat(expense.INR))}</p></div>
-                    <div><p>Note</p> <p>${expense.Note}</p></div>
-                    <div><p>Description</p> <p>${expense.Description}</p></div>
+                    <table>
+                        <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
+                        <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
+                        <tr><td>Note</td> <td>${expense.Note}</td></tr>
+                        <tr><td>Description</td> <td>${expense.Description}</td></tr>
+                    </table>
                 `;
                 rowPopup.style.display = 'block';
             }
@@ -472,12 +472,18 @@ document.addEventListener('DOMContentLoaded', () => {
             setActiveTab(tabName);
             if (tabName === 'monthly') {
                 currentPeriod.textContent = formatDate(currentMonthlyDate);
-                updateMonthlyTransactions();
+                if (selectedCategory != null) {
+                    updateMonthlyTransactions();
+                }
             } else if (tabName === 'yearly') {
                 currentPeriod.textContent = currentYearDate;
-                updateYearlyTransactions();
+                if (selectedCategory != null) {
+                    updateYearlyTransactions();
+                }
             } else if (tabName === 'total') {
-                updateTotalTransactions();
+                if (selectedCategory != null) {
+                    updateTotalTransactions();
+                }
             }
         });
     });
@@ -487,12 +493,16 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() - 1);
             currentPeriod.textContent = formatDate(currentMonthlyDate);
             updateCategoryTotals();
-            updateMonthlyTransactions();
+            if (selectedCategory != null) {
+                updateMonthlyTransactions();
+            }
         } else if (currentTab === 'yearly') {
             currentYearDate -= 1;
             currentPeriod.textContent = currentYearDate;
             updateCategoryTotals();
-            updateYearlyTransactions();
+            if (selectedCategory != null) {
+                updateYearlyTransactions();
+            }
         }
     });
 
@@ -501,12 +511,16 @@ document.addEventListener('DOMContentLoaded', () => {
             currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() + 1);
             currentPeriod.textContent = formatDate(currentMonthlyDate);
             updateCategoryTotals();
-            updateMonthlyTransactions();
+            if (selectedCategory != null) {
+                updateMonthlyTransactions();
+            }
         } else if (currentTab === 'yearly') {
             currentYearDate += 1;
             currentPeriod.textContent = currentYearDate;
             updateCategoryTotals();
-            updateYearlyTransactions();
+            if (selectedCategory != null) {
+                updateYearlyTransactions();
+            }
         }
     });
 

@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return searchResults;
     }
 
-    function displaySearchResults(results) {
+    function displaySearchResults(transactions) {
         // clear previous results
         if (document.getElementById('selected-total')) {
             document.getElementById('selected-total').textContent = '';
@@ -302,13 +302,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchResultsDiv = document.getElementById('searchResults');
         searchResultsDiv.innerHTML = ''; // Clear previous results
 
-        if (results.length === 0) {
+        if (transactions.length === 0) {
             searchResultsDiv.textContent = 'No matching results found.';
             return;
         } else {
             const resultCountElement = document.createElement('p');
             resultCountElement.classList.add('search-count');
-            resultCountElement.innerHTML = `Showing ${results.length} results.`;
+            resultCountElement.innerHTML = `Showing ${transactions.length} results.`;
             searchResultsDiv.appendChild(resultCountElement);
         }
 
@@ -322,18 +322,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // headerRow.appendChild(th);
         });
 
-        let totalIncome = results.filter(expense => expense["Income/Expense"] === "Income")
+        let totalIncome = transactions.filter(expense => expense["Income/Expense"] === "Income")
             .reduce((total, expense) => total + parseFloat(expense.INR), 0).toFixed(2);
-        let totalExpenses = results.filter(expense => expense["Income/Expense"] === "Expense")
+        let totalExpenses = transactions.filter(expense => expense["Income/Expense"] === "Expense")
             .reduce((total, expense) => total + parseFloat(expense.INR), 0).toFixed(2);
-        let totalTransfer = results.filter(expense => expense["Income/Expense"] === "Transfer-Out")
+        let totalTransfer = transactions.filter(expense => expense["Income/Expense"] === "Transfer-Out")
             .reduce((total, expense) => total + parseFloat(expense.INR), 0).toFixed(2);
 
         document.getElementById('total-income').innerHTML = `<p>Income</p> <p>${totalIncome}</p>`;
         document.getElementById('total-expenses').innerHTML = `<p>Expenses</p> <p>${totalExpenses}</p>`;
         document.getElementById('total-transfers').innerHTML = `<p>Transfer</p> <p>${totalTransfer}</p>`;
 
-        results.forEach(result => {
+        transactions.forEach(expense => {
             const dayContainer = table.insertRow();
             dayContainer.className = 'transaction-day';
     
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
             const dayContent = document.createElement('h3');
             dayContent.classList.add('day-content');
-            dayContent.textContent = new Date(convertDateFormat(result.Date)).toDateString();;
+            dayContent.textContent = new Date(convertDateFormat(expense.Date)).toDateString();;
             dayHeader.appendChild(dayContent);
             dayContainer.appendChild(dayHeader);
             table.appendChild(dayContainer);
@@ -360,25 +360,40 @@ document.addEventListener('DOMContentLoaded', () => {
     
             const dateElement = row.insertCell();
             const dateCell = document.createElement('p');
-            dateCell.textContent = new Date(convertDateFormat(result.Date)).toDateString();
+            dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
             dateCell.className = 'date';
             const categoryElement = document.createElement('p');
             categoryElement.classList.add('transaction-category');
-            categoryElement.textContent = `${result.Category}`;
+            categoryElement.textContent = `${expense.Category}`;
             dateElement.appendChild(dateCell);
             dateElement.appendChild(categoryElement);
 
             const noteCell = row.insertCell();
-            noteCell.textContent = result.Note;
+            noteCell.textContent = expense.Note;
             noteCell.classList.add('note');
 
+            // Only include note and description in the popup for mobile view
+            noteCell.addEventListener('click', () => {
+                if (window.innerWidth <= 768) { // Mobile view
+                    rowDetails.innerHTML = `
+                        <table>
+                            <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
+                            <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
+                            <tr><td>Note</td> <td>${expense.Note}</td></tr>
+                            <tr><td>Description</td> <td>${expense.Description}</td></tr>
+                        </table>
+                    `;
+                    rowPopup.style.display = 'block';
+                }
+            });
+
             const amountCell = row.insertCell();
-            amountCell.textContent = result.INR;
-            const type = result['Income/Expense'] === 'Expense' ? 'expense' : result['Income/Expense'] === 'Income' ? 'income' : 'transfer-out';
+            amountCell.textContent = expense.INR;
+            const type = expense['Income/Expense'] === 'Expense' ? 'expense' : expense['Income/Expense'] === 'Income' ? 'income' : 'transfer-out';
             amountCell.classList.add('amount', type);
             
             const descriptionCell = row.insertCell();
-            descriptionCell.textContent = result.Description;
+            descriptionCell.textContent = expense.Description;
             descriptionCell.classList.add('description');
         });
 
