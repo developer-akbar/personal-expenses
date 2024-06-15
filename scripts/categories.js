@@ -1,22 +1,42 @@
 document.addEventListener('DOMContentLoaded', () => {
     const categoriesContainer = document.getElementById('categories-container');
     const selectedCategoryContainer = document.getElementById('selected-category-container');
-    const categoryHeading = document.querySelector('.category-heading');
+    const mainTabs = document.querySelectorAll('.main-tab-button');
     const tabs = document.querySelectorAll('.tab-button');
     const currentPeriod = document.getElementById('current-period');
     const totalAmount = document.getElementById('total-amount');
-    const backButton = document.createElement('button');
-    backButton.classList.add('back-button');
-    backButton.textContent = '← Back';
     let currentMonthlyDate = new Date();
     let currentYearDate = new Date().getFullYear();
     let selectedCategory = null;
     let selectedSubcategory = null;
     let currentTab = 'monthly';
     let isSubcategoryView = false;
+    let currentMainTab = 'expense';
 
     function formatIndianCurrency(amount) {
         return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatDate(date) {
+        return `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+    }
+
+    function formatYear(date) {
+        return date.getFullYear().toString();
+    }
+
+    function convertDateFormat(dateString) {
+        const parts = dateString.includes('/') ? dateString.split("/") : dateString.split("-");
+        return `${parts[1]}/${parts[0]}/${parts[2]}`;
+    }
+
+    function setActiveMainTab(tabName) {
+        mainTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === tabName));
+        currentMainTab = tabName;
+        selectedCategory = null;
+        categoriesContainer.style.display = 'flex';
+        document.getElementById('transactions').innerHTML = '';
+        updateCategoryTotals();
     }
 
     function setActiveTab(tabName) {
@@ -25,15 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCategoryTotals();
     }
 
-    function formatDate(date) {
-        return `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
-    }
-
     function updateCategoryTotals() {
         const categories = {};
 
         masterExpenses.forEach(expense => {
-            if (expense["Income/Expense"] === "Expense") {
+            if (expense["Income/Expense"] === (currentMainTab === 'expense' ? 'Expense' : 'Income')) {
                 const { Category, Subcategory, INR } = expense;
                 const expenseDate = new Date(convertDateFormat(expense.Date));
 
@@ -48,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         categories[Category].subcategories[Subcategory] += parseFloat(INR);
                     }
-                } else if (currentTab === 'yearly' && expenseDate.getFullYear() === currentYearDate) {
+                } else if (currentTab === 'yearly' && expenseDate.getFullYear() === currentMonthlyDate.getFullYear()) {
                     if (!categories[Category]) {
                         categories[Category] = { total: 0, subcategories: {} };
                     }
@@ -74,8 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        if (selectedCategory == null) populateCategories(categories);
-        else if (selectedCategory != null && categories.hasOwnProperty(selectedCategory)) populateCategories(categories);
+        if (selectedCategory === null || (selectedCategory !== null && categories.hasOwnProperty(selectedCategory))) {
+            populateCategories(categories);
+        }
     }
 
     function populateCategories(categories) {
@@ -86,7 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalSum += categories[category].total;
             }
         }
-        totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(totalSum)}</p>`;
+        totalAmount.className = currentMainTab;
+        totalAmount.innerHTML = `<p>${currentMainTab.charAt(0).toUpperCase() + currentMainTab.slice(1)}</p> <p>${formatIndianCurrency(totalSum)}</p>`;
 
         categoriesContainer.innerHTML = '';
 
@@ -98,15 +116,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="category">
                     <div class="back-button" style="display: none;">←</div>
                     <span title="categoryName">${categoryName}</span>
-                    <span class="amount expense">${formatIndianCurrency(category.total)}</span>
+                    <span class="amount ${currentMainTab}">${formatIndianCurrency(category.total)}</span>
                 </div>
                 <ul class="subcategory-list" style="display: none;">
                     <li class="subcategory all" data-subcategory="${categoryName}">
-                        <span>All</span><span class="amount expense">${formatIndianCurrency(category.total)}</span>
+                        <span>All</span><span class="amount ${currentMainTab}">${formatIndianCurrency(category.total)}</span>
                     </li>
                     ${Object.keys(category.subcategories).map(subcategoryName => `
                         <li class="subcategory" data-subcategory="${subcategoryName}">
-                            <span>${subcategoryName}</span><span class="amount expense">${formatIndianCurrency(category.subcategories[subcategoryName])}</span>
+                            <span>${subcategoryName}</span><span class="amount ${currentMainTab}">${formatIndianCurrency(category.subcategories[subcategoryName])}</span>
                         </li>
                     `).join('')}
                 </ul>
@@ -116,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const subcategoryList = categoryElement.querySelector('.subcategory-list');
 
             const toggleDisplay = () => {
-                // currentPeriod.textContent = formatDate(new Date());
                 const isSubcategoryListVisible = subcategoryList.style.display === 'block';
                 subcategoryList.style.display = isSubcategoryListVisible ? 'none' : 'block';
                 categoryElement.querySelector('.back-button').style.display = isSubcategoryListVisible ? 'none' : 'block';
@@ -140,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectedCategory = null;
                     isSubcategoryView = false;
                     document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
-                    updateCategoryTotals(); // think about this change
+                    updateCategoryTotals(); 
                 }
             };
 
@@ -155,8 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         selectedSubcategory = subcategoryElement.dataset.subcategory;
                     }
+
                     document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
                     subcategoryElement.classList.add('active');
+
                     updateTransactions();
                 });
             });
@@ -164,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
             categoriesContainer.appendChild(categoryElement);
         });
 
-        // Ensure the selected category is expanded if in subcategory view
         if (isSubcategoryView && selectedCategory) {
             const selectedCategoryElement = Array.from(categoriesContainer.children).find(child =>
                 child.querySelector('.category span[title="categoryName"]').textContent === selectedCategory);
@@ -224,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableBodyElement = document.createElement('tbody');
 
         if (Object.entries(transactionsByDay).length > 0) {
+            categoriesContainer.style.display = 'flex';
             for (const [date, transactions] of Object.entries(transactionsByDay)) {
                 const dayContainer = tableElement.insertRow();
                 dayContainer.className = 'transaction-day';
@@ -239,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const totals = calculateTotals(transactions);
                 const dayTotals = document.createElement('div');
                 dayTotals.classList.add('day-totals');
-                dayTotals.innerHTML = `<p class="expense">${formatIndianCurrency(totals.expenses)}</p>`;
+                dayTotals.innerHTML = `<p class="${currentMainTab}">${formatIndianCurrency(totals[currentMainTab])}</p>`;
                 dayContent.appendChild(dayTotals);
                 dayHeader.appendChild(dayContent);
                 dayContainer.appendChild(dayHeader);
@@ -251,14 +270,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } else {
-            tableBodyElement.innerHTML = `<tr>No transactions for <b>${selectedCategory} ${selectedSubcategory != null ? '- ' + selectedSubcategory : ''}</b></tr>`;
+            categoriesContainer.style.display = 'none';
+            tableBodyElement.innerHTML = `<tr>No transactions for <b>${selectedCategory} ${selectedSubcategory != null ? '- ' + selectedSubcategory : ''}</b> in <b>${formatDate(currentMonthlyDate)}</b></tr>`;
         }
 
         tableElement.appendChild(tableBodyElement);
         transactionsContainer.appendChild(tableElement);
 
         const monthlyTotals = calculateTotals(filteredTransactions);
-        totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(monthlyTotals.expenses)}</p>`;
+        totalAmount.innerHTML = `<p>${currentMainTab.charAt(0).toUpperCase() + currentMainTab.slice(1)}</p> <p>${formatIndianCurrency(monthlyTotals[currentMainTab])}</p>`;
     }
 
     function updateYearlyTransactions() {
@@ -270,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             return expense.Category === selectedCategory &&
                 (!selectedSubcategory || expense.Subcategory === selectedSubcategory) &&
-                expenseDate.getFullYear() === currentYearDate;
+                expenseDate.getFullYear() === currentMonthlyDate.getFullYear();
         });
 
         const transactionsByMonth = filteredTransactions.reduce((acc, expense) => {
@@ -286,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableBodyElement = document.createElement('tbody');
 
         if (Object.entries(transactionsByMonth).length > 0) {
+            categoriesContainer.style.display = 'flex';
             for (let i = 0; i < 12; i++) {
                 const monthContainer = document.createElement('tr');
                 monthContainer.className = 'transaction-row';
@@ -294,10 +315,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const monthName = document.createElement('td');
                 monthName.textContent = new Date(2024, i).toLocaleString('default', { month: 'short' });
 
-                const totals = transactionsByMonth[i] ? calculateTotals(transactionsByMonth[i]) : { income: 0, expenses: 0 };
+                const totals = transactionsByMonth[i] ? calculateTotals(transactionsByMonth[i]) : { income: 0, expense: 0 };
                 const expenses = document.createElement('td');
-                expenses.className = 'amount expense';
-                expenses.textContent = formatIndianCurrency(totals.expenses);
+                expenses.className = `amount ${currentMainTab}`;
+                expenses.textContent = formatIndianCurrency(totals[currentMainTab]);
 
                 monthContainer.appendChild(monthName);
                 monthContainer.appendChild(expenses);
@@ -305,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableBodyElement.appendChild(monthContainer);
             }
         } else {
+            categoriesContainer.style.display = 'none';
             tableBodyElement.innerHTML = `<tr>No transactions for <b>${selectedCategory}</b> in <b>${currentYearDate}</b></tr>`;
         }
 
@@ -312,17 +334,17 @@ document.addEventListener('DOMContentLoaded', () => {
         transactionsContainer.appendChild(tableElement);
 
         const yearlyTotals = calculateTotals(filteredTransactions);
-        totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(yearlyTotals.expenses)}</p>`;
+        totalAmount.innerHTML = `<p>${currentMainTab.charAt(0).toUpperCase() + currentMainTab.slice(1)}</p> <p>${formatIndianCurrency(yearlyTotals[currentMainTab])}</p>`;
 
-        // Add click event listener for each month row to switch to Monthly tab
         const monthRows = document.querySelectorAll('#transactions .transaction-row');
         monthRows.forEach(row => {
             row.addEventListener('click', () => {
                 if (document.querySelector('.tabs .active').dataset.tab === 'yearly') {
-                    currentDailyDate = new Date(currentMonthlyDate.getFullYear(), row.dataset.month);
+                    currentMonthlyDate = new Date(currentMonthlyDate.getFullYear(), row.dataset.month);
                     setActiveTab('monthly');
-                    currentMonthlyDate.setMonth(currentDailyDate.getMonth());
-                    currentPeriod.textContent = formatDate(currentDailyDate);
+                    currentMonthlyDate.setMonth(currentMonthlyDate.getMonth());
+                    currentPeriod.textContent = formatDate(currentMonthlyDate);
+                    updateCategoryTotals();
                     updateMonthlyTransactions();
                 }
             });
@@ -352,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tableBodyElement = document.createElement('tbody');
 
         for (const [year, transactions] of Object.entries(transactionsByYear)) {
+            categoriesContainer.style.display = 'flex';
             const yearContainer = document.createElement('tr');
             yearContainer.className = 'transaction-row';
             yearContainer.dataset.year = year;
@@ -361,8 +384,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const totals = calculateTotals(transactions);
             const expenses = document.createElement('td');
-            expenses.className = 'amount expense';
-            expenses.textContent = formatIndianCurrency(totals.expenses);
+            expenses.className = `amount ${currentMainTab}`;
+            expenses.textContent = formatIndianCurrency(totals[currentMainTab]);
 
             yearContainer.appendChild(yearName);
             yearContainer.appendChild(expenses);
@@ -374,16 +397,15 @@ document.addEventListener('DOMContentLoaded', () => {
         transactionsContainer.appendChild(tableElement);
 
         const totalTotals = calculateTotals(filteredTransactions);
-        totalAmount.innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(totalTotals.expenses)}</p>`;
+        totalAmount.innerHTML = `<p>${currentMainTab.charAt(0).toUpperCase() + currentMainTab.slice(1)}</p> <p>${formatIndianCurrency(totalTotals[currentMainTab])}</p>`;
 
-        // Add click event listener for each year row to switch to Yearly tab
-        const monthRows = document.querySelectorAll('#transactions .transaction-row');
-        monthRows.forEach(row => {
+        const yearRows = document.querySelectorAll('#transactions .transaction-row');
+        yearRows.forEach(row => {
             row.addEventListener('click', () => {
                 if (document.querySelector('.tabs .active').dataset.tab === 'total') {
                     currentMonthlyDate = new Date(row.dataset.year);
                     setActiveTab('yearly');
-                    // currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear());
+                    currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear());
                     currentPeriod.textContent = formatYear(currentMonthlyDate);
                     updateYearlyTransactions();
                 }
@@ -391,19 +413,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function formatYear(date) {
-        return date.getFullYear().toString();
-    }
-
     function calculateTotals(transactions) {
         return transactions.reduce((acc, expense) => {
             if (expense["Income/Expense"] === "Income") {
                 acc.income += parseFloat(expense.INR);
             } else if (expense["Income/Expense"] === "Expense") {
-                acc.expenses += parseFloat(expense.INR);
+                acc.expense += parseFloat(expense.INR);
             }
             return acc;
-        }, { income: 0, expenses: 0 });
+        }, { income: 0, expense: 0 });
     }
 
     function createTransactionRow(expense) {
@@ -429,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const amountCell = row.insertCell();
         amountCell.textContent = formatIndianCurrency(parseFloat(expense.INR));
-        amountCell.className = `amount ${expense['Income/Expense'].toLowerCase()}`;
+        amountCell.className = `amount ${currentMainTab}`;
 
         const noteCell = row.insertCell();
         noteCell.textContent = expense.Note;
@@ -445,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
         row.appendChild(descriptionCell);
 
         noteCell.addEventListener('click', () => {
-            if (window.innerWidth <= 768) { // Mobile view
+            if (window.innerWidth <= 768) {
                 rowDetails.innerHTML = `
                     <table>
                         <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
@@ -461,30 +479,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return row;
     }
 
-    function convertDateFormat(dateString) {
-        const parts = dateString.includes('/') ? dateString.split("/") : dateString.split("-");
-        return `${parts[1]}/${parts[0]}/${parts[2]}`;
-    }
-
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabName = tab.dataset.tab;
             setActiveTab(tabName);
             if (tabName === 'monthly') {
+                document.getElementById('period-navigation').style.display = 'flex';
                 currentPeriod.textContent = formatDate(currentMonthlyDate);
                 if (selectedCategory != null) {
                     updateMonthlyTransactions();
                 }
             } else if (tabName === 'yearly') {
-                currentPeriod.textContent = currentYearDate;
+                document.getElementById('period-navigation').style.display = 'flex';
+                currentYearDate = currentMonthlyDate.getFullYear();
+                currentPeriod.textContent = currentMonthlyDate.getFullYear();
                 if (selectedCategory != null) {
                     updateYearlyTransactions();
                 }
             } else if (tabName === 'total') {
+                document.getElementById('period-navigation').style.display = 'none';
                 if (selectedCategory != null) {
                     updateTotalTransactions();
                 }
             }
+        });
+    });
+
+    mainTabs.forEach(mainTab => {
+        mainTab.addEventListener('click', () => {
+            const mainTabName = mainTab.dataset.tab;
+            setActiveMainTab(mainTabName);
+            setActiveTab('monthly');
+            currentPeriod.textContent = formatDate(currentMonthlyDate);
         });
     });
 
@@ -497,8 +523,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateMonthlyTransactions();
             }
         } else if (currentTab === 'yearly') {
-            currentYearDate -= 1;
-            currentPeriod.textContent = currentYearDate;
+            currentYearDate = currentMonthlyDate.getFullYear() - 1;
+            currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() - 1);
+            currentPeriod.textContent = formatYear(currentMonthlyDate);
             updateCategoryTotals();
             if (selectedCategory != null) {
                 updateYearlyTransactions();
@@ -515,8 +542,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateMonthlyTransactions();
             }
         } else if (currentTab === 'yearly') {
-            currentYearDate += 1;
-            currentPeriod.textContent = currentYearDate;
+            currentYearDate = currentMonthlyDate.getFullYear() + 1;
+            currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() + 1);
+            currentPeriod.textContent = formatYear(currentMonthlyDate);
             updateCategoryTotals();
             if (selectedCategory != null) {
                 updateYearlyTransactions();
@@ -527,8 +555,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('masterExpensesLoaded', () => {
         currentPeriod.textContent = formatDate(currentMonthlyDate);
         updateCategoryTotals();
-
-        // Initial setup
+        setActiveMainTab('expense');
         setActiveTab('monthly');
     });
-});    
+});
+
+

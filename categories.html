@@ -27,6 +27,10 @@
     </nav>
     <main>
         <h2 class="heading">Categories</h2>
+        <div class="main-tabs">
+            <button class="main-tab-button active" data-tab="expense">Expenses</button>
+            <button class="main-tab-button" data-tab="income">Income</button>
+        </div>
         <div class="tabs">
             <button class="tab-button" data-tab="monthly">Monthly</button>
             <button class="tab-button" data-tab="yearly">Yearly</button>
@@ -39,14 +43,12 @@
                 <button id="next-period">&gt;</button>
             </div>
             <div class="totals">
-                <div id="total-amount" class="amount expense"></div>
+                <div id="total-amount"></div>
             </div>
-            
             <div id="categories-container" class="categories-container">
                 <!-- Categories will be populated here -->
             </div>
             <div id="selected-category-container" style="display: none;">
-                <!-- <div class="back-button">&larr; Back</div> -->
                 <h2 class="category-heading"></h2>
                 <ul id="subcategory-list" class="subcategory-list"></ul>
                 <div class="selected-total-wrapper mb-16">

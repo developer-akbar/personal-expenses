@@ -6,7 +6,7 @@
 }
 
 :root {
-    box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    --box-shadow: 0px 6px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 html, body {
@@ -224,7 +224,7 @@ button {
     background-color: #004080;
     color: white;
     padding: 10px 18px;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
     border: none;
     cursor: pointer;
     border-radius: 5px;
@@ -298,7 +298,7 @@ button:hover {
 
 /* Responsive design */
 @media (max-width: 768px) {
-    header h1 {
+    header {
         display: none;
     }
 
@@ -378,6 +378,12 @@ button:hover {
         align-items: center;
     }
 
+    .tabs {
+        background: #003366;
+        color: #fff;
+        margin-bottom: 10px;
+    }
+
     .transaction-row {
         padding: 10px !important;
         margin-bottom: 10px;
@@ -388,7 +394,8 @@ button:hover {
     }
 
     .search {
-        display: block;position: absolute;
+        display: block;
+        /* position: absolute; */
         right: 10px;
         top: -30px;
     }
