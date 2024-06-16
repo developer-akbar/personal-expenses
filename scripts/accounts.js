@@ -1,6 +1,6 @@
 // accounts.js
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const accountsLink = document.getElementById('accounts-link');
     const accountsSection = document.getElementById('accounts-section');
     const dailyTransactionsSection = document.getElementById('daily-transactions-section');
@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentDailyDate = new Date();
     let selectedAccount = null;
+    
+    const masterData = await utility.initializeMasterData();
+    currentPeriod.textContent = formatDate(currentDailyDate);
+    updateAccountBalances();
 
     function formatDate(date) {
         return `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
@@ -20,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateAccountBalance(account, date) {
-        return masterExpenses.reduce((acc, expense) => {
+        return masterData.reduce((acc, expense) => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             if (expenseDate > date) return acc;
 
@@ -46,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         accountsBalancesContainer.innerHTML = ''; // Clear previous balances
 
         // Calculate account balances
-        const accountBalances = masterExpenses.reduce((acc, expense) => {
+        const accountBalances = masterData.reduce((acc, expense) => {
             const account = expense.Account;
             const amount = parseFloat(expense.INR);
             if (!acc[account]) {
@@ -125,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         accountTransactionsContainer.innerHTML = ''; // Clear previous transactions
 
         // Filter transactions for the current month and year for the selected account
-        const filteredTransactions = masterExpenses.filter(expense => {
+        const filteredTransactions = masterData.filter(expense => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             const matchesDate = expenseDate.getMonth() === currentDailyDate.getMonth() && expenseDate.getFullYear() === currentDailyDate.getFullYear();
             const matchesAccount = expense.Account === selectedAccount || (expense["Income/Expense"] === "Transfer-Out" && expense.Category === selectedAccount);
@@ -186,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateMonthEndBalance(account, date) {
-        const transactions = masterExpenses.filter(expense => {
+        const transactions = masterData.filter(expense => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             return expenseDate <= date && (expense.Account === account || (expense["Income/Expense"] === "Transfer-Out" && expense.Category === account));
         });
@@ -316,10 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Wait for masterExpenses to be loaded
-    document.addEventListener('masterExpensesLoaded', () => {
-        currentPeriod.textContent = formatDate(currentDailyDate);
-        updateAccountBalances();
-    });
+    // document.addEventListener('masterExpensesLoaded', () => {
+    //     currentPeriod.textContent = formatDate(currentDailyDate);
+    //     updateAccountBalances();
+    // });
 });
 
 function convertDateFormat(dateString) {

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const categoriesContainer = document.getElementById('categories-container');
     const selectedCategoryContainer = document.getElementById('selected-category-container');
     const mainTabs = document.querySelectorAll('.main-tab-button');
@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTab = 'monthly';
     let isSubcategoryView = false;
     let currentMainTab = 'expense';
+    
+    currentPeriod.textContent = formatDate(currentMonthlyDate);
+    const masterExpenses = await utility.initializeMasterData();
+    updateCategoryTotals();
+    setActiveMainTab('expense');
+    setActiveTab('monthly');
 
     function formatIndianCurrency(amount) {
         return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -550,13 +556,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateYearlyTransactions();
             }
         }
-    });
-
-    document.addEventListener('masterExpensesLoaded', () => {
-        currentPeriod.textContent = formatDate(currentMonthlyDate);
-        updateCategoryTotals();
-        setActiveMainTab('expense');
-        setActiveTab('monthly');
     });
 });
 

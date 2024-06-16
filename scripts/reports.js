@@ -1,13 +1,13 @@
-// reports.js
-let masterExpenses;
-
-// Define months array
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
+
+    const masterData = await utility.initializeMasterData();
+    generateReports();
+
     // Calculate expenses by category
-    function calculateExpensesByCategory(masterExpenses) {
-        const expensesFiltered = masterExpenses.filter(expense => expense["Income/Expense"] === "Expense");
+    function calculateExpensesByCategory() {
+        const expensesFiltered = masterData.filter(expense => expense["Income/Expense"] === "Expense");
         const expensesByCategory = {};
         expensesFiltered.forEach(expense => {
             expensesByCategory[expense.Category] = (expensesByCategory[expense.Category] || 0) + parseFloat(expense.INR);
@@ -16,14 +16,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Calculate total expenses
-    function calculateTotalExpenses(masterExpenses) {
-        const expensesFiltered = masterExpenses.filter(expense => expense["Income/Expense"] === "Expense");
+    function calculateTotalExpenses() {
+        const expensesFiltered = masterData.filter(expense => expense["Income/Expense"] === "Expense");
         return expensesFiltered.reduce((total, expense) => total + parseFloat(expense.INR), 0);
     }
 
     // Function to generate and display yearly expense reports
-    function generateYearlyExpenseReports(masterExpenses) {
-        const yearlyExpenses = groupExpensesByYear(masterExpenses);
+    function generateYearlyExpenseReports() {
+        const yearlyExpenses = groupExpensesByYear();
 
         const reportContainer = document.getElementById('reportContainer');
         reportContainer.innerHTML = ''; // Clear existing content
@@ -52,9 +52,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to group expenses by year
-    function groupExpensesByYear(masterExpenses) {
+    function groupExpensesByYear() {
         const yearlyExpenses = {};
-        masterExpenses.forEach(expense => {
+        masterData.forEach(expense => {
             const year = new Date(convertDateFormat(expense.Date)).getFullYear();
             yearlyExpenses[year] = yearlyExpenses[year] || [];
             yearlyExpenses[year].push(expense);
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to generate monthly expense reports
-    function generateMonthlyExpenseReports(masterExpenses) {
+    function generateMonthlyExpenseReports() {
         const monthlyExpenseReports = {};
         expenses.forEach(expense => {
             const monthYear = new Date(convertDateFormat(expense.Date)).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Function to generate the HTML table
-    function generateExpenseTable(masterExpenses) {
+    function generateExpenseTable() {
         const table = document.createElement('table');
         const thead = document.createElement('thead');
         const tbody = document.createElement('tbody');
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
         headerRow.appendChild(headerCell);
 
         // Add years as header cells
-        for (const year in expenses[Object.keys(masterExpenses)[0]]) {
+        for (const year in expenses[Object.keys(masterData)[0]]) {
             const yearHeader = document.createElement('th');
             yearHeader.textContent = year;
             headerRow.appendChild(yearHeader);
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to generate and display reports for expenses
     function generateReports() {
         // Filter expenses based on "Income/Expense" attribute
-        const expensesFiltered = masterExpenses.filter(expense => expense["Income/Expense"] === "Expense");
+        const expensesFiltered = masterData.filter(expense => expense["Income/Expense"] === "Expense");
 
         // Group expenses by category and year
         const expensesByCategoryAndYear = {};
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
         spanElement.textContent = '▼';
         categoryHeader.appendChild(spanElement);
 
-        const totalExpenses = calculateTotalExpenses(masterExpenses);
+        const totalExpenses = calculateTotalExpenses(masterData);
         const yearTotal = document.createElement('p');
         yearTotal.classList.add('total-expenses');
         yearTotal.classList.add(`amount`);
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tableHeaderRow.appendChild(yearHeader);
 
             // add year total expenses
-            const yearTotalExpenses = groupExpensesByYear(masterExpenses);
+            const yearTotalExpenses = groupExpensesByYear(masterData);
             const yearTotal = document.createElement('p');
             yearTotal.classList.add('year-total-expenses');
             yearTotal.classList.add(`amount`);
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 tableRow.appendChild(amountCell);
             });
 
-            const categoryTotalExpenses = calculateExpensesByCategory(masterExpenses);
+            const categoryTotalExpenses = calculateExpensesByCategory(masterData);
             const categoryTotal = document.createElement('span');
             categoryTotal.classList.add('category-total-expenses');
             categoryTotal.classList.add(`amount`);
@@ -227,11 +227,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
-
-    // Wait for masterExpenses to be loaded
-    document.addEventListener('masterExpensesLoaded', () => {
-        generateReports();
-    });
 
 });
 
@@ -611,14 +606,3 @@ function convertDateFormat(dateString) {
     const convertedDate = `${parts[1]}/${parts[0]}/${parts[2]}`;
     return convertedDate;
 }
-
-function convertAmountToINR() {
-    document.querySelectorAll('.amount').forEach(amt => {
-        amt.textContent = parseFloat(amt.textContent).toLocaleString('en-IN', {
-            // maximumFractionDigits: 2,
-            // style: 'currency',
-            // currency: 'INR'
-        });
-    });
-}
-

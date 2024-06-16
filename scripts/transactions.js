@@ -1,13 +1,18 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async function () {
     const tabs = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
     const currentPeriod = document.getElementById('current-period');
     const currentYear = document.getElementById('current-year');
     const rowDetails = document.querySelector('.row-details');
 
-    let currentDate = new Date();
     let currentDailyDate = new Date();
     let currentMonthlyDate = new Date();
+
+    currentPeriod.textContent = formatDate(currentDailyDate);
+    currentYear.textContent = formatYear(currentMonthlyDate);
+
+    const masterData = await utility.initializeMasterData();
+    updateDailyTransactions();
 
     function setActiveTab(tabName) {
         tabs.forEach(tab => {
@@ -37,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dailyTransactionsContainer.innerHTML = ''; // Clear previous transactions
 
         // Filter transactions for the current month and year
-        const filteredTransactions = masterExpenses.filter(expense => {
+        const filteredTransactions = masterData.filter(expense => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             return expenseDate.getMonth() === currentDailyDate.getMonth() && expenseDate.getFullYear() === currentDailyDate.getFullYear();
         });
@@ -97,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         monthlyTransactionsContainer.innerHTML = ''; // Clear previous transactions
 
         // Filter transactions for the current year
-        const filteredTransactions = masterExpenses.filter(expense => {
+        const filteredTransactions = masterData.filter(expense => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             return expenseDate.getFullYear() === currentMonthlyDate.getFullYear();
         });
@@ -161,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         totalTransactionsContainer.innerHTML = ''; // Clear previous transactions
 
         // Group transactions by year
-        const transactionsByYear = masterExpenses.reduce((acc, expense) => {
+        const transactionsByYear = masterData.reduce((acc, expense) => {
             const year = new Date(convertDateFormat(expense.Date)).getFullYear();
             if (!acc[year]) {
                 acc[year] = [];
@@ -198,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             totalTransactionsContainer.appendChild(yearContainer);
         }
 
-        const totalTotals = calculateTotals(masterExpenses);
+        const totalTotals = calculateTotals(masterData);
         document.getElementById('total-income').innerHTML = `<p>Income</p> <p>${formatIndianCurrency(totalTotals.income)}</p>`;
         document.getElementById('total-expenses').innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(totalTotals.expenses)}</p>`;
         document.getElementById('total-balance').innerHTML = `<p>Balance</p> <p>${formatIndianCurrency(totalTotals.income - totalTotals.expenses)}</p>`;
@@ -322,13 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateTotalTransactions();
             }
         });
-    });
-
-    // Wait for masterExpenses to be loaded
-    document.addEventListener('masterExpensesLoaded', () => {
-        currentPeriod.textContent = formatDate(currentDailyDate);
-        currentYear.textContent = formatYear(currentMonthlyDate);
-        updateDailyTransactions();
     });
 });
 
