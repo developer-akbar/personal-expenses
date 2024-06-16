@@ -1,7 +1,6 @@
 // accounts.js
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const accountsLink = document.getElementById('accounts-link');
     const accountsSection = document.getElementById('accounts-section');
     const dailyTransactionsSection = document.getElementById('daily-transactions-section');
     const selectedAccountDisplay = document.getElementById('selected-account');
@@ -14,36 +13,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const masterData = await utility.initializeMasterData();
     currentPeriod.textContent = formatDate(currentDailyDate);
     updateAccountBalances();
-
-    function formatDate(date) {
-        return `${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()}`;
-    }
-
-    function formatIndianCurrency(amount) {
-        return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function calculateAccountBalance(account, date) {
-        return masterData.reduce((acc, expense) => {
-            const expenseDate = new Date(convertDateFormat(expense.Date));
-            if (expenseDate > date) return acc;
-
-            const amount = parseFloat(expense.INR);
-            if (expense.Account === account) {
-                if (expense["Income/Expense"] === "Income") {
-                    acc += amount;
-                } else if (expense["Income/Expense"] === "Expense") {
-                    acc -= amount;
-                } else if (expense["Income/Expense"] === "Transfer-Out") {
-                    acc -= amount;
-                }
-            }
-            if (expense.Category === account && expense["Income/Expense"] === "Transfer-Out") {
-                acc += amount;
-            }
-            return acc;
-        }, 0);
-    }
 
     function updateAccountBalances() {
         const accountsBalancesContainer = document.getElementById('accounts-balances');
@@ -232,19 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, { deposits: 0, withdrawal: 0 });
     }
 
-    function calculateAccountTotals(transactions) {
-        return transactions.reduce((acc, expense) => {
-            const amount = parseFloat(expense.INR);
-            if (expense["Income/Expense"] === "Expense") {
-                acc.withdrawal += amount;
-            } else {
-                acc.deposits += amount;
-            }
-            return acc;
-        }, { deposits: 0, withdrawal: 0 });
-    }
-
-    function createTransactionRow(expense) {
+    function createTransactionRow1(expense) {
         const row = document.createElement('tr');
         row.className = 'transaction-row';
 
@@ -273,6 +230,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         noteCell.textContent = expense.Note;
         noteCell.className = 'note';
 
+        const descriptionCell = row.insertCell();
+        descriptionCell.textContent = expense.Description;
+        descriptionCell.className = 'description';
+
+        row.appendChild(checkboxCell);
+        row.appendChild(dateElement);
+        row.appendChild(noteCell);
+        row.appendChild(amountCell);
+        row.appendChild(descriptionCell);
+
         noteCell.addEventListener('click', () => {
             if (window.innerWidth <= 768) { // Mobile view
                 rowDetails.innerHTML = `
@@ -286,16 +253,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 rowPopup.style.display = 'block';
             }
         });
-
-        const descriptionCell = row.insertCell();
-        descriptionCell.textContent = expense.Description;
-        descriptionCell.className = 'description';
-
-        row.appendChild(checkboxCell);
-        row.appendChild(dateElement);
-        row.appendChild(noteCell);
-        row.appendChild(amountCell);
-        row.appendChild(descriptionCell);
 
         return row;
     }
@@ -318,16 +275,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         accountsSection.style.display = 'block';
         dailyTransactionsSection.style.display = 'none';
     });
-
-    // Wait for masterExpenses to be loaded
-    // document.addEventListener('masterExpensesLoaded', () => {
-    //     currentPeriod.textContent = formatDate(currentDailyDate);
-    //     updateAccountBalances();
-    // });
 });
-
-function convertDateFormat(dateString) {
-    const parts = dateString.includes('/') ? dateString.split("/") : dateString.split("-");
-    const convertedDate = `${parts[1]}/${parts[0]}/${parts[2]}`;
-    return convertedDate;
-}

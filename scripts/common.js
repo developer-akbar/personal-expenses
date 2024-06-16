@@ -15,12 +15,40 @@ closeButton.addEventListener('click', () => {
 // Event listeners for mobile navigation
 mobileNavButtons.forEach(button => {
     button.addEventListener('click', () => {
+        // Remove active class from all buttons
+        mobileNavButtons.forEach(btn => btn.classList.remove('active'));
+
+        // Add active class to the clicked button
+        button.classList.add('active');
+
+        // Navigate to the clicked page
         window.location.href = button.dataset.page;
+    });
+
+    // Optionally, you can highlight the active button based on the current URL
+    const currentPage = window.location.pathname.split('/').pop();
+    mobileNavButtons.forEach(button => {
+        if (button.dataset.page === currentPage) {
+            button.classList.add('active');
+        }
     });
 });
 
 function formatIndianCurrency(amount) {
     return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function formatDate(date) {
+    return `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+}
+
+function formatYear(date) {
+    return date.getFullYear().toString();
+}
+
+function convertDateFormat(dateString) {
+    const parts = dateString.includes('/') ? dateString.split("/") : dateString.split("-");
+    return `${parts[1]}/${parts[0]}/${parts[2]}`;
 }
 
 function updateSelectedTotal() {
@@ -44,6 +72,72 @@ function updateSelectedTotal() {
         selectedTotalWrapper.style.display = 'block';
         selectedTotalElement.textContent = `Selected Total: ${selectedTotal.toFixed(2)}`;
     }
+}
+
+function createTransactionRow(expense) {
+    const row = document.createElement('tr');
+    row.className = 'transaction-row';
+
+    const checkboxCell = row.insertCell();
+    const inputElement = document.createElement('input');
+    inputElement.type = 'checkbox';
+    inputElement.className = 'select-checkbox';
+    inputElement.addEventListener('change', updateSelectedTotal);
+    checkboxCell.appendChild(inputElement);
+
+    const dateElement = row.insertCell();
+    const dateCell = document.createElement('p');
+    dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
+    dateCell.className = 'date';
+    const categoryElement = document.createElement('p');
+    categoryElement.classList.add('transaction-category');
+    categoryElement.textContent = `${expense.Category}`;
+    dateElement.appendChild(dateCell);
+    dateElement.appendChild(categoryElement);
+
+    const amountCell = row.insertCell();
+    amountCell.textContent = formatIndianCurrency(parseFloat(expense.INR));
+    amountCell.className = `amount ${expense['Income/Expense'].toLowerCase()}`;
+
+    const noteCell = row.insertCell();
+    noteCell.textContent = expense.Note;
+    noteCell.className = 'note';
+    const descriptionCell = row.insertCell();
+    descriptionCell.textContent = expense.Description;
+    descriptionCell.className = 'description';
+
+    row.appendChild(checkboxCell);
+    row.appendChild(dateElement);
+    row.appendChild(noteCell);
+    row.appendChild(amountCell);
+    row.appendChild(descriptionCell);
+
+    noteCell.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            rowDetails.innerHTML = `
+                <table>
+                    <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
+                    <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
+                    <tr><td>Note</td> <td>${expense.Note}</td></tr>
+                    <tr><td>Description</td> <td>${expense.Description}</td></tr>
+                </table>
+            `;
+            rowPopup.style.display = 'block';
+        }
+    });
+
+    return row;
+}
+
+function calculateTotals(transactions) {
+    return transactions.reduce((acc, expense) => {
+        if (expense["Income/Expense"] === "Income") {
+            acc.income += parseFloat(expense.INR);
+        } else if (expense["Income/Expense"] === "Expense") {
+            acc.expense += parseFloat(expense.INR);
+        }
+        return acc;
+    }, { income: 0, expense: 0 });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -147,32 +241,12 @@ document.addEventListener('DOMContentLoaded', function () {
             return masterExpenses;
         }
 
-        // Expose the functions you want to use in other files
+        // Expose the utiltiy functions to use in other files
         return {
-            getDataFromLocalStorage,
-            updateMasterExpensesFromCSV,
-            storeDataInLocalStorage,
             initializeMasterData
         };
     })();
 
-    // This makes MyApp available globally
+    // This makes `utility` available globally
     window.utility = utility;
 });
-
-function convertDateFormat(dateString) {
-    const parts = dateString.includes('/') ? dateString.split("/") : dateString.split("-");
-    const convertedDate = `${parts[1]}/${parts[0]}/${parts[2]}`;
-    return convertedDate;
-}
-
-function convertAmountToINR() {
-    document.querySelectorAll('.amount').forEach(amt => {
-        amt.textContent = parseFloat(amt.textContent).toLocaleString('en-IN', {
-            // maximumFractionDigits: 2,
-            // style: 'currency',
-            // currency: 'INR'
-        });
-    });
-}
-

@@ -19,23 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setActiveMainTab('expense');
     setActiveTab('monthly');
 
-    function formatIndianCurrency(amount) {
-        return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function formatDate(date) {
-        return `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
-    }
-
-    function formatYear(date) {
-        return date.getFullYear().toString();
-    }
-
-    function convertDateFormat(dateString) {
-        const parts = dateString.includes('/') ? dateString.split("/") : dateString.split("-");
-        return `${parts[1]}/${parts[0]}/${parts[2]}`;
-    }
-
     function setActiveMainTab(tabName) {
         mainTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === tabName));
         currentMainTab = tabName;
@@ -350,7 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     setActiveTab('monthly');
                     currentMonthlyDate.setMonth(currentMonthlyDate.getMonth());
                     currentPeriod.textContent = formatDate(currentMonthlyDate);
-                    updateCategoryTotals();
+                    // updateCategoryTotals();
                     updateMonthlyTransactions();
                 }
             });
@@ -430,61 +413,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, { income: 0, expense: 0 });
     }
 
-    function createTransactionRow(expense) {
-        const row = document.createElement('tr');
-        row.className = 'transaction-row';
-
-        const checkboxCell = row.insertCell();
-        const inputElement = document.createElement('input');
-        inputElement.type = 'checkbox';
-        inputElement.className = 'select-checkbox';
-        inputElement.addEventListener('change', updateSelectedTotal);
-        checkboxCell.appendChild(inputElement);
-
-        const dateElement = row.insertCell();
-        const dateCell = document.createElement('p');
-        dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
-        dateCell.className = 'date';
-        const categoryElement = document.createElement('p');
-        categoryElement.classList.add('transaction-category');
-        categoryElement.textContent = `${expense.Category}`;
-        dateElement.appendChild(dateCell);
-        dateElement.appendChild(categoryElement);
-
-        const amountCell = row.insertCell();
-        amountCell.textContent = formatIndianCurrency(parseFloat(expense.INR));
-        amountCell.className = `amount ${currentMainTab}`;
-
-        const noteCell = row.insertCell();
-        noteCell.textContent = expense.Note;
-        noteCell.className = 'note';
-        const descriptionCell = row.insertCell();
-        descriptionCell.textContent = expense.Description;
-        descriptionCell.className = 'description';
-
-        row.appendChild(checkboxCell);
-        row.appendChild(dateElement);
-        row.appendChild(noteCell);
-        row.appendChild(amountCell);
-        row.appendChild(descriptionCell);
-
-        noteCell.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                rowDetails.innerHTML = `
-                    <table>
-                        <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
-                        <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
-                        <tr><td>Note</td> <td>${expense.Note}</td></tr>
-                        <tr><td>Description</td> <td>${expense.Description}</td></tr>
-                    </table>
-                `;
-                rowPopup.style.display = 'block';
-            }
-        });
-
-        return row;
-    }
-
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const tabName = tab.dataset.tab;
@@ -558,5 +486,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
-
-
