@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const subcategoryList = categoryElement.querySelector('.subcategory-list');
 
             const toggleDisplay = () => {
+                document.querySelector('.selected-total-wrapper').style.display = 'none';
                 const isSubcategoryListVisible = subcategoryList.style.display === 'block';
                 subcategoryList.style.display = isSubcategoryListVisible ? 'none' : 'block';
                 categoryElement.querySelector('.back-button').style.display = isSubcategoryListVisible ? 'none' : 'block';
@@ -206,6 +207,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function updateMonthlyTransactions() {
+        document.querySelector('.selected-total-wrapper').style.display = 'none';
+
         document.getElementById('period-navigation').style.display = 'flex';
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
@@ -271,6 +274,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function updateYearlyTransactions() {
+        document.querySelector('.selected-total-wrapper').style.display = 'none';
         document.getElementById('period-navigation').style.display = 'flex';
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
@@ -341,6 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function updateTotalTransactions() {
+        document.querySelector('.selected-total-wrapper').style.display = 'none';
         document.getElementById('period-navigation').style.display = 'none';
 
         const transactionsContainer = document.getElementById('transactions');
@@ -441,6 +446,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     mainTabs.forEach(mainTab => {
         mainTab.addEventListener('click', () => {
+            document.querySelector('.selected-total-wrapper').style.display = 'none';
             const mainTabName = mainTab.dataset.tab;
             setActiveMainTab(mainTabName);
             setActiveTab('monthly');

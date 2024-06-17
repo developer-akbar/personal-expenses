@@ -1,10 +1,3 @@
-.tabs-wrapper {
-    position: sticky;
-    top: 0;
-    background-color: white;
-    border-bottom: 1px solid #ddd;
-}
-
 .tabs {
     display: flex;
     justify-content: space-around;
@@ -41,10 +34,6 @@
 .totals {
     display: flex;
     justify-content: space-around;
-    margin-bottom: 10px;
-}
-
-.selected-total-wrapper {
     margin-bottom: 10px;
 }
 

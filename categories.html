@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/categories.css">
 </head>
+
 <body>
     <header>
         <h1>Personal Finance Manager</h1>
@@ -27,16 +29,16 @@
     </nav>
     <main>
         <h2 class="heading">Categories</h2>
-        <div class="main-tabs">
-            <button class="main-tab-button active" data-tab="expense">Expenses</button>
-            <button class="main-tab-button" data-tab="income">Income</button>
-        </div>
-        <div class="tabs">
-            <button class="tab-button" data-tab="monthly">Monthly</button>
-            <button class="tab-button" data-tab="yearly">Yearly</button>
-            <button class="tab-button" data-tab="total">Total</button>
-        </div>
-        <div id="category-transactions-container" class="category-transactions-container content-container">
+        <div class="sticky">
+            <div class="main-tabs">
+                <button class="main-tab-button active" data-tab="expense">Expenses</button>
+                <button class="main-tab-button" data-tab="income">Income</button>
+            </div>
+            <div class="tabs">
+                <button class="tab-button" data-tab="monthly">Monthly</button>
+                <button class="tab-button" data-tab="yearly">Yearly</button>
+                <button class="tab-button" data-tab="total">Total</button>
+            </div>
             <div id="period-navigation" class="period-navigation">
                 <button id="prev-period">&lt;</button>
                 <span id="current-period" class="period-display"></span>
@@ -45,15 +47,17 @@
             <div class="totals">
                 <div id="total-amount"></div>
             </div>
+            <div class="selected-total-wrapper mb-16" style="display: none;">
+                <span id="selected-total"></span>
+            </div>
+        </div>
+        <div id="category-transactions-container" class="category-transactions-container content-container">
             <div id="categories-container" class="categories-container">
                 <!-- Categories will be populated here -->
             </div>
             <div id="selected-category-container" style="display: none;">
                 <h2 class="category-heading"></h2>
                 <ul id="subcategory-list" class="subcategory-list"></ul>
-                <div class="selected-total-wrapper mb-16">
-                    <span id="selected-total"></span>
-                </div>
                 <div id="transactions" class="transaction-list"></div>
             </div>
         </div>
@@ -94,10 +98,12 @@
         <button class="mobile-nav-button" data-page="reports.html">Stats</button>
         <button class="mobile-nav-button" data-page="accounts.html">Accounts</button>
         <button class="mobile-nav-button" data-page="categories.html">Categories</button>
-        <button class="mobile-nav-button search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></button>
+        <button class="mobile-nav-button search" style="display: none;"><a href="search.html"
+                id="search-link">&#128269</a></button>
     </div>
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>
     <script src="scripts/categories.js"></script>
 </body>
+
 </html>

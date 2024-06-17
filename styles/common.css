@@ -35,6 +35,14 @@ main {
     padding-bottom: 56px;
 }
 
+.sticky {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
 .content-container {
     padding-inline: 8px;
 }
@@ -235,10 +243,8 @@ button {
     background-color: #004080;
     color: white;
     padding: 10px 18px;
-    /* margin-bottom: 10px; */
     border: none;
     cursor: pointer;
-    /* border-radius: 5px; */
 }
 
 button:hover {
@@ -321,7 +327,6 @@ button:hover {
     }
 
     main {
-        /* padding: 0.75rem; */
         position: relative;
     }
 
@@ -411,6 +416,7 @@ button:hover {
         top: -30px;
     }
 }
+
 .tabs {
     display: flex;
     justify-content: space-around;
@@ -478,6 +484,10 @@ button:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.selected-total-wrapper {
+    padding-inline: 10px;
 }
 
 #monthly-transactions .transaction-row, #total-transactions .transaction-row {
