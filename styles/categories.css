@@ -65,7 +65,7 @@
 .main-tabs {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 1rem;
+    border-color: #161616;
 }
 
 .main-tab-button {
@@ -83,7 +83,7 @@
 }
 
 .main-tab-button:not(.active):hover {
-    background: #ddd;
+    background: #003366;
 }
 
 /* Responsive design */

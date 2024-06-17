@@ -28,15 +28,27 @@ main {
     flex-direction: column;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
     background: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     width: 100%;
+    padding-bottom: 56px;
+}
+
+.content-container {
+    padding-inline: 8px;
 }
 
 a {
     text-decoration: none;
+}
+
+.mi-16 {
+    margin-block: 8px;
+}
+
+.search {
+    font-size: 1.175rem;
 }
 
 header {
@@ -91,7 +103,6 @@ nav ul li:last-child {
     color: #fff;
     background: #004080;
     border: none;
-    border-radius: 5px;
     text-decoration: none;
     text-align: center;
     cursor: pointer;
@@ -227,7 +238,7 @@ button {
     /* margin-bottom: 10px; */
     border: none;
     cursor: pointer;
-    border-radius: 5px;
+    /* border-radius: 5px; */
 }
 
 button:hover {
@@ -245,8 +256,7 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     background-color: #e0e0e0;
-    padding-inline: 5px;
-   
+    padding-inline: 5px;   
     border-radius: 5px;
 }
 
@@ -311,7 +321,7 @@ button:hover {
     }
 
     main {
-        padding: 0.75rem;
+        /* padding: 0.75rem; */
         position: relative;
     }
 
@@ -336,8 +346,9 @@ button:hover {
         justify-content: space-between;
         background: #004080;
         z-index: 999;
+        height: 56px; /* Set the height to match the padding-bottom value */
     }
-
+    
     .mobile-nav-button {
         text-align: center;
         padding: 1rem;
@@ -351,11 +362,11 @@ button:hover {
         text-overflow: ellipsis;
         font-size: 14px;
     }
-
+    
     .mobile-nav-button.active {
         background: #003366;
     }
-
+    
     .mobile-nav-button:hover {
         background: #002244;
     }
@@ -411,7 +422,6 @@ button:hover {
     background: #161616;
     color: #fff;
     border: none;
-    border-radius: 5px;
     transition: background 0.3s ease;
 }
 

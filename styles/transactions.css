@@ -3,32 +3,6 @@
     justify-content: space-around;
 }
 
-.tab-button {
-    padding: 10px 20px;
-    cursor: pointer;
-    background: #161616;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    transition: background 0.3s ease;
-}
-
-.tab-button.active {
-    background: #0a58a5;
-}
-
-.tab-button:hover {
-    background: #0a58a5;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
 .period-navigation {
     display: flex;
     justify-content: center;
@@ -75,6 +49,10 @@
     margin-inline: 1rem;
     border-bottom: 1px solid #ddd;
     cursor: pointer;
+}
+
+.transaction-row span:not(:first-child) {
+    flex: 1;
 }
 
 .transaction-row:last-child {

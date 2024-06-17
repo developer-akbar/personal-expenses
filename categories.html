@@ -36,7 +36,7 @@
             <button class="tab-button" data-tab="yearly">Yearly</button>
             <button class="tab-button" data-tab="total">Total</button>
         </div>
-        <div id="category-transactions-container" class="category-transactions-container">
+        <div id="category-transactions-container" class="category-transactions-container content-container">
             <div id="period-navigation" class="period-navigation">
                 <button id="prev-period">&lt;</button>
                 <span id="current-period" class="period-display"></span>
@@ -90,10 +90,11 @@
 
     <!-- Mobile Bottom Navigation -->
     <div class="mobile-nav" style="display: none;">
-        <button class="mobile-nav-button active" data-page="transactions.html">Transactions</button>
-        <button class="mobile-nav-button" data-page="reports.html">Reports</button>
+        <button class="mobile-nav-button" data-page="transactions.html">Trans</button>
+        <button class="mobile-nav-button" data-page="reports.html">Stats</button>
         <button class="mobile-nav-button" data-page="accounts.html">Accounts</button>
         <button class="mobile-nav-button" data-page="categories.html">Categories</button>
+        <button class="mobile-nav-button search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></button>
     </div>
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>

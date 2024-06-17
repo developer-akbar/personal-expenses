@@ -35,6 +35,7 @@ mobileNavButtons.forEach(button => {
 });
 
 function formatIndianCurrency(amount) {
+    if (amount === undefined || isNaN(amount)) amount = 0;
     return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
