@@ -1,4 +1,7 @@
 /* accounts.css */
+#accounts-section {
+    padding-top: 10px;
+}
 
 .period-navigation {
     display: flex;
@@ -57,8 +60,6 @@
 
 .selected-account {
     font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
 }
 
 /* Specific styles for accounts page */
@@ -104,13 +105,13 @@
 }
 
 #back-button {
-    background: #004080;
     color: #fff;
     border: none;
     border-radius: 5px;
     padding: 5px 10px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 1.25rem;
     margin-right: 8px;
 }
 
