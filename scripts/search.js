@@ -1,5 +1,5 @@
 // search.js
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const searchLink = document.getElementById('search-link');
     const searchSection = document.getElementById('search-section');
     const clearFiltersButton = document.getElementById('clear-filters');
@@ -11,12 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextPeriodButton = document.getElementById('next-period');
     const filterToggle = document.getElementById('filter-toggle');
     const filterWrapper = document.getElementById('filter-wrapper');
+    const searchResultsWrapper = document.querySelector('.search-results-wrapper');
 
     document.getElementById('searchInput').focus();
 
     let periodType = 'all';
     let currentDate = new Date();
 
+    const masterData = await utility.initializeMasterData();
 
     document.getElementById('searchInput').addEventListener('input', showSuggestions);
     document.getElementById('searchInput').addEventListener('keydown', navigateSuggestions);
@@ -54,9 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
     nextPeriodButton.addEventListener('click', () => changePeriod(1));
     filterToggle.addEventListener('click', () => {
         if (filterWrapper.style.display === 'none' || filterWrapper.style.display === '') {
-            filterWrapper.style.display = 'flex';
+            filterWrapper.style.display = 'block';
+            searchResultsWrapper.style.display = 'flex';
         } else {
             filterWrapper.style.display = 'none';
+            searchResultsWrapper.style.display = 'block';
         }
     });
 
@@ -150,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const notesSet = new Set();
         const regex = /^[a-zA-Z\s]+$/; // Only letters and spaces
 
-        masterExpenses.forEach(expense => {
+        masterData.forEach(expense => {
             if (regex.test(expense.Note) && expense.Note.toLowerCase().includes(searchInput)) {
                 notesSet.add(expense.Note);
             }
@@ -223,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const minAmount = document.getElementById('min-amount').value;
         const maxAmount = document.getElementById('max-amount').value;
 
-        let searchResults = masterExpenses.filter(expense => {
+        let searchResults = masterData.filter(expense => {
             const description = expense.Description.toLowerCase();
             const note = expense.Note.toLowerCase();
             return description.includes(searchInput) || note.includes(searchInput);
@@ -306,10 +310,10 @@ document.addEventListener('DOMContentLoaded', () => {
             searchResultsDiv.textContent = 'No matching results found.';
             return;
         } else {
-            const resultCountElement = document.createElement('p');
+            const resultCountElement = document.querySelector('.search-count');
             resultCountElement.classList.add('search-count');
             resultCountElement.innerHTML = `Showing ${transactions.length} results.`;
-            searchResultsDiv.appendChild(resultCountElement);
+            // searchResultsDiv.appendChild(resultCountElement);
         }
 
         const table = document.createElement('table');

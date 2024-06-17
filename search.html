@@ -32,120 +32,122 @@
     <div class="overlay"></div>
     <main style="display: none;">
         <h2 class="heading">Search</h2>
-        <!-- <div class="search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></div> -->
 
+        <div class="mobile-header"></div>
         <!-- Search Section -->
         <div id="search-section" class="search-section">
-            <form class="search-form">
-                <div class="search-input-field">
-                    <input type="text" id="searchInput" placeholder="Search..." autocomplete="off" />
-                    <div id="suggestions"></div>
-                </div>
-                <button type="submit" id="searchButton">Search</button>
+            <div class="sticky">
+                <div class="content-container">
+                    <form class="search-form">
+                        <div class="search-input-field">
+                            <input type="text" id="searchInput" placeholder="Search..." autocomplete="off" />
+                            <div id="suggestions"></div>
+                        </div>
+                        <button type="submit" id="searchButton">Search</button>
 
-                <!-- Filter Toggle Icon -->
-                <span class="filter-toggle" id="filter-toggle" style="display: none;">&#9776;</span>
-            </form>
+                        <!-- Filter Toggle Icon -->
+                        <span class="filter-toggle" id="filter-toggle" style="display: none;">&#9776;</span>
+                    </form>
+
+                    <div class="totals">
+                        <span id="total-income" class="income"></span>
+                        <span id="total-expenses" class="expense"></span>
+                        <span id="total-transfers" class="transfer-out"></span>
+                    </div>
+
+                    <div class="period-navigation" id="period-navigation">
+                        <button id="prev-period">&lt;</button>
+                        <span id="current-period" class="period-display"></span>
+                        <button id="next-period">&gt;</button>
+                    </div>
+
+                    <div class="selected-results">
+                        <p class="search-count"></p>
+                        <div class="selected-total-wrapper" style="display: none;">
+                            <span id="selected-total"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="search-results-wrapper">
-                <div class="totals">
-                    <span id="total-income" class="income"></span>
-                    <span id="total-expenses" class="expense"></span>
-                    <span id="total-transfers" class="transfer-out"></span>
-                </div>
-                <div class="selected-total-wrapper mb-16" style="display: none;">
-                    <span id="selected-total"></span>
-                </div>
+                <!-- Filters Section Starts -->
+                <div class="filter-wrapper" id="filter-wrapper">
 
-                <div class="search-results-container">
+                    <!-- Selected Filters Section -->
+                    <div class="selected-filters" id="selected-filters"></div>
 
-                    <!-- Filters Section Starts -->
-                    <div class="filter-wrapper" id="filter-wrapper">
+                    <!-- Clear filter button -->
+                    <button class="clear-filters" id="clear-filters">Clear Filters</button>
 
-                        <!-- Selected Filters Section -->
-                        <div class="selected-filters" id="selected-filters"></div>
+                    <div class="filter-item">
+                        <label for="period">Period</label>
+                        <select id="period" class="filter-options">
+                            <option value="all">All</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="annually">Annually</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                        <input type="date" id="custom-start" style="display:none;">
+                        <input type="date" id="custom-end" style="display:none;">
+                    </div>
 
-                        <!-- Clear filter button -->
-                        <button class="clear-filters" id="clear-filters">Clear Filters</button>
-
-                        <div class="filter-item">
-                            <label for="period">Period</label>
-                            <select id="period" class="filter-options">
-                                <option value="all">All</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                                <option value="annually">Annually</option>
-                                <option value="custom">Custom</option>
-                            </select>
-                            <input type="date" id="custom-start" style="display:none;">
-                            <input type="date" id="custom-end" style="display:none;">
-                        </div>
-
-                        <div class="filter-item">
-                            <p>Account</p>
-                            <div class="custom-select-wrapper" id="account-select">
-                                <div class="custom-options">
-                                    <div class="custom-option">
-                                        <input type="checkbox" value="all"> All
-                                    </div>
-                                    <!-- Populate dynamically with accounts -->
+                    <div class="filter-item">
+                        <p>Account</p>
+                        <div class="custom-select-wrapper" id="account-select">
+                            <div class="custom-options">
+                                <div class="custom-option">
+                                    <input type="checkbox" value="all"> All
                                 </div>
+                                <!-- Populate dynamically with accounts -->
                             </div>
                         </div>
+                    </div>
 
-                        <div class="filter-item">
-                            <p>Category</p>
-                            <div class="custom-select-wrapper" id="category-select">
-                                <div class="custom-options">
-                                    <div class="custom-option">
-                                        <input type="checkbox" value="all"> All
-                                    </div>
-                                    <!-- Populate dynamically with categories -->
+                    <div class="filter-item">
+                        <p>Category</p>
+                        <div class="custom-select-wrapper" id="category-select">
+                            <div class="custom-options">
+                                <div class="custom-option">
+                                    <input type="checkbox" value="all"> All
                                 </div>
+                                <!-- Populate dynamically with categories -->
                             </div>
                         </div>
+                    </div>
 
-                        <div class="filter-item">
-                            <p class="range">Amount Range</p>
-                            <div class="amount-range">
-                                <input type="number" id="min-amount" placeholder="Min">
-                                <input type="number" id="max-amount" placeholder="Max">
-                            </div>
+                    <div class="filter-item">
+                        <p class="range">Amount Range</p>
+                        <div class="amount-range">
+                            <input type="number" id="min-amount" placeholder="Min">
+                            <input type="number" id="max-amount" placeholder="Max">
                         </div>
+                    </div>
 
-                        <div class="filter-item">
-                            <p>Type</p>
-                            <div class="custom-select-wrapper" id="incomeExpense-select">
-                                <div class="custom-options">
-                                    <div class="custom-option">
-                                        <input type="checkbox" value="all"> All
-                                    </div>
-                                    <div class="custom-option">
-                                        <input type="checkbox" value="Income"> Income
-                                    </div>
-                                    <div class="custom-option">
-                                        <input type="checkbox" value="Expense"> Expense
-                                    </div>
-                                    <div class="custom-option">
-                                        <input type="checkbox" value="Transfer-Out"> Transfer-Out
-                                    </div>
+                    <div class="filter-item">
+                        <p>Type</p>
+                        <div class="custom-select-wrapper" id="incomeExpense-select">
+                            <div class="custom-options">
+                                <div class="custom-option">
+                                    <input type="checkbox" value="all"> All
+                                </div>
+                                <div class="custom-option">
+                                    <input type="checkbox" value="Income"> Income
+                                </div>
+                                <div class="custom-option">
+                                    <input type="checkbox" value="Expense"> Expense
+                                </div>
+                                <div class="custom-option">
+                                    <input type="checkbox" value="Transfer-Out"> Transfer-Out
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Filters Section Ends -->
-
-                    <div class="search-results-wrapper">
-                        <!-- Period Navigation Section -->
-                        <div class="period-navigation" id="period-navigation">
-                            <button id="prev-period">&lt;</button>
-                            <span id="current-period" class="period-display"></span>
-                            <button id="next-period">&gt;</button>
-                        </div>
-
-                        <div id="searchResults"></div>
-                    </div>
                 </div>
+                <!-- Filters Section Ends -->
+
+                <div id="searchResults"></div>
             </div>
         </div>
         <!-- End Search Section -->
@@ -186,7 +188,8 @@
         <button class="mobile-nav-button" data-page="reports.html">Stats</button>
         <button class="mobile-nav-button" data-page="accounts.html">Accounts</button>
         <button class="mobile-nav-button" data-page="categories.html">Categories</button>
-        <button class="mobile-nav-button search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></button>
+        <button class="mobile-nav-button search" style="display: none;"><a href="search.html"
+                id="search-link">&#128269</a></button>
     </div>
 
     <script src="scripts/common.js"></script>
