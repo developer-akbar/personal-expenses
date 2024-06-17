@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,6 @@
     <link rel="stylesheet" href="styles/login.css">
     <link rel="stylesheet" href="styles/transactions.css">
 </head>
-
 <body>
     <header>
         <h1>Personal Finance Manager</h1>
@@ -31,18 +29,15 @@
     <div class="overlay"></div>
     <main style="display: none;">
         <h2 class="heading">Transactions</h2>
-        <!-- <div class="search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></div> -->
 
         <!-- Tabs Navigation -->
-        <div class="tabs">
-            <button class="tab-button active" data-tab="daily">Daily</button>
-            <button class="tab-button" data-tab="monthly">Monthly</button>
-            <button class="tab-button" data-tab="total">Total</button>
-        </div>
-        <!-- Transactions Display Starts -->
-        <div id="transactions" class="transactions content-container">
-            <!-- Daily Transactions -->
-            <div id="daily" class="tab-content active">
+        <div class="tabs-wrapper sticky">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="daily">Daily</button>
+                <button class="tab-button" data-tab="monthly">Monthly</button>
+                <button class="tab-button" data-tab="total">Total</button>
+            </div>
+            <div id="daily" class="tab-content active content-container">
                 <div class="period-navigation">
                     <button id="prev-period">&lt;</button>
                     <span id="current-period" class="period-display"></span>
@@ -65,10 +60,7 @@
                 <div class="selected-total-wrapper mb-16" style="display: none;">
                     <span id="selected-total"></span>
                 </div>
-                <div id="daily-transactions" class="transaction-list"></div>
             </div>
-
-            <!-- Monthly Transactions -->
             <div id="monthly" class="tab-content">
                 <div class="period-navigation">
                     <button id="prev-year">&lt;</button>
@@ -89,10 +81,7 @@
                         <p>0.00</p>
                     </div>
                 </div>
-                <div id="monthly-transactions" class="transaction-list"></div>
             </div>
-
-            <!-- Total Transactions -->
             <div id="total" class="tab-content">
                 <div class="totals">
                     <span id="total-income">
@@ -108,8 +97,17 @@
                         <p>0.00</p>
                     </span>
                 </div>
-                <div id="total-transactions" class="transaction-list"></div>
             </div>
+        </div>
+        
+        <!-- Transactions Display Starts -->
+        <div id="transactions" class="transactions content-container">
+            <!-- Daily Transactions -->
+            <div id="daily-transactions" class="transaction-list"></div>
+            <!-- Monthly Transactions -->
+            <div id="monthly-transactions" class="transaction-list"></div>
+            <!-- Total Transactions -->
+            <div id="total-transactions" class="transaction-list"></div>
         </div>
         <!-- Transactions Display Ends -->
     </main>
@@ -156,5 +154,4 @@
     <script src="scripts/auth.js"></script>
     <script src="scripts/transactions.js"></script>
 </body>
-
 </html>

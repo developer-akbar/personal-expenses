@@ -1,6 +1,14 @@
+.tabs-wrapper {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+}
+
 .tabs {
     display: flex;
     justify-content: space-around;
+    padding-block: 10px;
 }
 
 .period-navigation {
@@ -30,10 +38,21 @@
     margin: 0 10px;
 }
 
+.totals {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+}
+
+.selected-total-wrapper {
+    margin-bottom: 10px;
+}
+
 .transaction-list {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    overflow-y: auto;
 }
 
 .day-content {
@@ -69,6 +88,10 @@
 
 /* Mobile-specific styles */
 @media (max-width: 768px) {
+    .tabs {
+        padding-block: unset !important;
+    }
+
     .tab-button {
         flex: 1;
     }

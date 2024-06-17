@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
         tabContents.forEach(content => {
             content.classList.toggle('active', content.id === tabName);
+            content.style.display = content.id === tabName ? 'block' : 'none';
         });
     }
 
@@ -143,6 +144,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             row.addEventListener('click', () => {
                 currentDailyDate = new Date(currentMonthlyDate.getFullYear(), row.dataset.month);
                 setActiveTab('daily');
+                document.getElementById('daily-transactions').style.display = 'block';
+                document.getElementById('monthly-transactions').style.display = 'none';
+                document.getElementById('total-transactions').style.display = 'none';
                 currentPeriod.textContent = formatDate(currentDailyDate);
                 updateDailyTransactions();
             });
@@ -203,6 +207,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 currentMonthlyDate = new Date(row.dataset.year);
                 setActiveTab('monthly');
                 currentYear.textContent = formatYear(currentMonthlyDate);
+                document.getElementById('daily-transactions').style.display = 'none';
+                document.getElementById('monthly-transactions').style.display = 'block';
+                document.getElementById('total-transactions').style.display = 'none';
                 updateMonthlyTransactions();
             });
         });
@@ -249,10 +256,32 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
         });
     });
-});
 
-function convertDateFormat(dateString) {
-    const parts = dateString.includes('/') ? dateString.split("/") : dateString.split("-");
-    const convertedDate = `${parts[1]}/${parts[0]}/${parts[2]}`;
-    return convertedDate;
-}
+    // Call initial tab setting
+    setActiveTab('daily');
+
+    // Add click event listeners for the tabs
+    document.querySelector('[data-tab="daily"]').addEventListener('click', function () {
+        document.getElementById('daily-transactions').style.display = 'block';
+        document.getElementById('monthly-transactions').style.display = 'none';
+        document.getElementById('total-transactions').style.display = 'none';
+    });
+
+    document.querySelector('[data-tab="monthly"]').addEventListener('click', function () {
+        document.getElementById('daily-transactions').style.display = 'none';
+        document.getElementById('monthly-transactions').style.display = 'block';
+        document.getElementById('total-transactions').style.display = 'none';
+    });
+
+    document.querySelector('[data-tab="total"]').addEventListener('click', function () {
+        document.getElementById('daily-transactions').style.display = 'none';
+        document.getElementById('monthly-transactions').style.display = 'none';
+        document.getElementById('total-transactions').style.display = 'block';
+    });
+
+    // Ensure only one tab content is visible at a time initially
+    document.getElementById('daily-transactions').style.display = 'block';
+    document.getElementById('monthly-transactions').style.display = 'none';
+    document.getElementById('total-transactions').style.display = 'none';
+
+});
