@@ -398,28 +398,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchResultsDiv.appendChild(table);
     }
 
-    function updateSelectedTotal() {
-        const selectedCheckboxes = document.querySelectorAll('.select-checkbox:checked');
-        let selectedTotal = 0;
-        selectedCheckboxes.forEach(checkbox => {
-            const amountCell = checkbox.closest('tr').querySelector('.amount');
-            if (amountCell.classList.contains('expense')) {
-                selectedTotal -= parseFloat(amountCell.textContent);
-            }
-            if (amountCell.classList.contains('income')) {
-                selectedTotal += parseFloat(amountCell.textContent);
-            }
-        });
-        const selectedTotalWrapper = document.querySelector('.selected-total-wrapper');
-        const selectedTotalElement = document.getElementById('selected-total');
-        if (selectedTotal === 0) {
-            selectedTotalWrapper.style.display = 'none';
-        } else {
-            selectedTotalWrapper.style.display = 'block';
-            selectedTotalElement.textContent = `Selected Total: ${selectedTotal.toFixed(2)}`;
-        }
-    }
-
     function populateFilterOptions(searchResults) {
         const accountSet = new Set();
         const categorySet = new Set();

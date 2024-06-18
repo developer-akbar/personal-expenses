@@ -55,24 +55,32 @@ function convertDateFormat(dateString) {
 function updateSelectedTotal() {
     const selectedCheckboxes = document.querySelectorAll('.select-checkbox:checked');
     let selectedTotal = 0;
+    let totalSelectedTransfers = 0;
+
     selectedCheckboxes.forEach(checkbox => {
         const amountCell = checkbox.closest('tr').querySelector('.amount');
-        let amount = amountCell.textContent.replace(/,/g, '');
+        const amount = parseFloat(amountCell.textContent.replace(/,/g, ''));
+        
         if (amountCell.classList.contains('expense')) {
-            selectedTotal -= parseFloat(amount);
-        }
-        if (amountCell.classList.contains('income')) {
-            selectedTotal += parseFloat(amount);
+            selectedTotal -= amount;
+        } else if (amountCell.classList.contains('income')) {
+            selectedTotal += amount;
+        } else if (amountCell.classList.contains('transfer-out')) {
+            totalSelectedTransfers += amount;
         }
     });
+
     const selectedTotalWrapper = document.querySelector('.selected-total-wrapper');
     const selectedTotalElement = document.getElementById('selected-total');
-    if (selectedTotal === 0) {
-        selectedTotalWrapper.style.display = 'none';
-    } else {
-        selectedTotalWrapper.style.display = 'block';
-        selectedTotalElement.textContent = `Selected Total: ${selectedTotal.toFixed(2)}`;
-    }
+    const totalSelectedTransfersElement = document.getElementById('total-selected-transfers');
+
+    selectedTotalWrapper.style.display = 'block';
+
+    selectedTotalElement.style.display = selectedTotal ? 'block' : 'none';
+    selectedTotalElement.textContent = `Selected Total: ${selectedTotal.toFixed(2)}`;
+
+    totalSelectedTransfersElement.style.display = totalSelectedTransfers ? 'block' : 'none';
+    totalSelectedTransfersElement.textContent = `Total Transfers: ${totalSelectedTransfers.toFixed(2)}`;
 }
 
 function createTransactionRow(expense) {
