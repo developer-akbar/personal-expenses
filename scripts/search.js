@@ -1,7 +1,5 @@
 // search.js
 document.addEventListener('DOMContentLoaded', async () => {
-    const searchLink = document.getElementById('search-link');
-    const searchSection = document.getElementById('search-section');
     const clearFiltersButton = document.getElementById('clear-filters');
     const suggestionsDiv = document.getElementById('suggestions');
     const period = document.getElementById('period');
@@ -144,7 +142,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function showSuggestions() {
         const searchInput = document.getElementById('searchInput').value.toLowerCase();
-        const suggestionsDiv = document.getElementById('suggestions');
         suggestionsDiv.innerHTML = '';
 
         if (searchInput.length === 0) {
@@ -286,7 +283,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         displaySearchResults(searchResults);
         displaySelectedFilters();
 
-        const suggestionsDiv = document.getElementById('suggestions');
         suggestionsDiv.innerHTML = '';
 
         return searchResults;
@@ -307,13 +303,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchResultsDiv.innerHTML = ''; // Clear previous results
 
         if (transactions.length === 0) {
-            searchResultsDiv.textContent = 'No matching results found.';
+            searchResultsDiv.innerHTML = '<p class="no-results-info">No matching results found.</p>';
             return;
         } else {
             const resultCountElement = document.querySelector('.search-count');
             resultCountElement.classList.add('search-count');
             resultCountElement.innerHTML = `Showing ${transactions.length} results.`;
-            // searchResultsDiv.appendChild(resultCountElement);
         }
 
         const table = document.createElement('table');
@@ -323,7 +318,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const th = document.createElement('th');
             th.textContent = headerText;
             th.classList.add(headerText.toLowerCase());
-            // headerRow.appendChild(th);
         });
 
         let totalIncome = transactions.filter(expense => expense["Income/Expense"] === "Income")
@@ -387,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <tr><td>Description</td> <td>${expense.Description}</td></tr>
                         </table>
                     `;
-                    rowPopup.style.display = 'block';
+                    rowPopup.style.display = 'flex';
                 }
             });
 
@@ -519,6 +513,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             });
                         } else {
                             filter.element.value = 'all';
+                            document.getElementById('period-navigation').style.display = 'none';
                         }
                     } else if (filter.element.tagName === 'DIV') {
                         Array.from(filter.element.querySelectorAll('input[type="checkbox"]:checked')).forEach(checkbox => {
@@ -533,6 +528,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 selectedFiltersDiv.appendChild(filterSpan);
             }
         });
+    
+        // Adding filter count to filter icon to indicate user that some filters are applied
+        let filtersAvailable = false;
+        if(document.querySelector('.selected-filters').childElementCount == 1) {
+            filtersAvailable = !document.querySelector('.selected-filters span').innerText.includes('Period: All');
+            filterToggle.hasAttribute('data-filters-count') && filterToggle.removeAttribute('data-filters-count');
+        } else if(document.querySelector('.selected-filters').childElementCount > 1) {
+            filtersAvailable = true;
+            filterToggle.setAttribute('data-filters-count', document.querySelector('.selected-filters').childElementCount - 1);
+        }
+        filterToggle.classList.toggle('active', filtersAvailable);
     }
 
     function clearAllFilters() {

@@ -123,7 +123,7 @@ function createTransactionRow(expense) {
                     <tr><td>Description</td> <td>${expense.Description}</td></tr>
                 </table>
             `;
-            rowPopup.style.display = 'block';
+            rowPopup.style.display = 'flex';
         }
     });
 

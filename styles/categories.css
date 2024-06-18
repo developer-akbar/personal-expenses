@@ -3,22 +3,19 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 1rem;
+    padding-top: 10px;
     border-radius: 8px;
 }
 
 .category {
     flex: 1 1 30%;
-    background: #fff;
+    /* background: #fff; */
     cursor: pointer;
     transition: background 0.3s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
-}
-
-.category:hover {
-    background: #e0e0e0;
 }
 
 .subcategory-list {
@@ -52,6 +49,17 @@
     transition: background-color 0.3s ease;
 }
 
+.category-row:hover, .subcategory:hover {
+    background: #e0e0e0;
+    font-weight: 700;
+    min-width: fit-content;
+}
+
+.category-row.full-width:hover {
+    background: none !important;
+    font-weight: normal;
+}
+
 .category-row.full-width span[title="categoryName"] {
     font-size: 1rem;
     font-weight: 700;
@@ -73,6 +81,7 @@
     padding: 10px;
     background: #161616;
     border: none;
+    border-radius: unset;
     cursor: pointer;
     transition: background 0.3s ease;
 }
