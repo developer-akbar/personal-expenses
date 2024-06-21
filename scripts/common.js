@@ -74,7 +74,7 @@ function updateSelectedTotal() {
 
     selectedCheckboxes.forEach(checkbox => {
         const amountCell = checkbox.closest('tr').querySelector('.amount');
-        const amount = parseFloat(amountCell.textContent.replace(/,/g, ''));
+        const amount = parseFloat(amountCell.textContent.replace(/[^\d.]/g, ''));
         
         if (amountCell.classList.contains('expense')) {
             selectedTotal -= amount;
@@ -92,10 +92,10 @@ function updateSelectedTotal() {
     selectedTotalWrapper.style.display = 'block';
 
     selectedTotalElement.style.display = selectedTotal ? 'block' : 'none';
-    selectedTotalElement.textContent = `Selected Total: ${selectedTotal.toFixed(2)}`;
+    selectedTotalElement.textContent = `Selected Total: ${formatIndianCurrency(parseFloat(selectedTotal))}`;
 
     totalSelectedTransfersElement.style.display = totalSelectedTransfers ? 'block' : 'none';
-    totalSelectedTransfersElement.textContent = `Total Transfers: ${totalSelectedTransfers.toFixed(2)}`;
+    totalSelectedTransfersElement.textContent = `Total Transfers: ${formatIndianCurrency(parseFloat(totalSelectedTransfers))}`;
 }
 
 function createTransactionRow(expense) {

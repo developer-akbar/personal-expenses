@@ -45,7 +45,7 @@ form.search-form {
     flex-direction: column;
     gap: 1rem;
     margin-inline: 0.5rem;
-    padding-right: 10px;
+    padding-right: 1rem;
     position: sticky;
     top: 0;
     max-height: 100vh;

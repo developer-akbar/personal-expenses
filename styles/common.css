@@ -475,6 +475,7 @@ button:hover {
 
     main {
         position: relative;
+        padding-bottom: 56px;
     }
 
     nav ul {

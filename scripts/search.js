@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const filterToggle = document.getElementById('filter-toggle');
     const filterWrapper = document.getElementById('filter-wrapper');
     const searchResultsWrapper = document.querySelector('.search-results-wrapper');
+    const customStart = document.getElementById('custom-start');
+    const customEnd = document.getElementById('custom-end');
 
     document.getElementById('searchInput').focus();
 
@@ -68,15 +70,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('min-amount').addEventListener('change', performSearch);
     document.getElementById('max-amount').addEventListener('change', performSearch);
 
-    document.getElementById('custom-start').addEventListener('change', () => {
-        if (document.getElementById('custom-start').value && document.getElementById('custom-end').value) {
-            document.querySelector('.custom-period').textContent = `${document.getElementById('custom-start').value} - ${document.getElementById('custom-end').value}`;
+    customStart.addEventListener('change', () => {
+        if (customStart.value && customEnd.value) {
+            document.querySelector('.custom-period').textContent = `${customStart.value} - ${customEnd.value}`;
             performSearch();
         }
     });
-    document.getElementById('custom-end').addEventListener('change', () => {
-        if (document.getElementById('custom-start').value && document.getElementById('custom-end').value) {
-            document.querySelector('.custom-period').textContent = `${document.getElementById('custom-start').value} - ${document.getElementById('custom-end').value}`;
+    customEnd.addEventListener('change', () => {
+        if (customStart.value && customEnd.value) {
+            document.querySelector('.custom-period').textContent = `${customStart.value} - ${customEnd.value}`;
             performSearch();
         }
     });
@@ -90,14 +92,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     clearFiltersButton.addEventListener('click', clearAllFilters);
 
     function toggleCustomPeriod() {
-        const customStart = document.getElementById('custom-start');
-        const customEnd = document.getElementById('custom-end');
         if (period.value === 'custom') {
             const now = new Date();
             const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 2); // to get GMT+5:30 added one more day
             const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1); // to get GMT+5:30 added one more day
 
-			// Populating with current month's first and last dates
+            // Populating with current month's first and last dates
             customStart.value = firstDayOfMonth.toISOString().substring(0, 10);
             customEnd.value = lastDayOfMonth.toISOString().substring(0, 10);
 
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             customEnd.style.display = 'inline';
             document.querySelector('.custom-period').style.display = 'flex';
             periodNavigation.style.display = 'none';
-        } else if (['weekly', 'monthly', 'annually'].includes(period.value)) {
+        } else if (['weekly', 'monthly', 'annually', 'financial-yearly'].includes(period.value)) {
             customStart.style.display = 'none';
             customEnd.style.display = 'none';
             periodNavigation.style.display = 'flex';
@@ -132,6 +132,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentDate.setMonth(currentDate.getMonth() + direction);
         } else if (periodType === 'annually') {
             currentDate.setFullYear(currentDate.getFullYear() + direction);
+        } else if (periodType === 'financial-yearly') {
+            currentDate.setFullYear(currentDate.getFullYear() + direction);
         }
         updatePeriodLabel();
         performSearch();
@@ -149,6 +151,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentPeriod.textContent = `${month} ${currentDate.getFullYear()}`;
         } else if (periodType === 'annually') {
             currentPeriod.textContent = `${currentDate.getFullYear()}`;
+        } else if (periodType === 'financial-yearly') {
+            const financialYearStart = new Date(currentDate);
+            financialYearStart.setMonth(3); // April (0-based index for months)
+            financialYearStart.setDate(1);
+            const financialYearEnd = new Date(financialYearStart);
+            financialYearEnd.setFullYear(financialYearStart.getFullYear() + 1);
+            financialYearEnd.setDate(financialYearEnd.getDate() - 1);
+            currentPeriod.textContent = `Apr ${financialYearStart.getFullYear()} - Mar ${financialYearEnd.getFullYear()}`;
         }
     }
 
@@ -231,8 +241,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedAccounts = getSelectedCheckboxValues('account-select');
         const selectedCategory = getSelectedCheckboxValues('category-select');
         const selectedIncomeExpense = getSelectedCheckboxValues('incomeExpense-select');
-        const customStart = document.getElementById('custom-start').value;
-        const customEnd = document.getElementById('custom-end').value;
         const minAmount = document.getElementById('min-amount').value;
         const maxAmount = document.getElementById('max-amount').value;
 
@@ -255,8 +263,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return expenseDate.getMonth() === currentDate.getMonth() && expenseDate.getFullYear() === currentDate.getFullYear();
                 } else if (period === 'annually') {
                     return expenseDate.getFullYear() === currentDate.getFullYear();
-                } else if (period === 'custom' && customStart && customEnd) {
-                    return expenseDate >= new Date(customStart) && expenseDate <= new Date(customEnd);
+                } else if (period === 'financial-yearly') {
+                    let financialYearStart, financialYearEnd;
+
+                    if (currentDate.getMonth() >= 3) { // April to December
+                        financialYearStart = new Date(currentDate.getFullYear(), 3, 1);
+                        financialYearEnd = new Date(currentDate.getFullYear() + 1, 2, 31);
+                    } else { // January to March
+                        financialYearStart = new Date(currentDate.getFullYear() - 1, 3, 1);
+                        financialYearEnd = new Date(currentDate.getFullYear(), 2, 31);
+                    }
+
+                    return expenseDate >= financialYearStart && expenseDate <= financialYearEnd;
+                } else if (period === 'custom' && customStart.value && customEnd.value) {
+                    return expenseDate >= new Date(customStart.value) && expenseDate <= new Date(customEnd.value);
                 }
             });
         }
@@ -339,9 +359,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         let totalTransfer = transactions.filter(expense => expense["Income/Expense"] === "Transfer-Out")
             .reduce((total, expense) => total + parseFloat(expense.INR), 0).toFixed(2);
 
-        document.getElementById('total-income').innerHTML = `<p>Income</p> <p>${totalIncome}</p>`;
-        document.getElementById('total-expenses').innerHTML = `<p>Expenses</p> <p>${totalExpenses}</p>`;
-        document.getElementById('total-transfers').innerHTML = `<p>Transfer</p> <p>${totalTransfer}</p>`;
+        document.getElementById('total-income').innerHTML = `<p>Income</p> <p>${formatIndianCurrency(parseFloat(totalIncome))}</p>`;
+        document.getElementById('total-expenses').innerHTML = `<p>Expenses</p> <p>${formatIndianCurrency(parseFloat(totalExpenses))}</p>`;
+        document.getElementById('total-transfers').innerHTML = `<p>Transfer</p> <p>${formatIndianCurrency(parseFloat(totalTransfer))}</p>`;
 
         transactions.forEach(expense => {
             const dayContainer = table.insertRow();
@@ -568,16 +588,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function clearAllFilters() {
         document.getElementById('period').value = 'all';
-        document.getElementById('custom-start').value = '';
-        document.getElementById('custom-end').value = '';
+        customStart.style.display = 'none';
+        customEnd.style.display = 'none';
+        
+        document.querySelectorAll('.custom-options input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
         document.getElementById('min-amount').value = '';
         document.getElementById('max-amount').value = '';
-        document.getElementById('period-navigation').style.display = 'none';
-
-        Array.from(document.querySelectorAll('.custom-select-wrapper input[type="checkbox"]:checked')).forEach(checkbox => {
-            checkbox.checked = false;
-        });
-
         performSearch();
     }
 
