@@ -12,6 +12,21 @@ closeButton.addEventListener('click', () => {
     rowPopup.style.display = 'none';
 });
 
+function scrollToTop() {
+    window.scrollTo(0, 0);
+}
+
+document.addEventListener('scroll', () => {
+    var scrolled = window.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop;
+
+    // toggling scroll to top button when certain scroll to bottom
+    if (scrolled > 799) {
+        document.querySelector('.scroll-to-top').style.display = 'block';
+    } else {
+        document.querySelector('.scroll-to-top').style.display = 'none';
+    }
+});
+
 // Event listeners for mobile navigation
 mobileNavButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -36,7 +51,7 @@ mobileNavButtons.forEach(button => {
 
 function formatIndianCurrency(amount) {
     if (amount === undefined || isNaN(amount)) amount = 0;
-    return amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return '₹ ' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function formatDate(date) {

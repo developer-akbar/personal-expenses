@@ -44,6 +44,7 @@
     border: 1px solid #ddd;
     border-radius: 5px;
     width: 15%;
+    min-width: fit-content;
     margin: auto;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -52,7 +53,6 @@
 .category-row:hover, .subcategory:hover {
     background: #e0e0e0;
     font-weight: 700;
-    min-width: fit-content;
 }
 
 .category-row.full-width:hover {

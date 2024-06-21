@@ -11,13 +11,13 @@
 
 html, body {
     height: 100dvh;
+    scroll-behavior: smooth;
 }
 
 body {
     display: flex;
     flex-direction: column;
     background-color: #f4f6f9;
-    /* color: #333; */
     line-height: 1.6;
     font-size: 12px;
 }
@@ -37,6 +37,17 @@ main {
     border-radius: 8px;
     width: 100%;
     padding-bottom: 56px;
+}
+
+.scroll-to-top {
+    display: none;
+    aspect-ratio: 1 / 1;
+    position: fixed;
+    bottom: 4rem;
+    right: .75rem;
+    background-color: #00000085;
+    border-radius: 50%;
+    transform: translate(-50%, 0%);
 }
 
 .sticky-container {
