@@ -29,6 +29,10 @@ form.search-form {
     gap: 0.75rem;
 }
 
+.search-results-wrapper {
+    position: relative;
+}
+
 #searchResults {
     padding-inline: 5px;
     flex-grow: 1;
@@ -41,10 +45,14 @@ form.search-form {
     flex-direction: column;
     gap: 1rem;
     margin-inline: 0.5rem;
+    padding-right: 10px;
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    overflow-y: auto;
 }
 
 .filter-item {
-    display: flex;
     justify-content: space-between;
     align-items: start;
     gap: 0.5rem;
@@ -63,11 +71,11 @@ form.search-form {
     display: flex;
     gap: 1rem;
     justify-content: space-between;
+    flex-direction: column;
     width: 100%;
 }
 
 .amount-range input, #custom-start, #custom-end {
-    width: 48%;
     min-width: fit-content;
     padding: 5px;
     border: 1px solid #ccc;
@@ -99,6 +107,11 @@ form.search-form {
     cursor: pointer;
     display: flex;
     align-items: center;
+    min-width: max-content;
+}
+
+.custom-options .custom-option > *:hover {
+    cursor: pointer;
 }
 
 .custom-options .custom-option:hover {
@@ -178,24 +191,12 @@ form.search-form {
     vertical-align: middle;
     padding-inline: 5px;
     border-radius: 5px;
-}
-
-.search-results-container {
-    display: flex;
-    align-items: flex-start;
-    margin-block: 1rem;
-}
-
-.period-navigation {
-    display: none;
-}
-
-#searchResults .transaction-day {
-    display: none;
+    font-size: 1.65rem;
+    font-weight: bold;
 }
 
 .filter-toggle.active {
-    background: lightblue;
+    background: #31b8e5;
     position: relative;
 }
 
@@ -217,8 +218,26 @@ form.search-form {
     box-sizing: border-box;
 }
 
+.search-results-container {
+    display: flex;
+    align-items: flex-start;
+    margin-block: 1rem;
+}
+
+.period-navigation {
+    display: none;
+}
+
+#searchResults .transaction-day {
+    display: none;
+}
+
 .no-results-info {
     margin: 0.75rem;
+}
+
+.filter-option-count {
+    opacity: 0.6;
 }
 
 @media (max-width: 768px) {
@@ -226,7 +245,12 @@ form.search-form {
         display: block;
     }
 
-    .amount-range {
-        flex-direction: column;
+    .filter-wrapper {
+        min-width: 30%;
+        max-height: calc(100dvh - 3rem);
+    }
+
+    .amount-range input, #custom-start, #custom-end {
+        min-width: unset;
     }
 }

@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.querySelector('.selected-total-wrapper').style.display = 'none';
 
         filterToggle.style.display = 'block';
-        
+
         const searchInput = document.getElementById('searchInput').value.toLowerCase();
         const period = document.getElementById('period').value;
         const selectedAccounts = getSelectedCheckboxValues('account-select');
@@ -302,12 +302,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const searchResultsDiv = document.getElementById('searchResults');
         searchResultsDiv.innerHTML = ''; // Clear previous results
 
+        const resultCountElement = document.querySelector('.search-count');
         if (transactions.length === 0) {
             searchResultsDiv.innerHTML = '<p class="no-results-info">No matching results found.</p>';
+            resultCountElement.innerHTML = '';
             return;
         } else {
-            const resultCountElement = document.querySelector('.search-count');
-            resultCountElement.classList.add('search-count');
             resultCountElement.innerHTML = `Showing ${transactions.length} results.`;
         }
 
@@ -334,18 +334,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         transactions.forEach(expense => {
             const dayContainer = table.insertRow();
             dayContainer.className = 'transaction-day';
-    
+
             const dayHeader = dayContainer.insertCell();
             dayHeader.classList.add('day-header');
             dayHeader.setAttribute('colspan', '5'); // Adjusted for mobile view
-    
+
             const dayContent = document.createElement('h3');
             dayContent.classList.add('day-content');
             dayContent.textContent = new Date(convertDateFormat(expense.Date)).toDateString();;
             dayHeader.appendChild(dayContent);
             dayContainer.appendChild(dayHeader);
             table.appendChild(dayContainer);
-            
+
             const row = table.insertRow();
             row.classList.add('transaction-row');
 
@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             inputElement.className = 'select-checkbox';
             inputElement.addEventListener('change', updateSelectedTotal);
             checkboxCell.appendChild(inputElement);
-    
+
             const dateElement = row.insertCell();
             const dateCell = document.createElement('p');
             dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
@@ -386,10 +386,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             const amountCell = row.insertCell();
-            amountCell.textContent = expense.INR;
+            amountCell.textContent = formatIndianCurrency(parseFloat(expense.INR));
             const type = expense['Income/Expense'] === 'Expense' ? 'expense' : expense['Income/Expense'] === 'Income' ? 'income' : 'transfer-out';
             amountCell.classList.add('amount', type);
-            
+
             const descriptionCell = row.insertCell();
             descriptionCell.textContent = expense.Description;
             descriptionCell.classList.add('description');
@@ -398,14 +398,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         searchResultsDiv.appendChild(table);
     }
 
+    // Show filters
     function populateFilterOptions(searchResults) {
-        const accountSet = new Set();
-        const categorySet = new Set();
+        const accounts = getAccountsOrCategories(searchResults, 'Account');;
+        const categories = getAccountsOrCategories(searchResults, 'Category');;
 
-        searchResults.forEach(expense => {
-            accountSet.add(expense.Account);
-            categorySet.add(expense.Category);
-        });
+		// Set count for Filters
+        document.querySelector('.account-count').textContent = `(${Object.keys(accounts).length})`;
+        document.querySelector('.category-count').textContent = `(${Object.keys(categories).length})`;
 
         const accountSelect = document.getElementById('account-select').querySelector('.custom-options');
         const categorySelect = document.getElementById('category-select').querySelector('.custom-options');
@@ -414,23 +414,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         accountSelect.innerHTML = '<div class="custom-option"><input type="checkbox" value="all"> All</div>';
         categorySelect.innerHTML = '<div class="custom-option"><input type="checkbox" value="all"> All</div>';
 
-        accountSet.forEach(account => {
-            const option = document.createElement('div');
-            option.className = 'custom-option';
-            option.innerHTML = `<input type="checkbox" id="account-${account}" value="${account}"><label for="account-${account}">${account}</label>`;
-            accountSelect.appendChild(option);
-        });
+        for (let account in accounts) {
+            if (accounts.hasOwnProperty(account)) {
+                const option = document.createElement('div');
+                option.className = 'custom-option';
+                option.innerHTML = `<input type="checkbox" id="account-${account}" value="${account}"><label for="account-${account}">${account} <span class="filter-option-count">(${accounts[account].count})</span></label>`;
+                accountSelect.appendChild(option);
+            }
+        }
 
-        categorySet.forEach(category => {
-            const option = document.createElement('div');
-            option.className = 'custom-option';
-            option.innerHTML = `<input type="checkbox" id="category-${category}" value="${category}"><label for="category-${category}">${category}</label>`;
-            categorySelect.appendChild(option);
-        });
+        for (let category in categories) {
+            if (categories.hasOwnProperty(category)) {
+                const option = document.createElement('div');
+                option.className = 'custom-option';
+                option.innerHTML = `<input type="checkbox" id="category-${category}" value="${category}"><label for="category-${category}">${category} <span class="filter-option-count ${categories[category].type.toLowerCase()}">(${categories[category].count}) (${formatIndianCurrency(categories[category].total)})</span></label>`;
+                categorySelect.appendChild(option);
+            }
+        }
 
         // Reinitialize custom selects
         initializeCustomSelect('account-select');
         initializeCustomSelect('category-select');
+    }
+    
+    function getAccountsOrCategories(searchResults, key) {
+        const result = {};
+    
+        searchResults.forEach(item => {
+            const { Subcategory, INR } = item;
+            const mainKey = item[key];
+            const type = item["Income/Expense"];
+    
+            if (key === 'Category' && (type !== 'Expense' && type !== 'Income')) {
+                return; // Skip if the key is 'Category' and the type is neither 'Expense' nor 'Income'
+            }
+    
+            if (!result[mainKey]) {
+                result[mainKey] = { type: '', count: 0, total: 0, subcategories: {} };
+            }
+    
+            result[mainKey].type = type;
+            result[mainKey].count += 1;
+            result[mainKey].total += parseFloat(INR);
+    
+            if (Subcategory) {
+                if (!result[mainKey].subcategories[Subcategory]) {
+                    result[mainKey].subcategories[Subcategory] = 0;
+                }
+                result[mainKey].subcategories[Subcategory] += parseFloat(INR);
+            }
+        });
+    
+        return result;
     }
 
     function getSelectedCheckboxValues(selectId) {
@@ -506,13 +541,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 selectedFiltersDiv.appendChild(filterSpan);
             }
         });
-    
+
         // Adding filter count to filter icon to indicate user that some filters are applied
         let filtersAvailable = false;
-        if(document.querySelector('.selected-filters').childElementCount == 1) {
+        if (document.querySelector('.selected-filters').childElementCount == 1) {
             filtersAvailable = !document.querySelector('.selected-filters span').innerText.includes('Period: All');
             filterToggle.hasAttribute('data-filters-count') && filterToggle.removeAttribute('data-filters-count');
-        } else if(document.querySelector('.selected-filters').childElementCount > 1) {
+        } else if (document.querySelector('.selected-filters').childElementCount > 1) {
             filtersAvailable = true;
             filterToggle.setAttribute('data-filters-count', document.querySelector('.selected-filters').childElementCount - 1);
         }

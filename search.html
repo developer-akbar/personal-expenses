@@ -47,7 +47,7 @@
                         <button type="submit" id="searchButton">Search</button>
 
                         <!-- Filter Toggle Icon -->
-                        <span class="filter-toggle" id="filter-toggle" style="display: none;">&#9776;</span>
+                        <span class="filter-toggle" id="filter-toggle" style="display: none;">🝖</span>
                     </form>
 
                     <div class="totals">
@@ -96,7 +96,7 @@
                     </div>
 
                     <div class="filter-item">
-                        <p>Account</p>
+                        <p>Account <span class="account-count filter-option-count"></span></p>
                         <div class="custom-select-wrapper" id="account-select">
                             <div class="custom-options">
                                 <div class="custom-option">
@@ -108,7 +108,7 @@
                     </div>
 
                     <div class="filter-item">
-                        <p>Category</p>
+                        <p>Category <span class="category-count filter-option-count"></span></p>
                         <div class="custom-select-wrapper" id="category-select">
                             <div class="custom-options">
                                 <div class="custom-option">
@@ -153,6 +153,9 @@
             </div>
         </div>
         <!-- End Search Section -->
+
+        <!-- Scroll to top -->
+        <button class="scroll-to-top" onclick="scrollToTop()" style="display: none;">&uarr;</button>
     </main>
     <footer style="display: none;">
         <p>&copy; 2024 Personal Finance Manager</p>
