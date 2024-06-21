@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let currentDailyDate = new Date();
     let selectedAccount = null;
-    
+
     const masterData = await utility.initializeMasterData();
     currentPeriod.textContent = formatDate(currentDailyDate);
     updateAccountBalances();
@@ -257,22 +257,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         return row;
     }
 
-    // Event listeners for period navigation
-    document.getElementById('prev-period').addEventListener('click', () => {
-        currentDailyDate.setMonth(currentDailyDate.getMonth() - 1);
-        updateAccountTransactions();
-        currentPeriod.textContent = formatDate(currentDailyDate);
-    });
-
-    document.getElementById('next-period').addEventListener('click', () => {
-        currentDailyDate.setMonth(currentDailyDate.getMonth() + 1);
-        updateAccountTransactions();
-        currentPeriod.textContent = formatDate(currentDailyDate);
-    });
-
     // Back button event listener
     backButton.addEventListener('click', () => {
         accountsSection.style.display = 'block';
         dailyTransactionsSection.style.display = 'none';
     });
+
+    const updatePeriod = (direction) => {
+        currentDailyDate.setMonth(currentDailyDate.getMonth() + direction);
+        updateAccountTransactions();
+        currentPeriod.textContent = formatDate(currentDailyDate);
+    };
+
+    // Event listeners for period navigation
+    document.getElementById('prev-period').addEventListener('click', () => updatePeriod(-1));
+    document.getElementById('next-period').addEventListener('click', () => updatePeriod(1));
+
+    let startX = 0;
+    // Swipe right/left event listener
+    document.querySelector('.viewable-content').addEventListener('touchstart', (event) => {
+        startX = event.changedTouches[0].clientX;
+    }, false);
+
+    document.querySelector('.viewable-content').addEventListener('touchend', (event) => {
+        let endX = event.changedTouches[0].clientX;
+        let deltaX = endX - startX;
+
+        if (deltaX > 100) { // Swipe right
+            updatePeriod(-1);
+        } else if (deltaX < -100) { // Swipe left
+            updatePeriod(1);
+        }
+    }, false);
 });

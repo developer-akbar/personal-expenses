@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentTab = 'monthly';
     let isSubcategoryView = false;
     let currentMainTab = 'expense';
-    
+
     currentPeriod.textContent = formatDate(currentMonthlyDate);
     const masterExpenses = await utility.initializeMasterData();
     updateCategoryTotals();
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     selectedCategory = null;
                     isSubcategoryView = false;
                     document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
-                    updateCategoryTotals(); 
+                    updateCategoryTotals();
                 }
             };
 
@@ -452,43 +452,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             setActiveTab('monthly');
             currentPeriod.textContent = formatDate(currentMonthlyDate);
         });
-    });
-
-    document.getElementById('prev-period').addEventListener('click', () => {
+    });const updatePeriod = (direction) => {
         if (currentTab === 'monthly') {
-            currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() - 1);
+            currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() + direction);
             currentPeriod.textContent = formatDate(currentMonthlyDate);
             updateCategoryTotals();
             if (selectedCategory != null) {
                 updateMonthlyTransactions();
             }
         } else if (currentTab === 'yearly') {
-            currentYearDate = currentMonthlyDate.getFullYear() - 1;
-            currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() - 1);
+            currentYearDate = currentMonthlyDate.getFullYear() + direction;
+            currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() + direction);
             currentPeriod.textContent = formatYear(currentMonthlyDate);
             updateCategoryTotals();
             if (selectedCategory != null) {
                 updateYearlyTransactions();
             }
         }
-    });
-
-    document.getElementById('next-period').addEventListener('click', () => {
-        if (currentTab === 'monthly') {
-            currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() + 1);
-            currentPeriod.textContent = formatDate(currentMonthlyDate);
-            updateCategoryTotals();
-            if (selectedCategory != null) {
-                updateMonthlyTransactions();
-            }
-        } else if (currentTab === 'yearly') {
-            currentYearDate = currentMonthlyDate.getFullYear() + 1;
-            currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() + 1);
-            currentPeriod.textContent = formatYear(currentMonthlyDate);
-            updateCategoryTotals();
-            if (selectedCategory != null) {
-                updateYearlyTransactions();
-            }
+    };
+    
+    // Event listeners for period navigation
+    document.getElementById('prev-period').addEventListener('click', () => updatePeriod(-1));
+    document.getElementById('next-period').addEventListener('click', () => updatePeriod(1));
+    
+    let startX = 0;
+    
+    // Swipe right/left event listener
+    document.querySelector('.viewable-content').addEventListener('touchstart', (event) => {
+        startX = event.changedTouches[0].clientX;
+    }, false);
+    
+    document.querySelector('.viewable-content').addEventListener('touchend', (event) => {
+        let endX = event.changedTouches[0].clientX;
+        let deltaX = endX - startX;
+    
+        if (deltaX > 100) {
+            updatePeriod(-1); // Swipe right
+        } else if (deltaX < -100) {
+            updatePeriod(1); // Swipe left
         }
-    });
+    }, false);
 });

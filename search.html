@@ -61,6 +61,7 @@
                         <span id="current-period" class="period-display"></span>
                         <button id="next-period">&gt;</button>
                     </div>
+                    <div class="custom-period" style="display: none;"></div>
 
                     <div class="selected-results">
                         <p class="search-count"></p>
@@ -91,8 +92,10 @@
                             <option value="annually">Annually</option>
                             <option value="custom">Custom</option>
                         </select>
-                        <input type="date" id="custom-start" style="display:none;">
-                        <input type="date" id="custom-end" style="display:none;">
+                        <div class="date-range">
+                            <input type="date" id="custom-start" style="display:none;">
+                            <input type="date" id="custom-end" style="display:none;">
+                        </div>
                     </div>
 
                     <div class="filter-item">
@@ -149,7 +152,7 @@
                 </div>
                 <!-- Filters Section Ends -->
 
-                <div id="searchResults"></div>
+                <div id="searchResults" class="viewable-content"></div>
             </div>
         </div>
         <!-- End Search Section -->

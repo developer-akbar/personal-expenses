@@ -215,31 +215,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    // Event listeners for period navigation
-    document.getElementById('prev-period').addEventListener('click', () => {
-        currentDailyDate.setMonth(currentDailyDate.getMonth() - 1);
-        updateDailyTransactions();
-        currentPeriod.textContent = formatDate(currentDailyDate);
-    });
-
-    document.getElementById('next-period').addEventListener('click', () => {
-        currentDailyDate.setMonth(currentDailyDate.getMonth() + 1);
-        updateDailyTransactions();
-        currentPeriod.textContent = formatDate(currentDailyDate);
-    });
-
-    document.getElementById('prev-year').addEventListener('click', () => {
-        currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() - 1);
-        updateMonthlyTransactions();
-        currentYear.textContent = formatYear(currentMonthlyDate);
-    });
-
-    document.getElementById('next-year').addEventListener('click', () => {
-        currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() + 1);
-        updateMonthlyTransactions();
-        currentYear.textContent = formatYear(currentMonthlyDate);
-    });
-
     // Initial setup
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -283,5 +258,52 @@ document.addEventListener('DOMContentLoaded', async function () {
     document.getElementById('daily-transactions').style.display = 'block';
     document.getElementById('monthly-transactions').style.display = 'none';
     document.getElementById('total-transactions').style.display = 'none';
+
+    // Event listeners for period navigation
+    const updateDailyPeriod = (direction) => {
+        currentDailyDate.setMonth(currentDailyDate.getMonth() + direction);
+        updateDailyTransactions();
+        currentPeriod.textContent = formatDate(currentDailyDate);
+    };
+    
+    const updateMonthlyPeriod = (direction) => {
+        currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() + direction);
+        updateMonthlyTransactions();
+        currentYear.textContent = formatYear(currentMonthlyDate);
+    };
+    
+    // Event listeners for period navigation
+    document.getElementById('prev-period').addEventListener('click', () => updateDailyPeriod(-1));
+    document.getElementById('next-period').addEventListener('click', () => updateDailyPeriod(1));
+    
+    document.getElementById('prev-year').addEventListener('click', () => updateMonthlyPeriod(-1));
+    document.getElementById('next-year').addEventListener('click', () => updateMonthlyPeriod(1));
+    
+    let startX = 0;
+    // Swipe right/left event listener
+    document.querySelector('.viewable-content').addEventListener('touchstart', (event) => {
+        startX = event.changedTouches[0].clientX;
+    }, false);
+    
+    document.querySelector('.viewable-content').addEventListener('touchend', (event) => {
+        let endX = event.changedTouches[0].clientX;
+        let deltaX = endX - startX;
+    
+        if (deltaX > 100) { // Swipe right
+            if (document.querySelector('.tab-content.active').getAttribute('id') === 'daily') {
+                updateDailyPeriod(-1);
+            }
+            if (document.querySelector('.tab-content.active').getAttribute('id') === 'monthly') {
+                updateMonthlyPeriod(-1);
+            }
+        } else if (deltaX < -100) { // Swipe left
+            if (document.querySelector('.tab-content.active').getAttribute('id') === 'daily') {
+                updateDailyPeriod(1);
+            }
+            if (document.querySelector('.tab-content.active').getAttribute('id') === 'monthly') {
+                updateMonthlyPeriod(1);
+            }
+        }
+    }, false);
 
 });

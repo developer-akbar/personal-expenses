@@ -70,11 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('custom-start').addEventListener('change', () => {
         if (document.getElementById('custom-start').value && document.getElementById('custom-end').value) {
+            document.querySelector('.custom-period').textContent = `${document.getElementById('custom-start').value} - ${document.getElementById('custom-end').value}`;
             performSearch();
         }
     });
     document.getElementById('custom-end').addEventListener('change', () => {
         if (document.getElementById('custom-start').value && document.getElementById('custom-end').value) {
+            document.querySelector('.custom-period').textContent = `${document.getElementById('custom-start').value} - ${document.getElementById('custom-end').value}`;
             performSearch();
         }
     });
@@ -88,21 +90,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     clearFiltersButton.addEventListener('click', clearAllFilters);
 
     function toggleCustomPeriod() {
-        // periodNavigation.style.display = 'flex';
         const customStart = document.getElementById('custom-start');
         const customEnd = document.getElementById('custom-end');
         if (period.value === 'custom') {
+            const now = new Date();
+            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 2); // to get GMT+5:30 added one more day
+            const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1); // to get GMT+5:30 added one more day
+
+			// Populating with current month's first and last dates
+            customStart.value = firstDayOfMonth.toISOString().substring(0, 10);
+            customEnd.value = lastDayOfMonth.toISOString().substring(0, 10);
+
             customStart.style.display = 'inline';
             customEnd.style.display = 'inline';
+            document.querySelector('.custom-period').style.display = 'flex';
             periodNavigation.style.display = 'none';
         } else if (['weekly', 'monthly', 'annually'].includes(period.value)) {
             customStart.style.display = 'none';
             customEnd.style.display = 'none';
             periodNavigation.style.display = 'flex';
+            document.querySelector('.custom-period').style.display = 'none';
         } else {
             customStart.style.display = 'none';
             customEnd.style.display = 'none';
             periodNavigation.style.display = 'none';
+            document.querySelector('.custom-period').style.display = 'none';
         }
     }
 
@@ -403,7 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const accounts = getAccountsOrCategories(searchResults, 'Account');;
         const categories = getAccountsOrCategories(searchResults, 'Category');;
 
-		// Set count for Filters
+        // Set count for Filters
         document.querySelector('.account-count').textContent = `(${Object.keys(accounts).length})`;
         document.querySelector('.category-count').textContent = `(${Object.keys(categories).length})`;
 
@@ -436,27 +448,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         initializeCustomSelect('account-select');
         initializeCustomSelect('category-select');
     }
-    
+
     function getAccountsOrCategories(searchResults, key) {
         const result = {};
-    
+
         searchResults.forEach(item => {
             const { Subcategory, INR } = item;
             const mainKey = item[key];
             const type = item["Income/Expense"];
-    
+
             if (key === 'Category' && (type !== 'Expense' && type !== 'Income')) {
                 return; // Skip if the key is 'Category' and the type is neither 'Expense' nor 'Income'
             }
-    
+
             if (!result[mainKey]) {
                 result[mainKey] = { type: '', count: 0, total: 0, subcategories: {} };
             }
-    
+
             result[mainKey].type = type;
             result[mainKey].count += 1;
             result[mainKey].total += parseFloat(INR);
-    
+
             if (Subcategory) {
                 if (!result[mainKey].subcategories[Subcategory]) {
                     result[mainKey].subcategories[Subcategory] = 0;
@@ -464,7 +476,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 result[mainKey].subcategories[Subcategory] += parseFloat(INR);
             }
         });
-    
+
         return result;
     }
 
@@ -568,4 +580,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         performSearch();
     }
+
+    let startX = 0;
+
+    // Swipe right/left event listener
+    document.querySelector('.viewable-content').addEventListener('touchstart', (event) => {
+        startX = event.changedTouches[0].clientX;
+    }, false);
+
+    document.querySelector('.viewable-content').addEventListener('touchend', (event) => {
+        let endX = event.changedTouches[0].clientX;
+        let deltaX = endX - startX;
+
+        if (deltaX > 100) {
+            if (document.querySelector('.period-navigation').style.display === 'flex') {
+                changePeriod(-1); // Swipe right
+            }
+        } else if (deltaX < -100) {
+            if (document.querySelector('.period-navigation').style.display === 'flex') {
+                changePeriod(1); // Swipe left
+            }
+        }
+    }, false);
 });
