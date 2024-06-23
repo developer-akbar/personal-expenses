@@ -93,9 +93,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function toggleCustomPeriod() {
         if (period.value === 'custom') {
-            const now = new Date();
-            const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 2); // to get GMT+5:30 added one more day
-            const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1); // to get GMT+5:30 added one more day
+            const today = new Date();
+
+            const firstDayOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
+            const lastDayOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0));
 
             // Populating with current month's first and last dates
             customStart.value = firstDayOfMonth.toISOString().substring(0, 10);
@@ -152,13 +153,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (periodType === 'annually') {
             currentPeriod.textContent = `${currentDate.getFullYear()}`;
         } else if (periodType === 'financial-yearly') {
-            const financialYearStart = new Date(currentDate);
-            financialYearStart.setMonth(3); // April (0-based index for months)
-            financialYearStart.setDate(1);
-            const financialYearEnd = new Date(financialYearStart);
-            financialYearEnd.setFullYear(financialYearStart.getFullYear() + 1);
-            financialYearEnd.setDate(financialYearEnd.getDate() - 1);
-            currentPeriod.textContent = `Apr ${financialYearStart.getFullYear()} - Mar ${financialYearEnd.getFullYear()}`;
+            const currentYear = currentDate.getUTCFullYear();
+            const currentMonth = currentDate.getUTCMonth();
+        
+            let financialYearStart, financialYearEnd;
+        
+            if (currentMonth >= 3) { // April to December
+                financialYearStart = new Date(Date.UTC(currentYear, 3, 1)); // April 1st
+                financialYearEnd = new Date(Date.UTC(currentYear + 1, 2, 31, 23, 59, 59, 999)); // March 31st of next year
+            } else { // January to March
+                financialYearStart = new Date(Date.UTC(currentYear - 1, 3, 1)); // April 1st of previous year
+                financialYearEnd = new Date(Date.UTC(currentYear, 2, 31, 23, 59, 59, 999)); // March 31st
+            }
+        
+            currentPeriod.textContent = `Apr ${financialYearStart.getUTCFullYear()} - Mar ${financialYearEnd.getUTCFullYear()}`;
         }
     }
 
@@ -268,10 +276,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     if (currentDate.getMonth() >= 3) { // April to December
                         financialYearStart = new Date(currentDate.getFullYear(), 3, 1);
-                        financialYearEnd = new Date(currentDate.getFullYear() + 1, 2, 31);
+                        financialYearEnd = new Date(currentDate.getFullYear() + 1, 2, 31, 23, 59, 59, 999);
                     } else { // January to March
                         financialYearStart = new Date(currentDate.getFullYear() - 1, 3, 1);
-                        financialYearEnd = new Date(currentDate.getFullYear(), 2, 31);
+                        financialYearEnd = new Date(currentDate.getFullYear(), 2, 31, 23, 59, 59, 999);
                     }
 
                     return expenseDate >= financialYearStart && expenseDate <= financialYearEnd;
@@ -590,10 +598,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('period').value = 'all';
         customStart.style.display = 'none';
         customEnd.style.display = 'none';
-        
+
         document.querySelectorAll('.custom-options input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
         document.getElementById('min-amount').value = '';
         document.getElementById('max-amount').value = '';
+
+        periodNavigation.style.display = 'none';
+        
         performSearch();
     }
 

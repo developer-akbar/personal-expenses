@@ -196,12 +196,12 @@ table td:nth-child(3) {
 }
 
 table td:nth-child(4) {
-    width: 10%;
+    width: 20%;
 }
 
 /* Setting a maximum width for the description cell and enabling word wrapping */
 table td.description {
-    width: 50%;
+    width: 40%;
     max-width: 0; /* Ensures content doesn't stretch beyond width */
     word-wrap: break-word;
     overflow-wrap: break-word;

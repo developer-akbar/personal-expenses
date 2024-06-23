@@ -64,6 +64,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                         categories[Category].subcategories[Subcategory] += parseFloat(INR);
                     }
+                } else if (currentTab === 'financial-yearly') {
+                    let financialYearStart, financialYearEnd;
+                    if (currentMonthlyDate.getMonth() >= 3) { // April to December
+                        financialYearStart = new Date(Date.UTC(currentMonthlyDate.getFullYear(), 3, 1));
+                        financialYearEnd = new Date(Date.UTC(currentMonthlyDate.getFullYear() + 1, 2, 31, 23, 59, 59, 999));
+                    } else { // January to March
+                        financialYearStart = new Date(Date.UTC(currentMonthlyDate.getFullYear() - 1, 3, 1));
+                        financialYearEnd = new Date(Date.UTC(currentMonthlyDate.getFullYear(), 2, 31, 23, 59, 59, 999));
+                    }
+                
+                    // Adjust expenseDate to UTC for comparison
+                    let expenseDateUTC = new Date(Date.UTC(expenseDate.getFullYear(), expenseDate.getMonth(), expenseDate.getDate()));
+                
+                    if (expenseDateUTC >= financialYearStart && expenseDateUTC <= financialYearEnd) {
+                        if (!categories[Category]) {
+                            categories[Category] = { total: 0, subcategories: {} };
+                        }
+                        categories[Category].total += parseFloat(INR);
+                        if (Subcategory) {
+                            if (!categories[Category].subcategories[Subcategory]) {
+                                categories[Category].subcategories[Subcategory] = 0;
+                            }
+                            categories[Category].subcategories[Subcategory] += parseFloat(INR);
+                        }
+                    }
                 } else if (currentTab === 'total') {
                     if (!categories[Category]) {
                         categories[Category] = { total: 0, subcategories: {} };
@@ -196,11 +221,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+
     function updateTransactions() {
         if (currentTab === 'monthly') {
             updateMonthlyTransactions();
         } else if (currentTab === 'yearly') {
             updateYearlyTransactions();
+        } else if (currentTab === 'financial-yearly') {
+            updateFinancialYearlyTransactions();
         } else if (currentTab === 'total') {
             updateTotalTransactions();
         }
@@ -208,7 +236,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateMonthlyTransactions() {
         document.querySelector('.selected-total-wrapper').style.display = 'none';
-
         document.getElementById('period-navigation').style.display = 'flex';
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
@@ -337,7 +364,92 @@ document.addEventListener('DOMContentLoaded', async () => {
                     setActiveTab('monthly');
                     currentMonthlyDate.setMonth(currentMonthlyDate.getMonth());
                     currentPeriod.textContent = formatDate(currentMonthlyDate);
-                    // updateCategoryTotals();
+                    updateMonthlyTransactions();
+                }
+            });
+        });
+    }
+
+    function updateFinancialYearlyTransactions() {
+        document.querySelector('.selected-total-wrapper').style.display = 'none';
+        document.getElementById('period-navigation').style.display = 'flex';
+        const transactionsContainer = document.getElementById('transactions');
+        transactionsContainer.innerHTML = '';
+
+        let financialYearStart, financialYearEnd;
+        if (currentMonthlyDate.getMonth() >= 3) { // April to December
+            financialYearStart = new Date(Date.UTC(currentMonthlyDate.getFullYear(), 3, 1));
+            financialYearEnd = new Date(Date.UTC(currentMonthlyDate.getFullYear() + 1, 2, 31, 23, 59, 59, 999));
+        } else { // January to March
+            financialYearStart = new Date(Date.UTC(currentMonthlyDate.getFullYear() - 1, 3, 1));
+            financialYearEnd = new Date(Date.UTC(currentMonthlyDate.getFullYear(), 2, 31, 23, 59, 59, 999));
+        }
+
+        const filteredTransactions = masterExpenses.filter(expense => {
+            const expenseDate = new Date(convertDateFormat(expense.Date));
+            return expense.Category === selectedCategory &&
+                (!selectedSubcategory || expense.Subcategory === selectedSubcategory) &&
+                expenseDate >= financialYearStart && expenseDate <= financialYearEnd;
+        });
+
+        const transactionsByMonth = filteredTransactions.reduce((acc, expense) => {
+            const month = new Date(convertDateFormat(expense.Date)).getMonth();
+            if (!acc[month]) {
+                acc[month] = [];
+            }
+            acc[month].push(expense);
+            return acc;
+        }, {});
+
+        const tableElement = document.createElement('table');
+        const tableBodyElement = document.createElement('tbody');
+
+        if (Object.entries(transactionsByMonth).length > 0) {
+            categoriesContainer.style.display = 'flex';
+            for (let i = 3; i < 15; i++) {
+                let monthIndex = i;
+                const monthContainer = document.createElement('tr');
+                monthContainer.className = 'transaction-row';
+                if (monthIndex > 11) {
+                    monthIndex = i - 12;
+                    monthContainer.dataset.month = i;
+                } else {
+                    monthIndex = i;
+                    monthContainer.dataset.month = i;
+                }
+
+                const monthName = document.createElement('td');
+                monthName.textContent = new Date(2024, monthIndex).toLocaleString('default', { month: 'short' });
+
+                const totals = transactionsByMonth[monthIndex] ? calculateTotals(transactionsByMonth[monthIndex]) : { income: 0, expense: 0 };
+                const expenses = document.createElement('td');
+                expenses.className = `amount ${currentMainTab}`;
+                expenses.textContent = formatIndianCurrency(totals[currentMainTab]);
+
+                monthContainer.appendChild(monthName);
+                monthContainer.appendChild(expenses);
+
+                tableBodyElement.appendChild(monthContainer);
+            }
+        } else {
+            categoriesContainer.style.display = 'none';
+            tableBodyElement.innerHTML = `<tr>No transactions for <b>${selectedCategory}</b> in the financial year</tr>`;
+        }
+
+        tableElement.appendChild(tableBodyElement);
+        transactionsContainer.appendChild(tableElement);
+
+        const financialYearlyTotals = calculateTotals(filteredTransactions);
+        totalAmount.innerHTML = `<p>${currentMainTab.charAt(0).toUpperCase() + currentMainTab.slice(1)}</p> <p>${formatIndianCurrency(financialYearlyTotals[currentMainTab])}</p>`;
+
+        const monthRows = document.querySelectorAll('#transactions .transaction-row');
+        monthRows.forEach(row => {
+            row.addEventListener('click', () => {
+                if (document.querySelector('.tabs .active').dataset.tab === 'financial-yearly') {
+                    currentMonthlyDate = new Date((row.dataset.month > 11 ? currentMonthlyDate.getFullYear() + 1 : currentMonthlyDate.getFullYear()), row.dataset.month % 12);
+                    setActiveTab('monthly');
+                    currentMonthlyDate.setMonth(currentMonthlyDate.getMonth());
+                    currentPeriod.textContent = formatDate(currentMonthlyDate);
                     updateMonthlyTransactions();
                 }
             });
@@ -435,6 +547,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (selectedCategory != null) {
                     updateYearlyTransactions();
                 }
+            } else if (tabName === 'financial-yearly') {
+                const financialYearStart = new Date(currentMonthlyDate);
+                financialYearStart.setMonth(3); // April (0-based index for months)
+                financialYearStart.setDate(1);
+                const financialYearEnd = new Date(financialYearStart);
+                financialYearEnd.setFullYear(financialYearStart.getFullYear() + 1);
+                financialYearEnd.setDate(financialYearEnd.getDate() - 1);
+                document.getElementById('period-navigation').style.display = 'flex';
+                currentPeriod.textContent = `${financialYearStart.toLocaleDateString()} - ${financialYearEnd.toLocaleDateString()}`;
+                if (selectedCategory != null) {
+                    updateFinancialYearlyTransactions();
+                }
             } else if (tabName === 'total') {
                 document.getElementById('period-navigation').style.display = 'none';
                 if (selectedCategory != null) {
@@ -452,7 +576,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             setActiveTab('monthly');
             currentPeriod.textContent = formatDate(currentMonthlyDate);
         });
-    });const updatePeriod = (direction) => {
+    });
+
+    const updatePeriod = (direction) => {
         if (currentTab === 'monthly') {
             currentMonthlyDate.setMonth(currentMonthlyDate.getMonth() + direction);
             currentPeriod.textContent = formatDate(currentMonthlyDate);
@@ -468,24 +594,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (selectedCategory != null) {
                 updateYearlyTransactions();
             }
+        } else if (currentTab === 'financial-yearly') {
+            currentYearDate = currentMonthlyDate.getFullYear() + direction;
+            currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() + direction);
+            const financialYearStart = new Date(currentYearDate.toString());
+            financialYearStart.setMonth(3); // April (0-based index for months)
+            financialYearStart.setDate(1);
+            const financialYearEnd = new Date(financialYearStart);
+            financialYearEnd.setFullYear(financialYearStart.getFullYear() + 1);
+            financialYearEnd.setDate(financialYearEnd.getDate() - 1);
+            currentPeriod.textContent = `${financialYearStart.toLocaleDateString()} - ${financialYearEnd.toLocaleDateString()}`;
+            updateCategoryTotals();
+            if (selectedCategory != null) {
+                updateFinancialYearlyTransactions();
+            }
         }
     };
-    
+
     // Event listeners for period navigation
     document.getElementById('prev-period').addEventListener('click', () => updatePeriod(-1));
     document.getElementById('next-period').addEventListener('click', () => updatePeriod(1));
-    
+
     let startX = 0;
-    
+
     // Swipe right/left event listener
     document.querySelector('.viewable-content').addEventListener('touchstart', (event) => {
         startX = event.changedTouches[0].clientX;
     }, false);
-    
+
     document.querySelector('.viewable-content').addEventListener('touchend', (event) => {
         let endX = event.changedTouches[0].clientX;
         let deltaX = endX - startX;
-    
+
         if (deltaX > 100) {
             updatePeriod(-1); // Swipe right
         } else if (deltaX < -100) {
