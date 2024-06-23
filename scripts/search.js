@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
 
         // Clear existing options first
-        document.getElementById('account-select').querySelector('.custom-options').innerHTML = '<div class="custom-option"><input type="checkbox" value="all"> All</div>';
-        document.getElementById('category-select').querySelector('.custom-options').innerHTML = '<div class="custom-option"><input type="checkbox" value="all"> All</div>';
+        document.getElementById('account-select').querySelector('.custom-options').innerHTML = '<div class="custom-option"><input type="checkbox" id="account-all" value="all"> <label for="account-all">All</label></div>';
+        document.getElementById('category-select').querySelector('.custom-options').innerHTML = '<div class="custom-option"><input type="checkbox" id="category-all" value="all"> <label for="category-all">All</label></div>';
 
         let searchResults = performSearch();
 
@@ -241,9 +241,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function performSearch() {
         document.querySelector('.selected-total-wrapper').style.display = 'none';
-
+    
         filterToggle.style.display = 'block';
-
+    
         const searchInput = document.getElementById('searchInput').value.toLowerCase();
         const period = document.getElementById('period').value;
         const selectedAccounts = getSelectedCheckboxValues('account-select');
@@ -251,13 +251,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedIncomeExpense = getSelectedCheckboxValues('incomeExpense-select');
         const minAmount = document.getElementById('min-amount').value;
         const maxAmount = document.getElementById('max-amount').value;
-
+    
         let searchResults = masterData.filter(expense => {
             const description = expense.Description.toLowerCase();
             const note = expense.Note.toLowerCase();
             return description.includes(searchInput) || note.includes(searchInput);
         });
-
+    
         if (period !== 'all') {
             searchResults = searchResults.filter(expense => {
                 const expenseDate = new Date(convertDateFormat(expense.Date));
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return expenseDate.getFullYear() === currentDate.getFullYear();
                 } else if (period === 'financial-yearly') {
                     let financialYearStart, financialYearEnd;
-
+    
                     if (currentDate.getMonth() >= 3) { // April to December
                         financialYearStart = new Date(currentDate.getFullYear(), 3, 1);
                         financialYearEnd = new Date(currentDate.getFullYear() + 1, 2, 31, 23, 59, 59, 999);
@@ -281,14 +281,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         financialYearStart = new Date(currentDate.getFullYear() - 1, 3, 1);
                         financialYearEnd = new Date(currentDate.getFullYear(), 2, 31, 23, 59, 59, 999);
                     }
-
+    
                     return expenseDate >= financialYearStart && expenseDate <= financialYearEnd;
                 } else if (period === 'custom' && customStart.value && customEnd.value) {
                     return expenseDate >= new Date(customStart.value) && expenseDate <= new Date(customEnd.value);
                 }
             });
         }
-
+    
         if (selectedAccounts.length > 0) {
             if (selectedAccounts.includes('all')) {
                 searchResults = searchResults.filter(expense => true);
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 searchResults = searchResults.filter(expense => selectedAccounts.includes(expense.Account));
             }
         }
-
+    
         if (selectedCategory.length > 0) {
             if (selectedCategory.includes('all')) {
                 searchResults = searchResults.filter(expense => true);
@@ -304,14 +304,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 searchResults = searchResults.filter(expense => selectedCategory.includes(expense.Category));
             }
         }
-
+    
         if (minAmount || maxAmount) {
             searchResults = searchResults.filter(expense => {
                 const price = parseFloat(expense.INR);
                 return (!minAmount || price >= minAmount) && (!maxAmount || price <= maxAmount);
             });
         }
-
+    
         if (selectedIncomeExpense.length > 0) {
             if (selectedIncomeExpense.includes('all')) {
                 searchResults = searchResults.filter(expense => true);
@@ -319,12 +319,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 searchResults = searchResults.filter(expense => selectedIncomeExpense.includes(expense["Income/Expense"]));
             }
         }
-
+    
         displaySearchResults(searchResults);
         displaySelectedFilters();
 
+        // Rretain selected filters if any
+        const selectedFilters = {
+            accounts: selectedAccounts,
+            categories: selectedCategory,
+            incomeExpense: selectedIncomeExpense
+        };
+        populateFilterOptions(searchResults, selectedFilters);
+    
         suggestionsDiv.innerHTML = '';
-
+    
         return searchResults;
     }
 
@@ -439,39 +447,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Show filters
-    function populateFilterOptions(searchResults) {
-        const accounts = getAccountsOrCategories(searchResults, 'Account');;
-        const categories = getAccountsOrCategories(searchResults, 'Category');;
-
+    function populateFilterOptions(searchResults, selectedFilters = {}) {
+        const accounts = getAccountsOrCategories(searchResults, 'Account');
+        const categories = getAccountsOrCategories(searchResults, 'Category');
+    
         // Set count for Filters
         document.querySelector('.account-count').textContent = `(${Object.keys(accounts).length})`;
         document.querySelector('.category-count').textContent = `(${Object.keys(categories).length})`;
-
+    
         const accountSelect = document.getElementById('account-select').querySelector('.custom-options');
         const categorySelect = document.getElementById('category-select').querySelector('.custom-options');
-
+    
         // Clear existing options first
-        accountSelect.innerHTML = '<div class="custom-option"><input type="checkbox" value="all"> All</div>';
-        categorySelect.innerHTML = '<div class="custom-option"><input type="checkbox" value="all"> All</div>';
-
+        accountSelect.innerHTML = '<div class="custom-option"><input type="checkbox" id="account-all" value="all"> <label for="account-all">All</label></div>';
+        categorySelect.innerHTML = '<div class="custom-option"><input type="checkbox" id="category-all" value="all"> <label for="category-all">All</label></div>';
+    
         for (let account in accounts) {
             if (accounts.hasOwnProperty(account)) {
                 const option = document.createElement('div');
                 option.className = 'custom-option';
-                option.innerHTML = `<input type="checkbox" id="account-${account}" value="${account}"><label for="account-${account}">${account} <span class="filter-option-count">(${accounts[account].count})</span></label>`;
+                option.innerHTML = `<input type="checkbox" id="account-${account}" value="${account}" ${selectedFilters.accounts?.includes(account) ? 'checked' : ''}><label for="account-${account}">${account} <span class="filter-option-count">(${accounts[account].count})</span></label>`;
                 accountSelect.appendChild(option);
             }
         }
-
+    
         for (let category in categories) {
             if (categories.hasOwnProperty(category)) {
                 const option = document.createElement('div');
                 option.className = 'custom-option';
-                option.innerHTML = `<input type="checkbox" id="category-${category}" value="${category}"><label for="category-${category}">${category} <span class="filter-option-count ${categories[category].type.toLowerCase()}">(${categories[category].count}) (${formatIndianCurrency(categories[category].total)})</span></label>`;
+                option.innerHTML = `<input type="checkbox" id="category-${category}" value="${category}" ${selectedFilters.categories?.includes(category) ? 'checked' : ''}><label for="category-${category}">${category} <span class="filter-option-count ${categories[category].type.toLowerCase()}">(${categories[category].count}) (${formatIndianCurrency(categories[category].total)})</span></label>`;
                 categorySelect.appendChild(option);
             }
         }
-
+    
         // Reinitialize custom selects
         initializeCustomSelect('account-select');
         initializeCustomSelect('category-select');
@@ -510,15 +518,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function getSelectedCheckboxValues(selectId) {
         const checkboxes = document.getElementById(selectId).querySelectorAll('input[type="checkbox"]:checked');
-        return Array.from(checkboxes).map(checkbox => checkbox.value);
+        const values = Array.from(checkboxes).map(checkbox => checkbox.value);
+        // If 'All' is selected, return an empty array to indicate all values should be considered.
+        return values.includes('all') ? [] : values;
     }
 
     function initializeCustomSelect(selectId) {
         const selectWrapper = document.getElementById(selectId);
         const options = selectWrapper.querySelectorAll('.custom-option input[type="checkbox"]');
+        const allOption = selectWrapper.querySelector('input[value="all"]');
 
         options.forEach(option => {
             option.addEventListener('change', (event) => {
+                if (event.target.value === 'all') {
+                    options.forEach(opt => opt.checked = event.target.checked);
+                } else {
+                    const allChecked = Array.from(options).every(opt => opt.checked || opt.value === 'all');
+                    allOption.checked = allChecked;
+                }
                 performSearch();
             });
         });
@@ -583,15 +600,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         // Adding filter count to filter icon to indicate user that some filters are applied
-        let filtersAvailable = false;
-        if (document.querySelector('.selected-filters').childElementCount == 1) {
-            filtersAvailable = !document.querySelector('.selected-filters span').innerText.includes('Period: All');
-            filterToggle.hasAttribute('data-filters-count') && filterToggle.removeAttribute('data-filters-count');
-        } else if (document.querySelector('.selected-filters').childElementCount > 1) {
-            filtersAvailable = true;
-            filterToggle.setAttribute('data-filters-count', document.querySelector('.selected-filters').childElementCount - 1);
-        }
-        filterToggle.classList.toggle('active', filtersAvailable);
+        addFilterCount(filterToggle);
     }
 
     function clearAllFilters() {
@@ -629,4 +638,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     }, false);
+
+    function addFilterCount(filterToggle) {
+        let filtersAvailable = false;
+        if (document.querySelector('.selected-filters').childElementCount == 1) {
+            filtersAvailable = !document.querySelector('.selected-filters span').innerText.includes('Period: All');
+            filterToggle.hasAttribute('data-filters-count') && filterToggle.removeAttribute('data-filters-count');
+        } else if (document.querySelector('.selected-filters').childElementCount > 1) {
+            filtersAvailable = true;
+            filterToggle.setAttribute('data-filters-count', document.querySelector('.selected-filters').childElementCount - 1);
+        }
+        filterToggle.classList.toggle('active', filtersAvailable);
+    }
 });
