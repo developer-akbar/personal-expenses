@@ -95,6 +95,34 @@
     background: #003366;
 }
 
+.charts-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.chart-section {
+    height: 300px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 8px;
+    text-align: center;
+    padding: 1rem;
+    box-shadow: var(--box-shadow);
+}
+
+#category-spending-chart {
+    padding: 1rem;
+}
+
+#subcategory-trend-section {
+    display: none;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .category-row {

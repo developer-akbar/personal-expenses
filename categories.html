@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Finance Tracker</title>
     <link rel="stylesheet" href="styles/common.css">
-    <link rel="stylesheet" href="styles/categories.css">
+    <link rel="stylesheet" href="styles/categories.css">    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
 
 <body>
@@ -54,6 +55,17 @@
             </div>
         </div>
         <div id="category-transactions-container" class="category-transactions-container content-container viewable-content">
+            <div class="charts-container">
+                <section class="chart-section">
+                    <h3 id="category-chart-title">Category Spendings</h3>
+                    <canvas id="category-spending-chart"></canvas>
+                </section>
+                <section class="chart-section" id="subcategory-trend-section" style="display: none;">
+                    <h3 id="subcategory-trend-title">Subcategory Trends</h3>
+                    <canvas id="subcategory-trend-chart"></canvas>
+                </section>
+            </div>
+
             <div id="categories-container" class="categories-container">
                 <!-- Categories will be populated here -->
             </div>
