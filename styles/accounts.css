@@ -30,14 +30,6 @@
     margin: 0 10px;
 }
 
-.positive {
-    color: blue;
-}
-
-.negative {
-    color: red;
-}
-
 .transaction-list {
     display: flex;
     flex-direction: column;

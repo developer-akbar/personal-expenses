@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Finance Tracker</title>
     <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/login.css">
-    <link rel="stylesheet" href="styles/search.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
-
 <body>
     <header>
         <h1>Personal Finance Manager</h1>
@@ -32,6 +31,59 @@
     <div class="overlay"></div>
     <main style="display: none;">
         <h2 class="heading">Dashboard</h2>
+        <div class="dashboard-container">
+            <section class="summary-section">
+                <h3>Current Month's Summary</h3>
+                <div class="summary-item">
+                    <span>Total Income:</span>
+                    <span id="total-income"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Total Expenses:</span>
+                    <span id="total-expenses"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Expense Change:</span>
+                    <span id="expense-change"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Most Spending Category:</span>
+                    <span id="most-spending-category"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Average Monthly Spending:</span>
+                    <span id="avg-monthly-spending"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Average Yearly Spending:</span>
+                    <span id="avg-yearly-spending"></span>
+                </div>
+            </section>
+            <!-- <section class="charts-section">
+                <h3>Income vs Expenses</h3>
+                <canvas id="income-expense-chart"></canvas>
+            </section> -->
+            <section class="charts-section">
+                <h3>Monthly Category Spendings</h3>
+                <canvas id="monthly-category-spending-chart"></canvas>
+            </section>
+            <section class="charts-section">
+                <h3>Total Category Spendings</h3>
+                <canvas id="total-category-spending-chart"></canvas>
+            </section>
+            <section class="trends-section">
+                <h3>Monthly Trends</h3>
+                <canvas id="trends-chart"></canvas>
+            </section>
+            <section class="recent-transactions">
+                <h3>Recent Monthly Spendings</h3>
+                <ul id="recent-transactions-list"></ul>
+            </section>
+            <section class="yearly-analysis">
+                <h3>Yearly Analysis</h3>
+                <ul id="yearly-analysis-list"></ul>
+            </section>
+        </div>
 
         <!-- Scroll to top -->
         <button class="scroll-to-top" onclick="scrollToTop()" style="display: none;">&uarr;</button>
@@ -77,6 +129,6 @@
 
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>
+    <script src="scripts/dashboard.js"></script>
 </body>
-
 </html>

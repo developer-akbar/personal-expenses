@@ -255,11 +255,11 @@ footer {
     padding-bottom: 20px;
 }
 
-.income, .deposits {
+.income, .deposits, .positive{
     color: blue;
 }
 
-.expense, .withdrawal {
+.expense, .withdrawal, .negative {
     color: red;
 }
 
