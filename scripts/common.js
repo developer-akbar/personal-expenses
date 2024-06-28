@@ -13,7 +13,7 @@ closeButton.addEventListener('click', () => {
 });
 
 window.onload = () => {
-	// adding minHeight for viewable-content so that swiping can be done on the container.
+    // adding minHeight for viewable-content so that swiping can be done on the container.
     if (document.querySelector('body') != undefined && document.querySelector('.sticky-container').getClientRects().length > 0 && document.querySelector('.mobile-nav') != undefined) {
         document.querySelector('.viewable-content').style.minHeight = document.querySelector('body').getClientRects()[0].height
             - document.querySelector('.sticky-container').getClientRects()[0].bottom
@@ -57,11 +57,11 @@ mobileNavButtons.forEach(button => {
         }
     });
 });
-    
+
 function getRandomHslColor() {
     const h = Math.floor(Math.random() * 360); // Random hue (0-359)
     const s = Math.floor(Math.random() * 30) + 20 + '%'; // Low to medium saturation (20-50%)
-            const l = Math.floor(Math.random() * 20) + 70 + '%'; // High lightness (70-90%)
+    const l = Math.floor(Math.random() * 20) + 70 + '%'; // High lightness (70-90%)
     return `hsl(${h}, ${s}, ${l})`;
 }
 
@@ -130,7 +130,7 @@ function createTransactionRow(expense) {
     dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
     dateCell.className = 'date';
     const categoryElement = document.createElement('p');
-    categoryElement.classList.add('transaction-category');
+    categoryElement.classList.add('transaction-category', 'line-clamp');
     categoryElement.textContent = `${expense.Category}`;
     dateElement.appendChild(dateCell);
     dateElement.appendChild(categoryElement);
@@ -154,19 +154,26 @@ function createTransactionRow(expense) {
 
     noteCell.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
-            rowDetails.innerHTML = `
-                <table>
-                    <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
-                    <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
-                    <tr><td>Note</td> <td>${expense.Note}</td></tr>
-                    <tr><td>Description</td> <td>${expense.Description}</td></tr>
-                </table>
-            `;
-            rowPopup.style.display = 'flex';
+            showTransactionDetails(expense);
         }
     });
 
     return row;
+}
+
+function showTransactionDetails(expense) {
+    rowDetails.innerHTML = `
+        <table>
+            <tr><td>Type</td> <td>${expense["Income/Expense"]}</td></tr>
+            <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
+            <tr><td>Account</td> <td>${expense.Account}</td></tr>
+            <tr><td>Category</td> <td>${expense.Category}</td></tr>
+            <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
+            <tr><td>Note</td> <td>${expense.Note}</td></tr>
+            <tr><td>Description</td> <td>${expense.Description}</td></tr>
+        </table>
+    `;
+    rowPopup.style.display = 'flex';
 }
 
 function calculateTotals(transactions) {

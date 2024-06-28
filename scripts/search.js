@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             dateCell.textContent = new Date(convertDateFormat(expense.Date)).toDateString();
             dateCell.className = 'date';
             const categoryElement = document.createElement('p');
-            categoryElement.classList.add('transaction-category');
+            categoryElement.classList.add('transaction-category', 'line-clamp');
             categoryElement.textContent = `${expense.Category}`;
             dateElement.appendChild(dateCell);
             dateElement.appendChild(categoryElement);
@@ -421,15 +421,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Only include note and description in the popup for mobile view
             noteCell.addEventListener('click', () => {
                 if (window.innerWidth <= 768) { // Mobile view
-                    rowDetails.innerHTML = `
-                        <table>
-                            <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
-                            <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
-                            <tr><td>Note</td> <td>${expense.Note}</td></tr>
-                            <tr><td>Description</td> <td>${expense.Description}</td></tr>
-                        </table>
-                    `;
-                    rowPopup.style.display = 'flex';
+                    showTransactionDetails(expense);
                 }
             });
 

@@ -1,16 +1,14 @@
-<!-- reports.html -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Finance Tracker</title>
     <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/login.css">
-    <link rel="stylesheet" href="styles/reports.css">
+    <link rel="stylesheet" href="styles/dashboard.css">
+    <script src="scripts/plugins/chart.js" defer></script>
 </head>
-
 <body>
     <header>
         <h1>Personal Finance Manager</h1>
@@ -18,11 +16,10 @@
     <nav>
         <div class="navigation">
             <ul>
-                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html">Dashboard</a></li>
                 <li><a href="transactions.html">Transactions</a></li>
                 <li><a href="accounts.html" id="accounts-link">Accounts</a></li>
                 <li><a href="categories.html">Categories</a></li>
-                <li><a href="reports.html" id="reports-link">Reports</a></li>
                 <li><a href="#">Expenses</a></li>
                 <li><a href="#">Settings</a></li>
                 <li><a href="search.html" id="search-link">Search</a></li>
@@ -32,10 +29,59 @@
     </nav>
     <div class="overlay"></div>
     <main style="display: none;">
-        <h2 class="heading">Reports</h2>
-
-        <div id="reports-section">
-            <div id="expenses-table"></div>
+        <h2 class="heading">Dashboard</h2>
+        <div class="dashboard-container">
+            <section class="summary-section">
+                <h3>Current Month's Summary</h3>
+                <div class="summary-item">
+                    <span>Total Income:</span>
+                    <span id="total-income"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Total Expenses:</span>
+                    <span id="total-expenses"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Expense Change:</span>
+                    <span id="expense-change"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Most Spending Category:</span>
+                    <span id="most-spending-category"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Average Monthly Spending:</span>
+                    <span id="avg-monthly-spending"></span>
+                </div>
+                <div class="summary-item">
+                    <span>Average Yearly Spending:</span>
+                    <span id="avg-yearly-spending"></span>
+                </div>
+            </section>
+            <!-- <section class="charts-section">
+                <h3>Income vs Expenses</h3>
+                <canvas id="income-expense-chart"></canvas>
+            </section> -->
+            <section class="charts-section">
+                <h3>Monthly Category Spendings</h3>
+                <canvas id="monthly-category-spending-chart"></canvas>
+            </section>
+            <section class="charts-section">
+                <h3>Total Category Spendings</h3>
+                <canvas id="total-category-spending-chart"></canvas>
+            </section>
+            <section class="trends-section">
+                <h3>Monthly Trends</h3>
+                <canvas id="trends-chart"></canvas>
+            </section>
+            <section class="recent-transactions">
+                <h3>Recent Monthly Spendings</h3>
+                <ul id="recent-transactions-list"></ul>
+            </section>
+            <section class="yearly-analysis">
+                <h3>Yearly Analysis</h3>
+                <ul id="yearly-analysis-list"></ul>
+            </section>
         </div>
 
         <!-- Scroll to top -->
@@ -74,7 +120,7 @@
     <!-- Mobile Bottom Navigation -->
     <div class="mobile-nav" style="display: none;">
         <button class="mobile-nav-button" data-page="transactions.html">Trans</button>
-        <button class="mobile-nav-button" data-page="reports.html">Stats</button>
+        <button class="mobile-nav-button" data-page="statistics.html">Stats</button>
         <button class="mobile-nav-button" data-page="accounts.html">Accounts</button>
         <button class="mobile-nav-button" data-page="categories.html">Categories</button>
         <button class="mobile-nav-button search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></button>
@@ -82,7 +128,6 @@
 
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>
-    <script src="scripts/reports.js"></script>
+    <script src="scripts/dashboard.js"></script>
 </body>
-
 </html>

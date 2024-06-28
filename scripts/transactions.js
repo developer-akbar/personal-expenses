@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const tabContents = document.querySelectorAll('.tab-content');
     const currentPeriod = document.getElementById('current-period');
     const currentYear = document.getElementById('current-year');
-    const rowDetails = document.querySelector('.row-details');
 
     let currentDailyDate = new Date();
     let currentMonthlyDate = new Date();
