@@ -1,3 +1,5 @@
+import { updateCategorySpendingChart, updateSubcategoryTrendChart } from './category-charts.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
     const categoriesContainer = document.getElementById('categories-container');
     const selectedCategoryContainer = document.getElementById('selected-category-container');
@@ -5,10 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tabs = document.querySelectorAll('.tab-button');
     const currentPeriod = document.getElementById('current-period');
     const totalAmount = document.getElementById('total-amount');
-    const categorySpendingChartCtx = document.getElementById('category-spending-chart').getContext('2d');
-    const subcategoryTrendChartCtx = document.getElementById('subcategory-trend-chart').getContext('2d');
-    let categorySpendingChart;
-    let subcategoryTrendChart;
+    const periodNavigation = document.getElementById('period-navigation');
     let currentMonthlyDate = new Date();
     let currentYearDate = new Date().getFullYear();
     let selectedCategory = null;
@@ -116,64 +115,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateCategorySpendingChart(categories);
     }
 
-    function updateCategorySpendingChart(categories) {
-        const labels = Object.keys(categories);
-        const data = Object.values(categories).map(category => category.total);
-        const backgroundColors = labels.map((_, i) => `hsl(${i * 30}, 100%, 75%)`);
-
-        if (categorySpendingChart) {
-            categorySpendingChart.destroy();
-        }
-
-        categorySpendingChart = new Chart(categorySpendingChartCtx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: backgroundColors
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false // Disable the default legend display
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.raw / total) * 100).toFixed(2);
-                                return `${context.label}: ${formatIndianCurrency(context.raw)} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
     function populateCategories(categories) {
-        let totalSum = 0;
-
-        for (let category in categories) {
-            if (categories.hasOwnProperty(category)) {
-                totalSum += categories[category].total;
-            }
-        }
+        let totalSum = Object.values(categories).reduce((sum, category) => sum + category.total, 0);
         totalAmount.className = currentMainTab;
         totalAmount.innerHTML = `<p>${currentMainTab.charAt(0).toUpperCase() + currentMainTab.slice(1)}</p> <p>${formatIndianCurrency(totalSum)}</p>`;
 
         categoriesContainer.innerHTML = '';
 
-        Object.keys(categories).forEach(categoryName => {
-            const category = categories[categoryName];
-            const categoryElement = document.createElement('div');
-            categoryElement.classList.add('category-row');
-            categoryElement.innerHTML = `
+        Object.keys(categories)
+            .sort((a, b) => categories[b].total - categories[a].total) // sort categories by total
+            .forEach(categoryName => {
+                const category = categories[categoryName];
+                let categoryPercentageOfTotal = ((category.total / totalSum) * 100).toFixed(2);
+                const categoryElement = document.createElement('div');
+                categoryElement.classList.add('category-row');
+                categoryElement.innerHTML = `
                 <div class="category">
                     <div class="back-button" style="display: none;">←</div>
+                    <span class="percentage" style="background-color: ${getRandomHslColor()};" title="category-percentage">${categoryPercentageOfTotal}%</span>
                     <span title="categoryName">${categoryName}</span>
                     <span class="amount ${currentMainTab}">${formatIndianCurrency(category.total)}</span>
                 </div>
@@ -181,70 +140,76 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <li class="subcategory all" data-subcategory="${categoryName}">
                         <span>All</span><span class="amount ${currentMainTab}">${formatIndianCurrency(category.total)}</span>
                     </li>
-                    ${Object.keys(category.subcategories).map(subcategoryName => `
+                    ${Object.keys(category.subcategories)
+                        .sort((a, b) => category.subcategories[b] - category.subcategories[a]) // Sort subcategories by total
+                        .map(subcategoryName => `
                         <li class="subcategory" data-subcategory="${subcategoryName}">
-                            <span>${subcategoryName}</span><span class="amount ${currentMainTab}">${formatIndianCurrency(category.subcategories[subcategoryName])}</span>
+                            <span class="percentage" style="background-color: ${getRandomHslColor()};" title="subcategory-percentage">${((category.subcategories[subcategoryName] / category.total) * 100).toFixed(2)}%</span>
+                            <span>${subcategoryName}</span>
+                            <span class="amount ${currentMainTab}">${formatIndianCurrency(category.subcategories[subcategoryName])}</span>
                         </li>
                     `).join('')}
                 </ul>
             `;
 
-            const categoryDiv = categoryElement.querySelector('.category');
-            const subcategoryList = categoryElement.querySelector('.subcategory-list');
+                const categoryDiv = categoryElement.querySelector('.category');
+                const subcategoryList = categoryElement.querySelector('.subcategory-list');
 
-            const toggleDisplay = () => {
-                document.querySelector('.selected-total-wrapper').style.display = 'none';
-                const isSubcategoryListVisible = subcategoryList.style.display === 'block';
-                subcategoryList.style.display = isSubcategoryListVisible ? 'none' : 'block';
-                categoryElement.querySelector('.back-button').style.display = isSubcategoryListVisible ? 'none' : 'block';
-                categoryElement.classList.toggle('full-width', !isSubcategoryListVisible);
-                categoryDiv.style.justifyContent = !isSubcategoryListVisible ? 'flex-start' : 'space-between';
+                const toggleDisplay = () => {
+                    document.querySelector('.selected-total-wrapper').style.display = 'none';
+                    const isSubcategoryListVisible = subcategoryList.style.display === 'block';
+                    subcategoryList.style.display = isSubcategoryListVisible ? 'none' : 'block';
+                    categoryElement.querySelector('.back-button').style.display = isSubcategoryListVisible ? 'none' : 'block';
+                    categoryElement.classList.toggle('full-width', !isSubcategoryListVisible);
+                    categoryDiv.style.justifyContent = !isSubcategoryListVisible ? 'flex-start' : 'space-between';
 
-                if (!isSubcategoryListVisible) {
-                    Array.from(categoriesContainer.children).forEach(child => {
-                        if (child !== categoryElement) child.style.display = 'none';
-                    });
-                    selectedCategoryContainer.style.display = 'block';
-                    selectedCategory = categoryName;
-                    selectedSubcategory = null;
-                    isSubcategoryView = true;
-                    updateTransactions();
-                    updateSubcategoryTrendChart();
-                } else {
-                    Array.from(categoriesContainer.children).forEach(child => {
-                        child.style.display = 'block';
-                    });
-                    selectedCategoryContainer.style.display = 'none';
-                    selectedCategory = null;
-                    isSubcategoryView = false;
-                    document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
-                    updateCategoryTotals();
-                    document.getElementById('subcategory-trend-section').style.display = 'none';
-                }
-            };
-
-            categoryDiv.addEventListener('click', toggleDisplay);
-
-            categoryElement.querySelectorAll('.subcategory').forEach(subcategoryElement => {
-                subcategoryElement.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    if (subcategoryElement.classList.contains('all')) {
+                    if (!isSubcategoryListVisible) {
+                        Array.from(categoriesContainer.children).forEach(child => {
+                            if (child !== categoryElement) child.style.display = 'none';
+                        });
+                        selectedCategoryContainer.style.display = 'block';
                         selectedCategory = categoryName;
                         selectedSubcategory = null;
+                        isSubcategoryView = true;
+                        updateTransactions();
+                        document.getElementById('category-chart-section').style.display = 'none';
+                        updateSubcategoryTrendChart(masterExpenses, selectedCategory, selectedSubcategory, currentTab, currentMonthlyDate);
                     } else {
-                        selectedSubcategory = subcategoryElement.dataset.subcategory;
+                        document.getElementById('category-chart-section').style.display = 'flex';
+                        Array.from(categoriesContainer.children).forEach(child => {
+                            child.style.display = 'block';
+                        });
+                        selectedCategoryContainer.style.display = 'none';
+                        selectedCategory = null;
+                        isSubcategoryView = false;
+                        document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
+                        updateCategoryTotals();
+                        document.getElementById('subcategory-trend-section').style.display = 'none';
                     }
+                };
 
-                    document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
-                    subcategoryElement.classList.add('active');
+                categoryDiv.addEventListener('click', toggleDisplay);
 
-                    updateTransactions();
-                    updateSubcategoryTrendChart();
+                categoryElement.querySelectorAll('.subcategory').forEach(subcategoryElement => {
+                    subcategoryElement.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        if (subcategoryElement.classList.contains('all')) {
+                            selectedCategory = categoryName;
+                            selectedSubcategory = null;
+                        } else {
+                            selectedSubcategory = subcategoryElement.dataset.subcategory;
+                        }
+
+                        document.querySelectorAll('.subcategory').forEach(el => el.classList.remove('active'));
+                        subcategoryElement.classList.add('active');
+
+                        updateTransactions();
+                        updateSubcategoryTrendChart(masterExpenses, selectedCategory, selectedSubcategory, currentTab, currentMonthlyDate);
+                    });
                 });
-            });
 
-            categoriesContainer.appendChild(categoryElement);
-        });
+                categoriesContainer.appendChild(categoryElement);
+            });
 
         if (isSubcategoryView && selectedCategory) {
             const selectedCategoryElement = Array.from(categoriesContainer.children).find(child =>
@@ -266,62 +231,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
             }
+            updateSubcategoryTrendChart(masterExpenses, selectedCategory, selectedSubcategory, currentTab, currentMonthlyDate);
         }
-    }
-
-    function updateSubcategoryTrendChart() {
-        const filteredTransactions = masterExpenses.filter(expense => {
-            const expenseDate = new Date(convertDateFormat(expense.Date));
-            return expense.Category === selectedCategory && (!selectedSubcategory || expense.Subcategory === selectedSubcategory);
-        });
-    
-        const transactionsByPeriod = filteredTransactions.reduce((acc, expense) => {
-            const expenseDate = new Date(convertDateFormat(expense.Date));
-            let period;
-    
-            if (currentTab === 'monthly') {
-                period = `${expenseDate.getFullYear()}-${expenseDate.getMonth() + 1}`;
-            } else if (currentTab === 'yearly') {
-                period = `${expenseDate.getFullYear()}`;
-            } else if (currentTab === 'financial-yearly') {
-                period = `${expenseDate.getFullYear()}-${Math.floor((expenseDate.getMonth() + 9) / 12)}`;
-            } else {
-                period = `${expenseDate.getFullYear()}`;
-            }
-    
-            if (!acc[period]) {
-                acc[period] = 0;
-            }
-            acc[period] += parseFloat(expense.INR);
-            return acc;
-        }, {});
-    
-        const labels = Object.keys(transactionsByPeriod).sort();
-        const data = labels.map(period => transactionsByPeriod[period]);
-        const backgroundColors = labels.map((_, i) => `hsl(${i * 30}, 100%, 75%)`);
-    
-        if (subcategoryTrendChart) {
-            subcategoryTrendChart.destroy();
-        }
-    
-        subcategoryTrendChart = new Chart(subcategoryTrendChartCtx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: `${selectedSubcategory ? selectedSubcategory : 'All Subcategories'}`,
-                    data: data,
-                    borderColor: '#4caf50',
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true
-            }
-        });
-    
-        document.getElementById('subcategory-trend-title').textContent = `${selectedSubcategory ? selectedSubcategory : 'All Subcategories'} Trends`;
-        document.getElementById('subcategory-trend-section').style.display = 'block';
     }
 
     function updateTransactions() {
@@ -338,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateMonthlyTransactions() {
         document.querySelector('.selected-total-wrapper').style.display = 'none';
-        document.getElementById('period-navigation').style.display = 'flex';
+        periodNavigation.style.display = 'flex';
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
 
@@ -404,7 +315,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateYearlyTransactions() {
         document.querySelector('.selected-total-wrapper').style.display = 'none';
-        document.getElementById('period-navigation').style.display = 'flex';
+        periodNavigation.style.display = 'flex';
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
 
@@ -474,7 +385,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateFinancialYearlyTransactions() {
         document.querySelector('.selected-total-wrapper').style.display = 'none';
-        document.getElementById('period-navigation').style.display = 'flex';
+        periodNavigation.style.display = 'flex';
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
 
@@ -560,7 +471,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function updateTotalTransactions() {
         document.querySelector('.selected-total-wrapper').style.display = 'none';
-        document.getElementById('period-navigation').style.display = 'none';
+        periodNavigation.style.display = 'none';
 
         const transactionsContainer = document.getElementById('transactions');
         transactionsContainer.innerHTML = '';
@@ -636,14 +547,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         tab.addEventListener('click', () => {
             const tabName = tab.dataset.tab;
             setActiveTab(tabName);
+            periodNavigation.style.display = 'flex';
             if (tabName === 'monthly') {
-                document.getElementById('period-navigation').style.display = 'flex';
                 currentPeriod.textContent = formatDate(currentMonthlyDate);
                 if (selectedCategory != null) {
                     updateMonthlyTransactions();
                 }
             } else if (tabName === 'yearly') {
-                document.getElementById('period-navigation').style.display = 'flex';
                 currentYearDate = currentMonthlyDate.getFullYear();
                 currentPeriod.textContent = currentMonthlyDate.getFullYear();
                 if (selectedCategory != null) {
@@ -656,13 +566,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const financialYearEnd = new Date(financialYearStart);
                 financialYearEnd.setFullYear(financialYearStart.getFullYear() + 1);
                 financialYearEnd.setDate(financialYearEnd.getDate() - 1);
-                document.getElementById('period-navigation').style.display = 'flex';
                 currentPeriod.textContent = `${financialYearStart.toLocaleDateString()} - ${financialYearEnd.toLocaleDateString()}`;
                 if (selectedCategory != null) {
                     updateFinancialYearlyTransactions();
                 }
             } else if (tabName === 'total') {
-                document.getElementById('period-navigation').style.display = 'none';
+                periodNavigation.style.display = 'none';
                 if (selectedCategory != null) {
                     updateTotalTransactions();
                 }
@@ -673,7 +582,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     mainTabs.forEach(mainTab => {
         mainTab.addEventListener('click', () => {
             document.querySelector('.selected-total-wrapper').style.display = 'none';
+            document.getElementById('category-chart-section').style.display = 'flex';
             document.getElementById('subcategory-trend-section').style.display = 'none';
+            periodNavigation.style.display = 'flex';
             const mainTabName = mainTab.dataset.tab;
             setActiveMainTab(mainTabName);
             setActiveTab('monthly');

@@ -12,6 +12,15 @@ closeButton.addEventListener('click', () => {
     rowPopup.style.display = 'none';
 });
 
+window.onload = () => {
+	// adding minHeight for viewable-content so that swiping can be done on the container.
+    if (document.querySelector('body') != undefined && document.querySelector('.sticky-container').getClientRects().length > 0 && document.querySelector('.mobile-nav') != undefined) {
+        document.querySelector('.viewable-content').style.minHeight = document.querySelector('body').getClientRects()[0].height
+            - document.querySelector('.sticky-container').getClientRects()[0].bottom
+            - document.querySelector('.mobile-nav').getClientRects()[0].height + 'px';
+    }
+}
+
 function scrollToTop() {
     window.scrollTo(0, 0);
 }
@@ -48,6 +57,13 @@ mobileNavButtons.forEach(button => {
         }
     });
 });
+    
+function getRandomHslColor() {
+    const h = Math.floor(Math.random() * 360); // Random hue (0-359)
+    const s = Math.floor(Math.random() * 30) + 20 + '%'; // Low to medium saturation (20-50%)
+            const l = Math.floor(Math.random() * 20) + 70 + '%'; // High lightness (70-90%)
+    return `hsl(${h}, ${s}, ${l})`;
+}
 
 function formatIndianCurrency(amount) {
     if (amount === undefined || isNaN(amount)) amount = 0;
@@ -75,7 +91,7 @@ function updateSelectedTotal() {
     selectedCheckboxes.forEach(checkbox => {
         const amountCell = checkbox.closest('tr').querySelector('.amount');
         const amount = parseFloat(amountCell.textContent.replace(/[^\d.]/g, ''));
-        
+
         if (amountCell.classList.contains('expense')) {
             selectedTotal -= amount;
         } else if (amountCell.classList.contains('income')) {

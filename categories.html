@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Finance Tracker</title>
     <link rel="stylesheet" href="styles/common.css">
-    <link rel="stylesheet" href="styles/categories.css">    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <link rel="stylesheet" href="styles/categories.css">
+    <script src="/scripts/plugins/chart.js"></script>
 </head>
 
 <body>
@@ -56,12 +56,13 @@
         </div>
         <div id="category-transactions-container" class="category-transactions-container content-container viewable-content">
             <div class="charts-container">
-                <section class="chart-section">
+                <section id="category-chart-section" class="chart-section">
                     <h3 id="category-chart-title">Category Spendings</h3>
                     <canvas id="category-spending-chart"></canvas>
                 </section>
                 <section class="chart-section" id="subcategory-trend-section" style="display: none;">
                     <h3 id="subcategory-trend-title">Subcategory Trends</h3>
+                    <div id="show-all-trends-cta" class="cta" title="Show all trends">All</div>
                     <canvas id="subcategory-trend-chart"></canvas>
                 </section>
             </div>
@@ -120,7 +121,8 @@
     </div>
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>
-    <script src="scripts/categories.js"></script>
+    <script src="scripts/categories.js" type="module"></script>
+    <script src="scripts/category-charts.js" type="module"></script>
 </body>
 
 </html>
