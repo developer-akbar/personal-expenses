@@ -285,15 +285,17 @@ document.addEventListener('DOMContentLoaded', function () {
         // Initialize masterExpenses
         async function initializeMasterData() {
             let masterExpenses;
-            const csvConvertDetails = JSON.parse(localStorage.getItem('csvConvertDetails'));
-            if (csvConvertDetails != undefined && csvConvertDetails.isCSVProcessed) {
+            
+            // Check if csv file processed already. if not, procss csv and update latest masterExpenses object into localStorage
+            const csvConversionDetails = JSON.parse(localStorage.getItem('csvConversionDetails'));
+            if (csvConversionDetails != undefined && !csvConversionDetails.isCSVProcessed) {
                 await updateMasterExpensesFromCSV();
                 masterExpenses = getDataFromLocalStorage();
-                csvConvertDetails.isCSVProcessed = false;
-                localStorage.setItem('csvConvertDetails', JSON.stringify(csvConvertDetails));
-            } else {
+                csvConversionDetails.isCSVProcessed = true;
+                localStorage.setItem('csvConversionDetails', JSON.stringify(csvConversionDetails));
+            } else { // else get masterExpenses object from localstorage
                 masterExpenses = getDataFromLocalStorage();
-                if (!masterExpenses) {
+                if (!masterExpenses) { // still if not found, update masterExpenses object from csv file (here we may get outdated data).
                     await updateMasterExpensesFromCSV();
                     masterExpenses = getDataFromLocalStorage();
                 }
