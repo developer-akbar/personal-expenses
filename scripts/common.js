@@ -8,13 +8,15 @@ const mobileNavButtons = document.querySelectorAll('.mobile-nav-button');
 const rowDetails = document.querySelector('.row-details');
 
 // Close the popup
-closeButton.addEventListener('click', () => {
-    rowPopup.style.display = 'none';
-});
+if (closeButton != undefined) {
+    closeButton.addEventListener('click', () => {
+        rowPopup.style.display = 'none';
+    });
+}
 
 window.onload = () => {
     // adding minHeight for viewable-content so that swiping can be done on the container.
-    if (document.querySelector('body') != undefined && document.querySelector('.sticky-container').getClientRects().length > 0 && document.querySelector('.mobile-nav') != undefined) {
+    if (document.querySelector('body') != undefined && document.querySelector('.sticky-container') != undefined && document.querySelector('.sticky-container').getClientRects().length > 0 && document.querySelector('.mobile-nav') != undefined) {
         document.querySelector('.viewable-content').style.minHeight = document.querySelector('body').getClientRects()[0].height
             - document.querySelector('.sticky-container').getClientRects()[0].bottom
             - document.querySelector('.mobile-nav').getClientRects()[0].height + 'px';
@@ -37,26 +39,28 @@ document.addEventListener('scroll', () => {
 });
 
 // Event listeners for mobile navigation
-mobileNavButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        // Remove active class from all buttons
-        mobileNavButtons.forEach(btn => btn.classList.remove('active'));
-
-        // Add active class to the clicked button
-        button.classList.add('active');
-
-        // Navigate to the clicked page
-        window.location.href = button.dataset.page;
-    });
-
-    // Optionally, you can highlight the active button based on the current URL
-    const currentPage = window.location.pathname.split('/').pop();
+if (mobileNavButtons != undefined && mobileNavButtons.length > 0) {
     mobileNavButtons.forEach(button => {
-        if (button.dataset.page === currentPage) {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            mobileNavButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Add active class to the clicked button
             button.classList.add('active');
-        }
+
+            // Navigate to the clicked page
+            window.location.href = button.dataset.page;
+        });
+
+        // Optionally, you can highlight the active button based on the current URL
+        const currentPage = window.location.pathname.split('/').pop();
+        mobileNavButtons.forEach(button => {
+            if (button.dataset.page === currentPage) {
+                button.classList.add('active');
+            }
+        });
     });
-});
+}
 
 function getRandomHslColor() {
     const h = Math.floor(Math.random() * 360); // Random hue (0-359)
@@ -280,15 +284,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Initialize masterExpenses
         async function initializeMasterData() {
-            let masterExpenses = getDataFromLocalStorage();
-            if (!masterExpenses) {
+            let masterExpenses;
+            const csvConvertDetails = JSON.parse(localStorage.getItem('csvConvertDetails'));
+            if (csvConvertDetails != undefined && csvConvertDetails.isCSVProcessed) {
                 await updateMasterExpensesFromCSV();
                 masterExpenses = getDataFromLocalStorage();
+                csvConvertDetails.isCSVProcessed = false;
+                localStorage.setItem('csvConvertDetails', JSON.stringify(csvConvertDetails));
+            } else {
+                masterExpenses = getDataFromLocalStorage();
+                if (!masterExpenses) {
+                    await updateMasterExpensesFromCSV();
+                    masterExpenses = getDataFromLocalStorage();
+                }
             }
             return masterExpenses;
         }
 
-        // Expose the utiltiy functions to use in other files
+        // Expose the utility functions to use in other files
         return {
             initializeMasterData
         };
