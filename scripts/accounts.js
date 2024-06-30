@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             row.addEventListener('click', () => {
                 selectedAccount = row.dataset.account;
                 selectedAccountDisplay.textContent = `Transactions for ${selectedAccount}`;
+                localStorage.setItem('selectedAccount', selectedAccount);
                 currentDailyDate = new Date(); // Reset to current month
                 updateAccountTransactions();
                 accountsSection.style.display = 'none';

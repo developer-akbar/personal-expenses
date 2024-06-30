@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     new Chart(trendsChartCtx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: months,
             datasets: [
@@ -218,15 +218,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     label: 'Income',
                     data: incomeTrends,
                     borderColor: '#4caf50',
-                    fill: false,
-                    backgroundColor: '#4141c1'
+                    fill: false
                 },
                 {
                     label: 'Expenses',
                     data: expenseTrends,
                     borderColor: '#f44336',
-                    fill: false,
-                    backgroundColor: '#d25050'
+                    fill: false
                 }
             ]
         },

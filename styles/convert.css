@@ -19,12 +19,6 @@ body {
     text-align: center;
 }
 
-.csv-updated-at {
-    background-color: lightgreen;
-    padding: .25em .5em;
-    border-radius: 5px;
-}
-
 h1 {
     margin-bottom: 20px;
 }

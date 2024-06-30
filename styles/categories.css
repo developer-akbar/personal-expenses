@@ -21,12 +21,21 @@
     margin-left: auto;
 }
 
+.percentage-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.percentage-details > * {
+    flex: 1;
+}
+
 .percentage {
     background-color: var(--random-bg-color);
     padding-inline: 5px;
     border-radius: 5px;
-    min-width: 7.5ch;
-    text-align: center;
 }
 
 .subcategory-list {
