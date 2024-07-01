@@ -71,7 +71,7 @@ export function updateSubcategoryTrendChart(masterExpenses, selectedCategory, se
     }, {});
 
     const currentYear = currentMonthlyDate.getFullYear();
-    let labels = Object.keys(transactionsByPeriod).sort();
+    let labels = Object.keys(transactionsByPeriod).reverse();
     const originalLabels = [...labels]; // Store all labels for the 'All' view
     const limit = 9; // Number of periods to show by default
 
