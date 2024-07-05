@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function performSearch() {
+    async function performSearch() {
         document.querySelector('.selected-total-wrapper').style.display = 'none';
     
         filterToggle.style.display = 'block';
@@ -252,6 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const minAmount = document.getElementById('min-amount').value;
         const maxAmount = document.getElementById('max-amount').value;
     
+        const masterData = await utility.initializeMasterData();
         let searchResults = masterData.filter(expense => {
             const description = expense.Description.toLowerCase();
             const note = expense.Note.toLowerCase();
@@ -401,6 +402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const inputElement = document.createElement('input');
             inputElement.type = 'checkbox';
             inputElement.className = 'select-checkbox';
+            inputElement.setAttribute('data-id', expense.ID)
             inputElement.addEventListener('change', updateSelectedTotal);
             checkboxCell.appendChild(inputElement);
 

@@ -108,6 +108,7 @@ function updateSelectedTotal() {
     const selectedTotalWrapper = document.querySelector('.selected-total-wrapper');
     const selectedTotalElement = document.getElementById('selected-total');
     const totalSelectedTransfersElement = document.getElementById('total-selected-transfers');
+    const deleteSelectedTransactionsElement = document.getElementById('delete-selected-transactions');
 
     selectedTotalWrapper.style.display = 'block';
 
@@ -116,6 +117,16 @@ function updateSelectedTotal() {
 
     totalSelectedTransfersElement.style.display = totalSelectedTransfers ? 'block' : 'none';
     totalSelectedTransfersElement.textContent = `Total Transfers: ${formatIndianCurrency(parseFloat(totalSelectedTransfers))}`;
+
+    deleteSelectedTransactionsElement.style.display = selectedCheckboxes.length > 0 ? 'block' : 'none';
+
+    deleteSelectedTransactionsElement.addEventListener('click', () => {
+        const idsToDelete = Array.from(document.querySelectorAll('.select-checkbox:checked')).map(checkbox => parseInt(checkbox.dataset.id));
+
+        if (idsToDelete.length > 0) {
+            deleteTransaction(idsToDelete);
+        }
+    });
 }
 
 function createTransactionRow(expense) {
@@ -126,6 +137,7 @@ function createTransactionRow(expense) {
     const inputElement = document.createElement('input');
     inputElement.type = 'checkbox';
     inputElement.className = 'select-checkbox';
+    inputElement.setAttribute('data-id', expense.ID)
     inputElement.addEventListener('change', updateSelectedTotal);
     checkboxCell.appendChild(inputElement);
 
@@ -168,6 +180,7 @@ function createTransactionRow(expense) {
 function showTransactionDetails(expense) {
     rowDetails.innerHTML = `
         <table>
+            <tr hidden><td>ID</td> <td>${expense.ID}</td></tr>
             <tr><td>Type</td> <td>${expense["Income/Expense"]}</td></tr>
             <tr><td>Date</td> <td>${new Date(convertDateFormat(expense.Date)).toDateString()}</td></tr>
             <tr><td>Account</td> <td>${expense.Account}</td></tr>
@@ -176,8 +189,49 @@ function showTransactionDetails(expense) {
             <tr><td>Note</td> <td>${expense.Note}</td></tr>
             <tr><td>Description</td> <td>${expense.Description}</td></tr>
         </table>
+        <button class="delete-button" onClick="deleteTransaction(${expense.ID})">Delete</button>
     `;
     rowPopup.style.display = 'flex';
+}
+
+function deleteTransaction(ids) {
+    let masterData = JSON.parse(localStorage.getItem('masterExpenses'));
+
+    if (!Array.isArray(ids)) {
+        ids = [ids]; // Convert single ID to an array
+    }
+
+    ids.forEach(id => {
+        let transactionIndex = masterData.findIndex(transaction => parseInt(transaction.ID) === id);
+        if (transactionIndex > -1) {
+            masterData.splice(transactionIndex, 1);
+
+            // Find the row in the DOM and add the 'deleting' class
+            const transactionRow = document.querySelector(`.transaction-row .select-checkbox[data-id="${id}"]`).closest('tr');
+            transactionRow.classList.add('deleting');
+
+            // Wait for the transition to finish before removing the row from the DOM
+            transactionRow.addEventListener('transitionend', () => {
+                const dayWrapper = transactionRow.closest('.transaction-day-wrapper');
+
+                transactionRow.remove();
+
+                // Check if the transaction-day-wrapper has no more transaction rows
+                if (dayWrapper && dayWrapper.querySelectorAll('.transaction-row').length === 0) {
+                    dayWrapper.classList.add('deleting');
+                    dayWrapper.addEventListener('transitionend', () => {
+                        dayWrapper.remove();
+                    });
+                }
+            });
+        }
+    });
+
+    localStorage.setItem('masterExpenses', JSON.stringify(masterData));
+
+    if (ids.length === 1) {
+        rowPopup.style.display = 'none'; // Close modal popup if a single transaction was deleted
+    }
 }
 
 function calculateTotals(transactions) {
@@ -285,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Initialize masterExpenses
         async function initializeMasterData() {
             let masterExpenses;
-            
+
             // Check if csv file processed already. if not, procss csv and update latest masterExpenses object into localStorage
             const csvConversionDetails = JSON.parse(localStorage.getItem('csvConversionDetails'));
             if (csvConversionDetails != undefined && !csvConversionDetails.isCSVProcessed) {

@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             return expenseDate.getMonth() === currentDailyDate.getMonth() && expenseDate.getFullYear() === currentDailyDate.getFullYear();
         });
 
+        // sorting transactions by date
+        filteredTransactions.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+
         // Group transactions by day
         const transactionsByDay = filteredTransactions.reduce((acc, expense) => {
             const date = new Date(convertDateFormat(expense.Date)).toDateString();
@@ -50,6 +53,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Display transactions grouped by day
         for (const [date, transactions] of Object.entries(transactionsByDay)) {
+            const dayWrapper = tableElement.insertRow();
+            dayWrapper.className = 'transaction-day-wrapper';
+
             const dayContainer = tableElement.insertRow();
             dayContainer.className = 'transaction-day';
 
@@ -68,11 +74,12 @@ document.addEventListener('DOMContentLoaded', async function () {
             dayContent.appendChild(dayTotals);
             dayHeader.appendChild(dayContent);
             dayContainer.appendChild(dayHeader);
-            tableBodyElement.appendChild(dayContainer);
+            dayWrapper.appendChild(dayContainer);
 
             transactions.forEach(expense => {
                 const transactionRow = createTransactionRow(expense);
-                tableBodyElement.appendChild(transactionRow);
+                dayWrapper.appendChild(transactionRow);
+                tableBodyElement.appendChild(dayWrapper);
             });
         }
 

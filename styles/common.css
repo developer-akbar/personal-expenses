@@ -447,6 +447,18 @@ button:hover {
 
 .selected-total-wrapper {
     padding-inline: 10px;
+    position: relative;
+}
+
+#delete-selected-transactions {
+    position: absolute;
+    right: 0.75rem;
+    top: 0;
+    background: lightsalmon;
+}
+
+.delete-button {
+    margin-top: 0.75rem;
 }
 
 #monthly-transactions .transaction-row, #total-transactions .transaction-row {
@@ -460,6 +472,18 @@ button:hover {
 
 .transaction-row:last-child {
     border-bottom: none;
+}
+
+.transaction-row, .transaction-day-wrapper {
+    transition: all 0.15s ease-out;
+}
+
+.transaction-row.deleting, .transaction-day-wrapper.deleting {
+    opacity: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
 }
 
 .amount.income, #daily-income, #monthly-income, #total-income {

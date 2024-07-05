@@ -27,6 +27,7 @@ form.search-form {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.75rem;
+    flex-direction: column;
 }
 
 .search-results-wrapper {
