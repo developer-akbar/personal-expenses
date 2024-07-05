@@ -1,0 +1,48 @@
+#transaction-modal .modal-content {
+    width: 100%;
+    margin: unset;
+    height: calc(100dvh - 56px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    max-height: fit-content;
+}
+
+.close:hover, .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5em;
+}
+
+.form-row label {
+    flex-basis: 15ch;
+}
+
+.form-row input, .form-row select, .form-row textarea, .form-row button {
+    flex: 1;
+}
+
+#transaction-form > .form-row:last-child {
+    margin-top: .75rem;
+}
+
+.cancel-btn {
+    background-color: #888;
+}
+
+.cancel-btn:hover {
+    background-color: #888888c2;
+}

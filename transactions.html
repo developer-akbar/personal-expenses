@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,9 @@
     <link rel="stylesheet" href="styles/common.css">
     <link rel="stylesheet" href="styles/login.css">
     <link rel="stylesheet" href="styles/transactions.css">
+    <link rel="stylesheet" href="styles/new-transaction.css">
 </head>
+
 <body>
     <header>
         <h1>Personal Finance Manager</h1>
@@ -60,6 +63,7 @@
                 <div class="selected-total-wrapper mb-16" style="display: none;">
                     <span id="selected-total"></span>
                     <span id="total-selected-transfers"></span>
+                    <span id="delete-selected-transactions">&#10060; Delete</span>
                 </div>
             </div>
             <div id="monthly" class="tab-content">
@@ -100,7 +104,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Transactions Display Starts -->
         <div id="transactions" class="transactions content-container viewable-content">
             <!-- Daily Transactions -->
@@ -112,8 +116,73 @@
         </div>
         <!-- Transactions Display Ends -->
 
+        <button id="add-transaction-btn" class="floating-btn">+</button>
+
         <!-- Scroll to top -->
         <button class="scroll-to-top" onclick="scrollToTop()" style="display: none;">&uarr;</button>
+
+        <div id="transaction-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" class="close">&times;</span>
+                <h2>Add Transaction</h2>
+                <form id="transaction-form">
+                    <input type="hidden" id="transaction-id" value="" readonly>
+                    <div class="form-row">
+                        <label for="type">Type</label>
+                        <select id="type" name="type">
+                            <option value="Expense">Expense</option>
+                            <option value="Income">Income</option>
+                            <option value="Transfer">Transfer</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" name="date" value="">
+                    </div>
+                    <div id="non-transfer-fields">
+                        <div class="form-row" id="account-row">
+                            <label for="account">Account</label>
+                            <select id="account" name="account"></select>
+                        </div>
+                        <div class="form-row" id="category-row">
+                            <label for="category">Category</label>
+                            <select id="category" name="category"></select>
+                        </div>
+                        <div class="form-row" id="subcategory-row">
+                            <label for="subcategory">Subcategory</label>
+                            <select id="subcategory" name="subcategory"></select>
+                        </div>
+                    </div>
+                    <div id="transfer-fields" style="display: none;">
+                        <div class="form-row" id="from-row" style="display: none;">
+                            <label for="from-account">From</label>
+                            <select id="from-account" name="from-account"></select>
+                        </div>
+                        <div class="form-row" id="to-row" style="display: none;">
+                            <label for="to-account">To</label>
+                            <select id="to-account" name="to-account"></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label for="amount">Amount</label>
+                        <input type="number" id="amount" name="amount">
+                    </div>
+                    <div class="form-row">
+                        <label for="note">Note</label>
+                        <input type="text" id="note" name="note">
+                    </div>
+                    <div class="form-row">
+                        <label for="description">Description</label>
+                        <textarea rows="3" id="description" name="description"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <button type="submit" class="submit-btn">Save</button>
+                        <button type="button" class="cancel-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </main>
     <footer style="display: none;">
         <p>&copy; 2024 Personal Finance Manager</p>
@@ -157,5 +226,6 @@
     <script src="scripts/common.js"></script>
     <script src="scripts/auth.js"></script>
     <script src="scripts/transactions.js"></script>
+    <script src="scripts/new-transaction.js"></script>
 </body>
 </html>

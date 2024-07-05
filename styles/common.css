@@ -153,19 +153,20 @@ form label {
 form input[type="text"],
 form input[type="number"],
 form input[type="date"],
-form select {
+form select, form textarea {
+    outline: 0;
+    border-width: 0 0 1px;
+    border-color: #ccc;
     width: 100%;
-    padding: 10px;
-    /* margin-bottom: 10px; */
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 0.5em;
+    margin-bottom: 0.4em;
     transition: border-color 0.3s ease;
 }
 
 form input[type="text"]:focus,
 form input[type="number"]:focus,
 form input[type="date"]:focus,
-form select:focus {
+form select:focus, form textarea:focus {
     border-color: #004080;
 }
 
@@ -353,10 +354,13 @@ button:hover {
     width: 80%;
     max-width: 80dvw;
     border-radius: 10px;
-    text-align: center;
     position: relative;
     max-height: 50dvh;
     overflow: scroll;
+}
+
+.modal-content h2, .modal-content .delete-button {
+    text-align: center;
 }
 
 .back-button {
@@ -494,6 +498,16 @@ button:hover {
     color: red;
 }
 
+.modal .close-button {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    cursor: pointer;
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     header {
@@ -561,16 +575,6 @@ button:hover {
 
     .modal .modal-content {
         padding: 1rem;
-    }
-
-    .modal .close-button {
-        position: absolute;
-        top: 0;
-        right: 10px;
-        cursor: pointer;
-        font-size: 1.5rem;
-        background: none;
-        border: none;
     }
 
     .tabs {

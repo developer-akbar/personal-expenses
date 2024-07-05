@@ -3,14 +3,16 @@
 const AMOUNT_COLUMN_NAME = "INR";
 
 const rowPopup = document.getElementById('rowPopup');
-const closeButton = document.querySelector('.close-button');
+const closeButtons = document.querySelectorAll('.close-button');
 const mobileNavButtons = document.querySelectorAll('.mobile-nav-button');
 const rowDetails = document.querySelector('.row-details');
 
 // Close the popup
-if (closeButton != undefined) {
-    closeButton.addEventListener('click', () => {
-        rowPopup.style.display = 'none';
+if (closeButtons.length > 0) {
+    closeButtons.forEach(closeButton => {
+        closeButton.addEventListener('click', () => {
+            rowPopup.style.display = 'none';
+        });
     });
 }
 
