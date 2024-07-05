@@ -40,10 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
             // Convert worksheet to CSV and replace commas within cell data
             const csv = XLSX.utils.sheet_to_csv(worksheet, { FS: ',', RS: '\n', strip: false })
                 .split('\n')
-                .map(row =>
-                    transformString(row).split(',')
+                .map((row, index) =>
+                row.length > 0 ? transformString(row, index).split(',')
                         .map(cell => `${cell.replace(/,/g, ';')}`) // replace commas within cell data and quote the cell
-                        .join(',')
+                        .join(',') : ''
                 ).join('\n');
 
             // Save the CSV file using the File System Access API
@@ -80,14 +80,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // This function helps to replace commas(,) which are delimiter in csv conversion.
     // Not to break the excel file structure when converting to csv
-    function transformString(inputString) {
+    function transformString(inputString, index) {
         // Find all quoted texts after commas and replace them accordingly
-        const outputString = inputString.replace(/,"([^"]*)"/g, function (match, p1) {
+        let outputString = inputString.replace(/,"([^"]*)"/g, function (match, p1) {
             // Replace commas with semicolons inside the quoted text
             let transformedText = p1.replace(/,/g, ';');
             return ',' + transformedText;
         });
-
+        outputString = outputString + ',' + (index === 0 ? 'ID' : ''+index);
         return outputString;
     }
 
