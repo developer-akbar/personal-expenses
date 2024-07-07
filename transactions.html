@@ -123,17 +123,16 @@
 
         <div id="transaction-modal" class="modal">
             <div class="modal-content">
-                <span class="close-button" class="close">&times;</span>
-                <h2>Add Transaction</h2>
                 <form id="transaction-form">
                     <input type="hidden" id="transaction-id" value="" readonly>
                     <div class="form-row">
-                        <label for="type">Type</label>
-                        <select id="type" name="type">
-                            <option value="Expense">Expense</option>
-                            <option value="Income">Income</option>
-                            <option value="Transfer">Transfer</option>
-                        </select>
+                        <div id="type-container" class="custom-dropdown">
+                            <div id="type-options" class="type-options">
+                                <span class="type-option income" data-value="Income">Income</span>
+                                <span class="type-option expense active" data-value="Expense">Expense</span>
+                                <span class="type-option" data-value="Transfer">Transfer</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-row">
                         <label for="date">Date</label>
@@ -141,26 +140,36 @@
                     </div>
                     <div id="non-transfer-fields">
                         <div class="form-row" id="account-row">
-                            <label for="account">Account</label>
-                            <select id="account" name="account"></select>
+                            <label for="amount">Account</label>
+                            <div id="account-container" class="custom-dropdown">
+                                <span id="account-btn" class="dropdown-btn"></span>
+                            </div>
                         </div>
                         <div class="form-row" id="category-row">
-                            <label for="category">Category</label>
-                            <select id="category" name="category"></select>
+                            <label for="amount">Category</label>
+                            <div id="category-container" class="custom-dropdown">
+                                <span id="category-btn" class="dropdown-btn"></span>
+                            </div>
                         </div>
                         <div class="form-row" id="subcategory-row">
-                            <label for="subcategory">Subcategory</label>
-                            <select id="subcategory" name="subcategory"></select>
+                            <label for="amount">Subcategory</label>
+                            <div id="subcategory-container" class="custom-dropdown">
+                                <span id="subcategory-btn" class="dropdown-btn"></span>
+                            </div>
                         </div>
                     </div>
                     <div id="transfer-fields" style="display: none;">
-                        <div class="form-row" id="from-row" style="display: none;">
-                            <label for="from-account">From</label>
-                            <select id="from-account" name="from-account"></select>
+                        <div class="form-row" id="from-row">
+                            <label for="amount">From</label>
+                            <div id="from-account-container" class="custom-dropdown">
+                                <span id="from-account-btn" class="dropdown-btn"></span>
+                            </div>
                         </div>
-                        <div class="form-row" id="to-row" style="display: none;">
-                            <label for="to-account">To</label>
-                            <select id="to-account" name="to-account"></select>
+                        <div class="form-row" id="to-row">
+                            <label for="amount">To</label>
+                            <div id="to-account-container" class="custom-dropdown">
+                                <span id="to-account-btn" class="dropdown-btn"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="form-row">
@@ -169,19 +178,28 @@
                     </div>
                     <div class="form-row">
                         <label for="note">Note</label>
-                        <input type="text" id="note" name="note">
+                        <div class="note-input">
+                            <input type="text" id="note" name="note" autocomplete="off">
+                            <div id="suggestions"></div>
+                        </div>
                     </div>
                     <div class="form-row">
                         <label for="description">Description</label>
-                        <textarea rows="3" id="description" name="description"></textarea>
+                        <textarea rows="2" id="description" name="description"></textarea>
                     </div>
                     <div class="form-row">
                         <button type="submit" class="submit-btn">Save</button>
                         <button type="button" class="cancel-btn">Cancel</button>
                     </div>
                 </form>
+                <div id="account-grid" class="grid hidden"></div>
+                <div id="category-grid" class="grid hidden"></div>
+                <div id="subcategory-grid" class="grid hidden"></div>
+                <div id="from-account-grid" class="grid hidden"></div>
+                <div id="to-account-grid" class="grid hidden"></div>
             </div>
         </div>
+
 
     </main>
     <footer style="display: none;">
@@ -220,7 +238,8 @@
         <button class="mobile-nav-button" data-page="statistics.html">Stats</button>
         <button class="mobile-nav-button" data-page="accounts.html">Accounts</button>
         <button class="mobile-nav-button" data-page="categories.html">Categories</button>
-        <button class="mobile-nav-button search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></button>
+        <button class="mobile-nav-button search" style="display: none;"><a href="search.html"
+                id="search-link">&#128269</a></button>
     </div>
 
     <script src="scripts/common.js"></script>
@@ -228,4 +247,5 @@
     <script src="scripts/transactions.js"></script>
     <script src="scripts/new-transaction.js"></script>
 </body>
+
 </html>

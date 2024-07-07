@@ -18,7 +18,7 @@ if (closeButtons.length > 0) {
 
 window.onload = () => {
     // adding minHeight for viewable-content so that swiping can be done on the container.
-    if (document.querySelector('body') != undefined && document.querySelector('.sticky-container') != undefined && document.querySelector('.sticky-container').getClientRects().length > 0 && document.querySelector('.mobile-nav') != undefined) {
+    if (!document.querySelector('body') && !document.querySelector('.sticky-container') && document.querySelector('.sticky-container').getClientRects().length > 0 && !document.querySelector('.mobile-nav')) {
         document.querySelector('.viewable-content').style.minHeight = document.querySelector('body').getClientRects()[0].height
             - document.querySelector('.sticky-container').getClientRects()[0].bottom
             - document.querySelector('.mobile-nav').getClientRects()[0].height + 'px';

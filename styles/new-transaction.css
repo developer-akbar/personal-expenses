@@ -1,14 +1,27 @@
+#transaction-form {
+    padding: 0.75em;
+    min-height: 50%;
+    overflow: auto;
+}
+
+#transaction-modal.modal {
+    background-color: white;
+}
+
 #transaction-modal .modal-content {
     width: 100%;
     margin: unset;
     height: calc(100dvh - 56px);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
 }
 
 .modal-content {
     background-color: white;
     margin: 10% auto;
     padding: 20px;
-    border: 1px solid #888;
+    border: unset;
     width: 80%;
     max-width: 500px;
     max-height: fit-content;
@@ -45,4 +58,85 @@
 
 .cancel-btn:hover {
     background-color: #888888c2;
+}
+
+.custom-dropdown {
+    position: relative;
+    flex: 1;
+    border-bottom: 1px solid #ccc;
+}
+
+#type-container {
+    border-bottom: unset !important;
+}
+
+.type-options {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.type-option {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    flex: 1;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.type-option.active {
+    border-color: currentColor;
+    font-weight: bold;
+}
+
+.type-option:not(.active) {
+    color: #000 !important;
+}
+
+.dropdown-btn {
+    display: inline-block;
+    width: 100%;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.grid.hidden {
+    display: none;
+}
+
+.grid.active {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    max-height: calc(100% - 56px);
+    overflow: auto;
+    left: 0;
+    right: 0;
+    border-top: 1px solid #ccc;
+    background: white;
+}
+
+.grid-header {
+    grid-column: 1 / -1;
+    padding: 0.75em;
+    background-color: #000;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.grid span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    border: 0.5px solid #ccc;
+    text-align: center;
+    height: 50px;    
+    cursor: pointer;
+}
+
+.note-input {
+    flex: 1;
+    position: relative;
 }
