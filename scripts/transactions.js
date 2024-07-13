@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
 
         // sorting transactions by date
-        filteredTransactions.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+        filteredTransactions.sort((a, b) => new Date(convertDateFormat(b.Date)) - new Date(convertDateFormat(a.Date)));
 
         // Group transactions by day
         const transactionsByDay = filteredTransactions.reduce((acc, expense) => {

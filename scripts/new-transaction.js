@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('subcategory-row').style.display = 'flex';
         } else {
             document.getElementById('subcategory-row').style.display = 'none';
+            document.getElementById('amount').focus(); // Automatically focus on the amount field if no subcategories
         }
     }
 
@@ -161,8 +162,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                 grid.classList.remove('active');
                 if (nextFocus) {
                     nextFocus.focus();
-                    if (nextGrid) {
+                    if (nextGrid && button !== subcategoryBtn) {
                         toggleGrid(nextGrid);
+                    } else if (button === subcategoryBtn && document.getElementById('subcategory-row').style.display === 'none') {
+                        document.getElementById('amount').focus();
                     }
                 }
                 if (button === categoryBtn) {
@@ -194,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
 
         masterExpenses.push({
-            Date: convertDateFormat(date),
+            Date: formatDateInput(date),
             Account: account,
             Category: category,
             Subcategory: subcategory,
@@ -261,5 +264,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             suggestionsList.appendChild(listItem);
         });
         suggestionsDiv.appendChild(suggestionsList);
+    }
+
+    function formatDateInput(dateString) {
+        const [year, month, day] = dateString.split('-');
+        return `${day}/${month}/${year}`;
     }
 });
