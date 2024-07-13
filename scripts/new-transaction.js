@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const noteElement = document.getElementById('note');
     const toAccountGrid = document.getElementById('to-account-grid');
     const cancelBtn = document.querySelector('.cancel-btn');
+    const suggestionsDiv = document.getElementById('suggestions');
 
     dateField.value = new Date().toISOString().substring(0, 10);
 
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         toAccountBtn.textContent = '';
         dateField.value = new Date().toISOString().substring(0, 10);
         noteElement.value = '';
+        suggestionsDiv.innerHTML = '';
         document.getElementById('description').value = '';
         document.getElementById('amount').value = '';
     }
@@ -179,6 +181,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     noteElement.addEventListener('input', showSuggestions);
 
+    // hide suggestions list when focus out
+    document.addEventListener('click', function(event) {
+        if (!noteElement.contains(event.target) && !suggestionsDiv.contains(event.target)) {
+            suggestionsDiv.innerHTML = '';
+        }
+    });
+
     transactionForm.addEventListener('submit', event => {
         event.preventDefault();
 
@@ -237,8 +246,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     fetchDropdowns();
 
     function showSuggestions() {
-        const suggestionsDiv = document.getElementById('suggestions');
-
         const noteInput = noteElement.value.toLowerCase();
         suggestionsDiv.innerHTML = '';
 

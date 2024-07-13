@@ -12,17 +12,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchResultsWrapper = document.querySelector('.search-results-wrapper');
     const customStart = document.getElementById('custom-start');
     const customEnd = document.getElementById('custom-end');
+    const searchInput = document.getElementById('searchInput');
 
-    document.getElementById('searchInput').focus();
+    searchInput.focus();
 
     let periodType = 'all';
     let currentDate = new Date();
 
     const masterData = await utility.initializeMasterData();
 
-    document.getElementById('searchInput').addEventListener('input', showSuggestions);
-    document.getElementById('searchInput').addEventListener('keydown', navigateSuggestions);
-    document.getElementById('searchInput').addEventListener('keydown', (e) => {
+    searchInput.addEventListener('input', showSuggestions);
+
+    // hide suggestions list when focus out
+    document.addEventListener('click', function(event) {
+        if (!searchInput.contains(event.target) && !suggestionsDiv.contains(event.target)) {
+            suggestionsDiv.innerHTML = '';
+        }
+    });
+    searchInput.addEventListener('keydown', navigateSuggestions);
+    searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             let searchResults = performSearch();
