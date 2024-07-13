@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        masterExpenses.push({
+        const newTransaction = {
             Date: formatDateInput(date),
             Account: account,
             Category: category,
@@ -208,11 +208,17 @@ document.addEventListener('DOMContentLoaded', async function () {
             Amount: amount,
             Currency: 'INR',
             ID: masterExpenses.length
-        });
+        };
 
+        masterExpenses.push(newTransaction);
         localStorage.setItem('masterExpenses', JSON.stringify(masterExpenses));
         fetchTransactionsFromLocalStorage();
         transactionModal.style.display = 'none';
+
+        // Add the transaction and update the UI
+        if (window.addTransaction) {
+            window.addTransaction(newTransaction);
+        }
     });
 
     function fetchTransactionsFromLocalStorage() {

@@ -134,6 +134,7 @@ function updateSelectedTotal() {
 function createTransactionRow(expense) {
     const row = document.createElement('tr');
     row.className = 'transaction-row';
+    row.id = `transaction-${expense.ID}`; 
 
     const checkboxCell = row.insertCell();
     const inputElement = document.createElement('input');

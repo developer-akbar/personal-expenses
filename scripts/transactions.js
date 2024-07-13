@@ -13,6 +13,33 @@ document.addEventListener('DOMContentLoaded', async function () {
     const masterData = await utility.initializeMasterData();
     updateDailyTransactions();
 
+    window.addTransaction = function (newTransaction) { // Define addTransaction globally
+        masterData.push(newTransaction);
+        localStorage.setItem('masterExpenses', JSON.stringify(masterData));
+
+        // Update currentDailyDate and currentMonthlyDate to the new transaction's date
+        const transactionDate = new Date(convertDateFormat(newTransaction.Date));
+        currentDailyDate = transactionDate;
+        currentMonthlyDate = transactionDate;
+
+        // Set active tab and update transactions
+        setActiveTab('daily');
+        updateDailyTransactions();
+
+        currentPeriod.textContent = formatDate(currentDailyDate);
+        currentYear.textContent = formatYear(currentMonthlyDate);
+
+        // Scroll to the newly added transaction
+        scrollToTransaction(newTransaction.ID);
+    };
+
+    function scrollToTransaction(transactionId) {
+        const transactionRow = document.getElementById(`transaction-${transactionId}`);
+        if (transactionRow) {
+            transactionRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
     function setActiveTab(tabName) {
         tabs.forEach(tab => {
             tab.classList.toggle('active', tab.dataset.tab === tabName);
