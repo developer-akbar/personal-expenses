@@ -14,7 +14,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     updateDailyTransactions();
 
     window.addTransaction = function (newTransaction) { // Define addTransaction globally
-        masterData.push(newTransaction);
+
+        const existingIndex = masterData.findIndex(expense => expense.ID == newTransaction.ID);
+
+        if (existingIndex > -1) {
+            masterData[existingIndex] = newTransaction;
+        } else {
+            masterData.push(newTransaction);
+        }
+
         localStorage.setItem('masterExpenses', JSON.stringify(masterData));
 
         // Update currentDailyDate and currentMonthlyDate to the new transaction's date
@@ -29,8 +37,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         currentPeriod.textContent = formatDate(currentDailyDate);
         currentYear.textContent = formatYear(currentMonthlyDate);
 
-        // Scroll to the newly added transaction
-        scrollToTransaction(newTransaction.ID);
+        // Smooth scroll to the transaction row
+        setTimeout(() => {
+            const transactionId = `transaction-${newTransaction.ID}`;
+            const transactionRow = document.getElementById(`transaction-${newTransaction.ID}`);
+            if (transactionRow) {
+                transactionRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                transactionRow.classList.add('highlight');
+                setTimeout(() => {
+                    transactionRow.classList.remove('highlight');
+                }, 1000); // Match the duration of the CSS animation
+            }
+        }, 100);
     };
 
     function scrollToTransaction(transactionId) {
@@ -298,30 +316,30 @@ document.addEventListener('DOMContentLoaded', async function () {
         updateDailyTransactions();
         currentPeriod.textContent = formatDate(currentDailyDate);
     };
-    
+
     const updateMonthlyPeriod = (direction) => {
         currentMonthlyDate.setFullYear(currentMonthlyDate.getFullYear() + direction);
         updateMonthlyTransactions();
         currentYear.textContent = formatYear(currentMonthlyDate);
     };
-    
+
     // Event listeners for period navigation
     document.getElementById('prev-period').addEventListener('click', () => updateDailyPeriod(-1));
     document.getElementById('next-period').addEventListener('click', () => updateDailyPeriod(1));
-    
+
     document.getElementById('prev-year').addEventListener('click', () => updateMonthlyPeriod(-1));
     document.getElementById('next-year').addEventListener('click', () => updateMonthlyPeriod(1));
-    
+
     let startX = 0;
     // Swipe right/left event listener
     document.querySelector('.viewable-content').addEventListener('touchstart', (event) => {
         startX = event.changedTouches[0].clientX;
     }, false);
-    
+
     document.querySelector('.viewable-content').addEventListener('touchend', (event) => {
         let endX = event.changedTouches[0].clientX;
         let deltaX = endX - startX;
-    
+
         if (deltaX > 100) { // Swipe right
             if (document.querySelector('.tab-content.active').getAttribute('id') === 'daily') {
                 updateDailyPeriod(-1);

@@ -461,8 +461,17 @@ button:hover {
     background: lightsalmon;
 }
 
-.delete-button {
+.edit-button, .delete-button {
     margin-top: 0.75rem;
+    flex: 1;
+}
+
+.flex {
+    display: flex;
+}
+
+.delete-button {
+    background-color: rgba(255, 0, 0, 0.723);
 }
 
 #monthly-transactions .transaction-row, #total-transactions .transaction-row {

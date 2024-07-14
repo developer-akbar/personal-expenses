@@ -192,11 +192,14 @@ function showTransactionDetails(expense) {
             <tr><td>Note</td> <td>${expense.Note}</td></tr>
             <tr><td>Description</td> <td>${expense.Description}</td></tr>
         </table>
-        <button class="delete-button" onClick="deleteTransaction(${expense.ID})">Delete</button>
+        <div class="cta-buttons flex">
+            <button class="edit-button" onClick="editTransaction(${expense.ID})">Edit</button>
+            <button class="delete-button" onClick="deleteTransaction(${expense.ID})">Delete</button>
+        </div>
     `;
     rowPopup.style.display = 'flex';
 }
-
+    
 function deleteTransaction(ids) {
     let masterData = JSON.parse(localStorage.getItem('masterExpenses'));
 

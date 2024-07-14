@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     let subcategories = [];
 
     function resetTransactionForm() {
+        document.getElementById('transaction-id').value = '';
         document.querySelectorAll('.type-option').forEach(option => option.classList.remove('active'));
         typeOptions.querySelector('.type-option[data-value="Expense"]').classList.add('active');
         accountBtn.textContent = '';
@@ -172,6 +173,10 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
                 if (button === categoryBtn) {
                     populateSubcategories();
+                    // Clear subcategory if no subcategories are found
+                    if (document.getElementById('subcategory-row').style.display === 'none') {
+                        subcategoryBtn.textContent = '';
+                    }
                 }
             }
         });
@@ -182,15 +187,41 @@ document.addEventListener('DOMContentLoaded', async function () {
     noteElement.addEventListener('input', showSuggestions);
 
     // hide suggestions list when focus out
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         if (!noteElement.contains(event.target) && !suggestionsDiv.contains(event.target)) {
             suggestionsDiv.innerHTML = '';
         }
     });
 
+    window.editTransaction = function (id) {
+        document.getElementById('rowPopup').style.display = 'none';
+        const transaction = JSON.parse(localStorage.getItem('masterExpenses')).find(expense => expense.ID == id);
+        if (transaction) {
+            document.getElementById('transaction-id').value = transaction.ID;
+            document.querySelector('.type-option.active').classList.remove('active');
+            document.querySelector(`.type-option[data-value="${transaction['Income/Expense']}"]`).classList.add('active');
+            document.getElementById('date').value = formatDateField(convertDateFormat(transaction.Date), 'show-date');
+            document.getElementById(transaction['Income/Expense'] === 'Transfer' ? 'from-account-btn' : 'account-btn').textContent = transaction.Account;
+            if (transaction['Income/Expense'] !== 'Transfer') {
+                categoryBtn.textContent = transaction.Category;
+                subcategoryBtn.textContent = transaction.Subcategory;
+                populateSubcategories();
+            } else {
+                document.getElementById('to-account-btn').textContent = transaction.Category;
+            }
+            document.getElementById('note').value = transaction.Note;
+            document.getElementById('amount').value = transaction.INR;
+            document.getElementById('description').value = transaction.Description;
+
+            transactionModal.style.display = 'block';
+            toggleGrid(accountGrid);
+        }
+    }
+
     transactionForm.addEventListener('submit', event => {
         event.preventDefault();
 
+        const id = document.getElementById('transaction-id').value;
         const type = document.querySelector('.type-option.active').dataset.value;
         const date = dateField.value;
         const account = document.getElementById(type === 'Transfer' ? 'from-account-btn' : 'account-btn').textContent;
@@ -205,8 +236,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        const newTransaction = {
-            Date: formatDateInput(date),
+        const transaction = {
+            Date: formatDateField(date, 'add-date'),
             Account: account,
             Category: category,
             Subcategory: subcategory,
@@ -216,17 +247,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             Description: description,
             Amount: amount,
             Currency: 'INR',
-            ID: masterExpenses.length
+            ID: id || Date.now()
         };
-
-        masterExpenses.push(newTransaction);
-        localStorage.setItem('masterExpenses', JSON.stringify(masterExpenses));
-        fetchTransactionsFromLocalStorage();
+        
         transactionModal.style.display = 'none';
 
         // Add the transaction and update the UI
         if (window.addTransaction) {
-            window.addTransaction(newTransaction);
+            window.addTransaction(transaction);
         }
     });
 
@@ -279,8 +307,24 @@ document.addEventListener('DOMContentLoaded', async function () {
         suggestionsDiv.appendChild(suggestionsList);
     }
 
-    function formatDateInput(dateString) {
-        const [year, month, day] = dateString.split('-');
+    function formatDateField(dateString, datePurpose) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+
+        if(datePurpose === 'add-date') {
         return `${day}/${month}/${year}`;
+        } else if (datePurpose === 'show-date') {
+            return `${year}-${month}-${day}`;
+        }
+    }
+
+    function toISODateString(dateString) {
+        const dateObj = new Date(dateString);
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 });

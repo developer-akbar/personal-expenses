@@ -90,6 +90,22 @@
     z-index: 900;
 }
 
+@keyframes flash {
+    0% {
+        background-color: yellow;
+    }
+    50% {
+        background-color: transparent;
+    }
+    100% {
+        background-color: yellow;
+    }
+}
+
+.transaction-row.highlight {
+    animation: flash 1s ease;
+}
+
 /* Mobile-specific styles */
 @media (max-width: 768px) {
     .tabs {
