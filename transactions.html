@@ -122,12 +122,12 @@
         <button class="scroll-to-top" onclick="scrollToTop()" style="display: none;">&uarr;</button>
 
         <div id="transaction-modal" class="modal">
-            <div class="modal-content">
+            <div class="transaction-modal-content">
                 <form id="transaction-form">
                     <input type="hidden" id="transaction-id" value="" readonly>
                     <div class="form-row">
                         <div id="type-container" class="custom-dropdown">
-                            <div id="type-options" class="type-options">
+                            <div id="type-options" class="field type-options">
                                 <span class="type-option income" data-value="Income">Income</span>
                                 <span class="type-option expense active" data-value="Expense">Expense</span>
                                 <span class="type-option" data-value="Transfer-Out">Transfer</span>
@@ -136,24 +136,24 @@
                     </div>
                     <div class="form-row">
                         <label for="date">Date</label>
-                        <input type="date" id="date" name="date" value="">
+                        <input type="date" id="date" name="date" class="field" value="">
                     </div>
                     <div id="non-transfer-fields">
                         <div class="form-row" id="account-row">
                             <label for="amount">Account</label>
-                            <div id="account-container" class="custom-dropdown">
+                            <div id="account-container" class="field custom-dropdown">
                                 <span id="account-btn" class="dropdown-btn"></span>
                             </div>
                         </div>
                         <div class="form-row" id="category-row">
                             <label for="amount">Category</label>
-                            <div id="category-container" class="custom-dropdown">
+                            <div id="category-container" class="field custom-dropdown">
                                 <span id="category-btn" class="dropdown-btn"></span>
                             </div>
                         </div>
                         <div class="form-row" id="subcategory-row">
                             <label for="amount">Subcategory</label>
-                            <div id="subcategory-container" class="custom-dropdown">
+                            <div id="subcategory-container" class="field custom-dropdown">
                                 <span id="subcategory-btn" class="dropdown-btn"></span>
                             </div>
                         </div>
@@ -161,34 +161,35 @@
                     <div id="transfer-fields" style="display: none;">
                         <div class="form-row" id="from-row">
                             <label for="amount">From</label>
-                            <div id="from-account-container" class="custom-dropdown">
+                            <div id="from-account-container" class="field custom-dropdown">
                                 <span id="from-account-btn" class="dropdown-btn"></span>
                             </div>
                         </div>
                         <div class="form-row" id="to-row">
                             <label for="amount">To</label>
-                            <div id="to-account-container" class="custom-dropdown">
+                            <div id="to-account-container" class="field custom-dropdown">
                                 <span id="to-account-btn" class="dropdown-btn"></span>
                             </div>
                         </div>
                     </div>
                     <div class="form-row">
                         <label for="amount">Amount</label>
-                        <input type="number" id="amount" name="amount">
+                        <input type="number" id="amount" name="amount" class="field">
                     </div>
                     <div class="form-row">
                         <label for="note">Note</label>
                         <div class="note-input">
-                            <input type="text" id="note" name="note" autocomplete="off">
+                            <input type="text" id="note" name="note" class="field" autocomplete="off">
                             <div id="suggestions"></div>
                         </div>
                     </div>
                     <div class="form-row">
                         <label for="description">Description</label>
-                        <textarea rows="2" id="description" name="description"></textarea>
+                        <textarea rows="2" id="description" name="description" class="field"></textarea>
                     </div>
                     <div class="form-row">
                         <button type="submit" class="submit-btn">Save</button>
+                        <button type="button" class="delete-button" style="display: none;">Delete</button>
                         <button type="button" class="cancel-btn">Cancel</button>
                     </div>
                 </form>

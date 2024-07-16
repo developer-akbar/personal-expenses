@@ -353,7 +353,7 @@ button:hover {
     border: 1px solid #888;
     width: 80%;
     max-width: 80dvw;
-    border-radius: 10px;
+    /* border-radius: 8px; */
     position: relative;
     max-height: 50dvh;
     overflow: scroll;
@@ -462,7 +462,7 @@ button:hover {
 }
 
 .edit-button, .delete-button {
-    margin-top: 0.75rem;
+    /* margin-top: 0.75rem; */
     flex: 1;
 }
 
@@ -613,7 +613,7 @@ button:hover {
     }
 
     .modal .modal-content {
-        padding: 1rem;
+        padding: 1.75rem 1rem 1rem;
     }
 
     .tabs {

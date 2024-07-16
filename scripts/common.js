@@ -173,7 +173,8 @@ function createTransactionRow(expense) {
 
     noteCell.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
-            showTransactionDetails(expense);
+            // showTransactionDetails(expense);
+            editTransaction(expense.ID);
         }
     });
 
@@ -236,7 +237,7 @@ function deleteTransaction(ids) {
     localStorage.setItem('masterExpenses', JSON.stringify(masterData));
 
     if (ids.length === 1) {
-        rowPopup.style.display = 'none'; // Close modal popup if a single transaction was deleted
+        document.getElementById('transaction-modal').style.display = 'none'; // Close modal popup if a single transaction was deleted
     }
 }
 

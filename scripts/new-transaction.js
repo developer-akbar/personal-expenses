@@ -113,6 +113,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     addTransactionBtn.addEventListener('click', () => {
+        document.querySelector('.submit-btn').style.display = 'block';
+        document.querySelector('.delete-button').style.display = 'none';
         resetTransactionForm();
         populateDropdowns();
         transactionModal.style.display = 'block';
@@ -213,8 +215,18 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('amount').value = transaction.INR;
             document.getElementById('description').value = transaction.Description;
 
+            document.querySelector('.submit-btn').style.display = 'none';
+            document.querySelector('.delete-button').style.display = 'block';
+            document.querySelector('.delete-button').setAttribute('onclick',  'deleteTransaction('+id+')');
+            
             transactionModal.style.display = 'block';
-            toggleGrid(accountGrid);
+            transactionModal.querySelectorAll('form .field').forEach(field => {
+                field.addEventListener('click', () => {
+                    document.querySelector('.submit-btn').style.display = 'block';
+                    document.querySelector('.delete-button').style.display = 'none';
+                });
+            });
+            accountGrid.classList.remove('active');
         }
     }
 
@@ -249,7 +261,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             Currency: 'INR',
             ID: id || Date.now()
         };
-        
+
         transactionModal.style.display = 'none';
 
         // Add the transaction and update the UI
@@ -313,8 +325,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
 
-        if(datePurpose === 'add-date') {
-        return `${day}/${month}/${year}`;
+        if (datePurpose === 'add-date') {
+            return `${day}/${month}/${year}`;
         } else if (datePurpose === 'show-date') {
             return `${year}-${month}-${day}`;
         }
