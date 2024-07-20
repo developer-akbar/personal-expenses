@@ -134,7 +134,7 @@ function updateSelectedTotal() {
 function createTransactionRow(expense) {
     const row = document.createElement('tr');
     row.className = 'transaction-row';
-    row.id = `transaction-${expense.ID}`; 
+    row.id = `transaction-${expense.ID}`;
 
     const checkboxCell = row.insertCell();
     const inputElement = document.createElement('input');
@@ -200,7 +200,7 @@ function showTransactionDetails(expense) {
     `;
     rowPopup.style.display = 'flex';
 }
-    
+
 function deleteTransaction(ids) {
     let masterData = JSON.parse(localStorage.getItem('masterExpenses'));
 
@@ -211,6 +211,8 @@ function deleteTransaction(ids) {
     ids.forEach(id => {
         let transactionIndex = masterData.findIndex(transaction => parseInt(transaction.ID) === id);
         if (transactionIndex > -1) {
+            const deletedTransaction = masterData[transactionIndex];
+
             masterData.splice(transactionIndex, 1);
 
             // Find the row in the DOM and add the 'deleting' class
@@ -231,10 +233,14 @@ function deleteTransaction(ids) {
                     });
                 }
             });
+
+            localStorage.setItem('masterExpenses', JSON.stringify(masterData));
+
+            if (window.showModifiedTransactionPeriod) {
+                window.showModifiedTransactionPeriod(deletedTransaction);
+            }
         }
     });
-
-    localStorage.setItem('masterExpenses', JSON.stringify(masterData));
 
     if (ids.length === 1) {
         document.getElementById('transaction-modal').style.display = 'none'; // Close modal popup if a single transaction was deleted

@@ -26,20 +26,10 @@ document.addEventListener('DOMContentLoaded', async function () {
         localStorage.setItem('masterExpenses', JSON.stringify(masterData));
 
         // Update currentDailyDate and currentMonthlyDate to the new transaction's date
-        const transactionDate = new Date(convertDateFormat(newTransaction.Date));
-        currentDailyDate = transactionDate;
-        currentMonthlyDate = transactionDate;
+        showModifiedTransactionPeriod(newTransaction);
 
-        // Set active tab and update transactions
-        setActiveTab('daily');
-        updateDailyTransactions();
-
-        currentPeriod.textContent = formatDate(currentDailyDate);
-        currentYear.textContent = formatYear(currentMonthlyDate);
-
-        // Smooth scroll to the transaction row
+        // Smooth scroll to the new transaction row
         setTimeout(() => {
-            const transactionId = `transaction-${newTransaction.ID}`;
             const transactionRow = document.getElementById(`transaction-${newTransaction.ID}`);
             if (transactionRow) {
                 transactionRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -51,11 +41,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         }, 100);
     };
 
-    function scrollToTransaction(transactionId) {
-        const transactionRow = document.getElementById(`transaction-${transactionId}`);
-        if (transactionRow) {
-            transactionRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+    window.showModifiedTransactionPeriod = function (newTransaction) {
+        const transactionDate = new Date(convertDateFormat(newTransaction.Date));
+        currentDailyDate = transactionDate;
+        currentMonthlyDate = transactionDate;
+
+        // Set active tab and update transactions
+        setActiveTab('daily');
+        updateDailyTransactions();
+
+        currentPeriod.textContent = formatDate(currentDailyDate);
+        currentYear.textContent = formatYear(currentMonthlyDate);
     }
 
     function setActiveTab(tabName) {
@@ -75,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         dailyTransactionsContainer.innerHTML = ''; // Clear previous transactions
 
         // Filter transactions for the current month and year
-        const filteredTransactions = masterData.filter(expense => {
+        const filteredTransactions = JSON.parse(localStorage.getItem('masterExpenses')).filter(expense => {
             const expenseDate = new Date(convertDateFormat(expense.Date));
             return expenseDate.getMonth() === currentDailyDate.getMonth() && expenseDate.getFullYear() === currentDailyDate.getFullYear();
         });
