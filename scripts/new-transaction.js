@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         categoryGrid.innerHTML = createGridHeader('Category');
         subcategoryGrid.innerHTML = '';
 
-        accounts.forEach(account => {
+        accounts.sort().forEach(account => {
             appendGridSpan(accountGrid, account);
             appendGridSpan(fromAccountGrid, account);
             appendGridSpan(toAccountGrid, account);
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             masterExpenses.some(expense => expense.Category === category && expense['Income/Expense'] === type)
         );
 
-        filteredCategories.forEach(category => appendGridSpan(categoryGrid, category));
+        filteredCategories.sort().forEach(category => appendGridSpan(categoryGrid, category));
         populateSubcategories();
     }
 
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (event.target.classList.contains('type-option')) {
             document.querySelectorAll('.type-option').forEach(option => option.classList.remove('active'));
             event.target.classList.add('active');
-            const isTransfer = event.target.dataset.value === 'Transfer';
+            const isTransfer = event.target.dataset.value === 'Transfer-Out';
             nonTransferFields.style.display = isTransfer ? 'none' : 'block';
             transferFields.style.display = isTransfer ? 'block' : 'none';
             if (isTransfer) {
@@ -203,8 +203,8 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.querySelector('.type-option.active').classList.remove('active');
             document.querySelector(`.type-option[data-value="${transaction['Income/Expense']}"]`).classList.add('active');
             document.getElementById('date').value = formatDateField(convertDateFormat(transaction.Date), 'show-date');
-            document.getElementById(transaction['Income/Expense'] === 'Transfer' ? 'from-account-btn' : 'account-btn').textContent = transaction.Account;
-            if (transaction['Income/Expense'] !== 'Transfer') {
+            document.getElementById(transaction['Income/Expense'] === 'Transfer-Out' ? 'from-account-btn' : 'account-btn').textContent = transaction.Account;
+            if (transaction['Income/Expense'] !== 'Transfer-Out') {
                 categoryBtn.textContent = transaction.Category;
                 subcategoryBtn.textContent = transaction.Subcategory;
                 populateSubcategories();
@@ -236,14 +236,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         const id = document.getElementById('transaction-id').value;
         const type = document.querySelector('.type-option.active').dataset.value;
         const date = dateField.value;
-        const account = document.getElementById(type === 'Transfer' ? 'from-account-btn' : 'account-btn').textContent;
-        const category = type === 'Transfer' ? document.getElementById('to-account-btn').textContent : categoryBtn.textContent;
-        const subcategory = type === 'Transfer' ? '' : subcategoryBtn.textContent;
+        const account = document.getElementById(type === 'Transfer-Out' ? 'from-account-btn' : 'account-btn').textContent;
+        const category = type === 'Transfer-Out' ? document.getElementById('to-account-btn').textContent : categoryBtn.textContent;
+        const subcategory = type === 'Transfer-Out' ? '' : subcategoryBtn.textContent;
         const note = noteElement.value;
         const amount = parseFloat(document.getElementById('amount').value);
         const description = document.getElementById('description').value;
 
-        if (!date || !account || (type !== 'Transfer' && !category) || (type === 'Transfer' && !category) || !amount) {
+        if (!date || !account || (type !== 'Transfer-Out' && !category) || (type === 'Transfer-Out' && !category) || !amount) {
             alert('Please fill all mandatory fields.');
             return;
         }

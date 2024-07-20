@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let liabilities = 0;
 
         // Display account balances
-        for (const [account, balance] of Object.entries(accountBalances)) {
+        for (const [account, balance] of Object.entries(accountBalances).sort()) {
             const accountContainer = document.createElement('div');
             accountContainer.className = 'account-row';
             accountContainer.dataset.account = account;
