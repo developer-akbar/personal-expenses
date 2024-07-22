@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,34 +9,61 @@
     <link rel="stylesheet" href="styles/settings.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
+
 <body>
     <div class="settings-container">
-        <h2>Account Groups</h2>
         <div class="group-container" id="account-group-container">
-            <button id="add-account-group-btn">Add Account Group</button>
-            <div id="account-groups-list" class="flex-container"></div>
+            <div class="cta-buttons sticky-container">
+                <button id="add-account-group-btn">Add Account Group</button>
+                <button id="add-account-btn">Add New Account</button>
+            </div>
+            <div id="account-groups-list" class="flex-container mapping-container"></div>
         </div>
-
-        <h2 id="unmapped-heading">Unmapped Accounts</h2>
         <div id="unmapped-accounts" class="mapping-container">
-            <div id="accounts-list" class="flex-container"></div>
+            <h3 id="unmapped-heading">Unmapped Accounts</h3>
+            <div id="accounts-list"></div>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing accounts -->
+    <div id="account-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-account-btn">&times;</span>
+            <h2 id="account-modal-title"></h2>
+            <form id="account-form">
+                <input type="hidden" id="account-id">
+                <div class="form-row">
+                    <label for="account-name">Account Name</label>
+                    <input type="text" id="account-name" name="account-name" class="field" required>
+                </div>
+                <div class="form-row">
+                    <label for="account-group-select">Account Group</label>
+                    <select id="account-group-select" name="account-group-select" class="field" required></select>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="submit-btn save-account-btn">Save</button>
+                    <button type="button" class="delete-btn delete-account-btn">Delete Account</button>
+                    <button type="button" class="cancel-btn cancel-account-btn">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- Modal for adding/editing groups -->
     <div id="group-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
+            <span class="close-button close-group-btn">&times;</span>
             <h2 id="modal-title"></h2>
             <form id="group-form">
                 <input type="hidden" id="group-id">
                 <div class="form-row">
                     <label for="group-name">Group Name</label>
-                    <input type="text" id="group-name" name="group-name" required>
+                    <input type="text" id="group-name" name="group-name" class="field" required>
                 </div>
                 <div class="form-row">
-                    <button type="submit" class="submit-btn">Save</button>
-                    <button type="button" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="submit-btn save-group-btn">Save</button>
+                    <button type="button" class="delete-btn delete-group-btn">Delete Group</button>
+                    <button type="button" class="cancel-btn cancel-group-btn">Cancel</button>
                 </div>
             </form>
         </div>
@@ -43,7 +71,7 @@
 
     <div id="group-select-modal" class="modal">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
+            <span class="close-button close-group-select-btn">&times;</span>
             <h3>Select Account Group</h3>
             <ul id="group-select-list"></ul>
         </div>
@@ -51,4 +79,5 @@
 
     <script src="scripts/settings.js"></script>
 </body>
+
 </html>
