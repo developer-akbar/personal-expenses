@@ -1,6 +1,7 @@
 /* accounts.css */
 #accounts-section {
-    padding-top: 10px;
+    background-color: #f4f6f9;
+    padding: 0.5em 0;
 }
 
 .period-navigation {
@@ -61,34 +62,50 @@
     font-weight: 700;
 }
 
+.totals {
+    background: #fff;
+    border-bottom: 1px solid #bfbfbf;
+    padding: 0.5em;
+}
+
 #accounts-balances {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: 0.75rem;
+    
+}
+
+.group-container {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75em;
+}
+
+.group-container h3 {
+    width: 100%;
+    padding: 0.5em 1rem;
 }
 
 .account-row {
-    flex: auto;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    padding: 10px;
+    justify-content: space-between;
+    padding: 0.65em 1rem;
     border: 1px solid #ddd;
-    border-radius: 5px;
-    width: 15%;
-    margin: auto;
-    cursor: pointer;
+    background: #fff;
+    gap: 0.5rem;
+    align-items: center;
     transition: background-color 0.3s ease;
+    flex-basis: calc(20% - 0.5rem);
 }
 
 .account-row:hover {
+    cursor: pointer;
     background-color: #e0e0e0;
 }
 
 .account-row span:first-child {
-    font-weight: bold;
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -106,18 +123,18 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
+    #accounts-balances {
+        flex-direction: column;
+    }
+
+    .group-container {
+        gap: unset;
+        flex-direction: column;
+        width: 100%;
+    }
+
     .account-row {
-        all: unset;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-direction: row;
-        gap: 0.75rem;
-        padding-block: 5px;
-        border-bottom: 1px solid #c6c6c6;
-        width: 45%;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
+        width: unset;
     }
 
     #back-button {

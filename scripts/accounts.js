@@ -11,13 +11,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedAccount = null;
 
     const masterData = await utility.initializeMasterData();
+    const accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [];
+    const accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || {};
+    const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+
     currentPeriod.textContent = formatDate(currentDailyDate);
     updateAccountBalances();
+
+	// hiding account group container if there are not accounts mapped.
+    document.querySelectorAll('.group-container').forEach(groupContainer => {
+        if (groupContainer.querySelectorAll('.account-row').length <= 0) {
+            groupContainer.style.display = 'none'
+        }
+    });
 
     function updateAccountBalances() {
         const accountsBalancesContainer = document.getElementById('accounts-balances');
         accountsBalancesContainer.innerHTML = ''; // Clear previous balances
-
+    
         // Calculate account balances
         const accountBalances = masterData.reduce((acc, expense) => {
             const account = expense.Account;
@@ -39,43 +50,97 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             return acc;
         }, {});
-
+    
         let assets = 0;
         let liabilities = 0;
-
-        // Display account balances
-        for (const [account, balance] of Object.entries(accountBalances).sort()) {
-            const accountContainer = document.createElement('div');
-            accountContainer.className = 'account-row';
-            accountContainer.dataset.account = account;
-
-            const accountName = document.createElement('span');
-            accountName.title = account;
-            accountName.textContent = account;
-
-            const accountBalance = document.createElement('span');
-            accountBalance.className = 'amount';
-            accountBalance.textContent = formatIndianCurrency(balance);
-            if (balance >= 0) {
-                accountBalance.classList.add('positive');
-                assets += balance;
-            } else {
-                accountBalance.classList.add('negative');
-                liabilities += Math.abs(balance);
-            }
-
-            accountContainer.appendChild(accountName);
-            accountContainer.appendChild(accountBalance);
-
-            accountsBalancesContainer.appendChild(accountContainer);
+    
+        // Display accounts group-wise if groups are available
+        if (accountGroups.length > 0 && Object.keys(accountMappings).length > 0) {
+            accountGroups.forEach(group => {
+                const groupContainer = document.createElement('div');
+                groupContainer.className = 'group-container';
+                const groupTitle = document.createElement('h3');
+                groupTitle.textContent = group.name;
+                groupContainer.appendChild(groupTitle);
+    
+                const groupAccounts = accountMappings[group.name] || [];
+    
+                groupAccounts.forEach(account => {
+                    const balance = accountBalances[account] || 0;
+                    const accountContainer = document.createElement('div');
+                    accountContainer.className = 'account-row';
+                    accountContainer.dataset.account = account;
+    
+                    const accountName = document.createElement('span');
+                    accountName.title = account;
+                    accountName.textContent = account;
+    
+                    const accountBalance = document.createElement('span');
+                    accountBalance.className = 'amount';
+                    accountBalance.textContent = formatIndianCurrency(balance);
+                    if (balance >= 0) {
+                        accountBalance.classList.add('positive');
+                        assets += balance;
+                    } else {
+                        accountBalance.classList.add('negative');
+                        liabilities += Math.abs(balance);
+                    }
+    
+                    accountContainer.appendChild(accountName);
+                    accountContainer.appendChild(accountBalance);
+                    groupContainer.appendChild(accountContainer);
+                });
+    
+                accountsBalancesContainer.appendChild(groupContainer);
+            });
         }
-
+    
+        // Display unmapped accounts
+        const mappedAccounts = Object.values(accountMappings).flat();
+        const unmappedAccounts = accounts.filter(account => !mappedAccounts.includes(account));
+    
+        if (unmappedAccounts.length > 0) {
+            const unmappedGroupContainer = document.createElement('div');
+            unmappedGroupContainer.className = 'group-container';
+            const unmappedGroupTitle = document.createElement('h3');
+            unmappedGroupTitle.textContent = 'Unmapped Accounts';
+            unmappedGroupContainer.appendChild(unmappedGroupTitle);
+    
+            unmappedAccounts.forEach(account => {
+                const balance = accountBalances[account] || 0;
+                const accountContainer = document.createElement('div');
+                accountContainer.className = 'account-row';
+                accountContainer.dataset.account = account;
+    
+                const accountName = document.createElement('span');
+                accountName.title = account;
+                accountName.textContent = account;
+    
+                const accountBalance = document.createElement('span');
+                accountBalance.className = 'amount';
+                accountBalance.textContent = formatIndianCurrency(balance);
+                if (balance >= 0) {
+                    accountBalance.classList.add('positive');
+                    assets += balance;
+                } else {
+                    accountBalance.classList.add('negative');
+                    liabilities += Math.abs(balance);
+                }
+    
+                accountContainer.appendChild(accountName);
+                accountContainer.appendChild(accountBalance);
+                unmappedGroupContainer.appendChild(accountContainer);
+            });
+    
+            accountsBalancesContainer.appendChild(unmappedGroupContainer);
+        }
+    
         const balance = assets - liabilities;
-
+    
         document.getElementById('assets').innerHTML = `<p>Assets</p><p>${formatIndianCurrency(assets)}</p>`;
         document.getElementById('liabilities').innerHTML = `<p>Liabilities</p><p>${formatIndianCurrency(liabilities)}</p>`;
-        document.getElementById('balance').innerHTML = `<p>Liabilities</p><p>${formatIndianCurrency(balance)}</p>`;
-
+        document.getElementById('balance').innerHTML = `<p>Balance</p><p>${formatIndianCurrency(balance)}</p>`;
+    
         // Add click event listener for each account row to switch to Daily tab with filtered transactions
         const accountRows = document.querySelectorAll('.account-row');
         accountRows.forEach(row => {
