@@ -277,9 +277,32 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function fetchDropdowns() {
-        accounts = getAccountsOrCategories(masterExpenses, 'Account');
+        accounts = getStoredAccounts();
         categories = getAccountsOrCategories(masterExpenses, 'Category');
         populateDropdowns();
+    }
+
+    function getStoredAccounts() {
+        const storedAccounts = JSON.parse(localStorage.getItem('accounts'));
+        if (storedAccounts && storedAccounts.length > 0) {
+            return storedAccounts;
+        } else {
+            const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
+                const account = expense.Account;
+                if (!acc.includes(account)) {
+                    acc.push(account);
+                }
+                if (expense["Income/Expense"] === "Transfer-Out") {
+                    const targetAccount = expense.Category;
+                    if (!acc.includes(targetAccount)) {
+                        acc.push(targetAccount);
+                    }
+                }
+                return acc;
+            }, []);
+    
+            return accountBalances;
+        }
     }
 
     fetchTransactionsFromLocalStorage();
