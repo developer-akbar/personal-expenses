@@ -23,6 +23,15 @@
             <h3 id="unmapped-heading">Unmapped Accounts</h3>
             <div id="accounts-list"></div>
         </div>
+        
+        <!-- Add new buttons for categories and subcategories -->
+        <div class="group-container" id="category-group-container">
+            <div class="cta-buttons sticky-container">
+                <button id="add-category-btn">Add New Category</button>
+                <button id="add-subcategory-btn">Add New Subcategory</button>
+            </div>
+            <div id="categories-list" class="flex-container mapping-container"></div>
+        </div>
     </div>
 
     <!-- Modal for adding/editing accounts -->
@@ -69,6 +78,50 @@
         </div>
     </div>
 
+    <!-- Modal for adding/editing categories -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-category-btn">&times;</span>
+            <h2 id="category-modal-title"></h2>
+            <form id="category-form">
+                <input type="hidden" id="category-id">
+                <div class="form-row">
+                    <label for="category-name">Category Name</label>
+                    <input type="text" id="category-name" name="category-name" class="field" required>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="submit-btn save-category-btn">Save</button>
+                    <button type="button" class="delete-btn delete-category-btn">Delete Category</button>
+                    <button type="button" class="cancel-btn cancel-category-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing subcategories -->
+    <div id="subcategory-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-subcategory-btn">&times;</span>
+            <h2 id="subcategory-modal-title"></h2>
+            <form id="subcategory-form">
+                <input type="hidden" id="subcategory-id">
+                <div class="form-row">
+                    <label for="subcategory-name">Subcategory Name</label>
+                    <input type="text" id="subcategory-name" name="subcategory-name" class="field" required>
+                </div>
+                <div class="form-row">
+                    <label for="parent-category-select">Parent Category</label>
+                    <select id="parent-category-select" name="parent-category-select" class="field" required></select>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="submit-btn save-subcategory-btn">Save</button>
+                    <button type="button" class="delete-btn delete-subcategory-btn">Delete Subcategory</button>
+                    <button type="button" class="cancel-btn cancel-subcategory-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="group-select-modal" class="modal">
         <div class="modal-content">
             <span class="close-button close-group-select-btn">&times;</span>
@@ -78,6 +131,7 @@
     </div>
 
     <script src="scripts/settings.js"></script>
+    <script src="scripts/categories-settings.js"></script>
 </body>
 
 </html>
