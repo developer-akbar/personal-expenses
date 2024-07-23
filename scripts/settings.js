@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountMappings[groupName] = [];
         }
 
-        account.push(account);
+        if(!accounts.includes(account)) accounts.push(account);
         localStorage.setItem('accounts', JSON.stringify(accounts));
 
         accountMappings[groupName].push(account);
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountMappings[groupName] = [];
         }
 
-        accounts.push(selectedAccount);
+        if(!accounts.includes(selectedAccount)) accounts.push(selectedAccount);
         localStorage.setItem('accounts', JSON.stringify(accounts));
 
         accountMappings[groupName].push(selectedAccount);
