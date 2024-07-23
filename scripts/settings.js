@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let selectedAccount = null;
 
-    let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [];
-    let accounts = JSON.parse(localStorage.getItem('accounts')) || getAccounts(); //getAccountsOrCategories(masterExpenses, 'Account');
+    let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [{"id":1,"name":"Cash"},{"id":2,"name":"Bank Accounts"},{"id":3,"name":"Credit Cards"},{"id":4,"name":"Electronic Cash"},{"id":5,"name":"Loans"}];
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || getAccounts();
     let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || {};
 
     localStorage.setItem('accounts', JSON.stringify(accounts));
@@ -213,6 +213,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountMappings[groupName] = [];
         }
 
+        account.push(account);
+        localStorage.setItem('accounts', JSON.stringify(accounts));
+
         accountMappings[groupName].push(account);
         localStorage.setItem('accountMappings', JSON.stringify(accountMappings));
 
@@ -253,6 +256,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!accountMappings[groupName]) {
             accountMappings[groupName] = [];
         }
+
+        accounts.push(selectedAccount);
+        localStorage.setItem('accounts', JSON.stringify(accounts));
 
         accountMappings[groupName].push(selectedAccount);
         localStorage.setItem('accountMappings', JSON.stringify(accountMappings));
@@ -401,38 +407,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeGroupSelectBtn.addEventListener('click', closeGroupSelectModal);
 
     renderGroups();
-
+    
     function getAccounts() {
-        // const result = [];
-        // data.forEach(item => {
-        //     if (!result.includes(item[key])) {
-        //         console.log(item[key] === 'PPF')
-        //         result.push(item[key]);
-        //     }
-        // });
-        // return result;
-
         const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
             const account = expense.Account;
-            const amount = parseFloat(expense.INR);
-            if (!acc[account]) {
-                acc[account] = 0;
+            if (!acc.includes(account)) {
+                acc.push(account);
             }
-            if (expense["Income/Expense"] === "Income") {
-                acc[account] += amount;
-            } else if (expense["Income/Expense"] === "Expense") {
-                acc[account] -= amount;
-            } else if (expense["Income/Expense"] === "Transfer-Out") {
-                acc[account] -= amount;
+            if (expense["Income/Expense"] === "Transfer-Out") {
                 const targetAccount = expense.Category;
-                if (!acc[targetAccount]) {
-                    acc[targetAccount] = 0;
+                if (!acc.includes(targetAccount)) {
+                    acc.push(targetAccount);
                 }
-                acc[targetAccount] += amount;
             }
             return acc;
-        }, {});
+        }, []);
 
-        return Object.keys(accountBalances).flat();
+        return accountBalances;
     }
 });

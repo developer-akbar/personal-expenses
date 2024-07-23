@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const masterData = await utility.initializeMasterData();
     const accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [];
     const accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || {};
-    const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    const accounts = JSON.parse(localStorage.getItem('accounts')) || getAccounts();
 
     currentPeriod.textContent = formatDate(currentDailyDate);
     updateAccountBalances();
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const unmappedGroupContainer = document.createElement('div');
             unmappedGroupContainer.className = 'group-container';
             const unmappedGroupTitle = document.createElement('h3');
-            unmappedGroupTitle.textContent = 'Unmapped Accounts';
+            // unmappedGroupTitle.textContent = 'Unmapped Accounts';
             unmappedGroupContainer.appendChild(unmappedGroupTitle);
     
             unmappedAccounts.forEach(account => {
@@ -153,6 +153,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 dailyTransactionsSection.style.display = 'block';
             });
         });
+    }
+    
+    function getAccounts() {
+        const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
+            const account = expense.Account;
+            if (!acc.includes(account)) {
+                acc.push(account);
+            }
+            if (expense["Income/Expense"] === "Transfer-Out") {
+                const targetAccount = expense.Category;
+                if (!acc.includes(targetAccount)) {
+                    acc.push(targetAccount);
+                }
+            }
+            return acc;
+        }, []);
+
+        return accountBalances;
     }
 
     function updateAccountTransactions() {
