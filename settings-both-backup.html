@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="stylesheet" href="styles/common.css">
+    <link rel="stylesheet" href="styles/settings.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+</head>
+
+<body>
+    <div class="settings-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="accounts-settings">Accounts</button>
+            <button class="tab-btn" data-tab="categories-settings">Categories</button>
+        </div>
+        <div id="accounts-settings" class="tab-content active">
+            <div class="group-container">
+                <div class="cta-buttons sticky-container">
+                    <button id="add-account-group-btn">Add Account Group</button>
+                    <button id="add-account-btn">Add New Account</button>
+                </div>
+                <div id="account-groups-list" class="flex-container mapping-container"></div>
+            </div>
+            <div id="unmapped-accounts" class="mapping-container">
+                <h3 id="unmapped-accounts-heading">Unmapped Accounts</h3>
+                <div id="accounts-list"></div>
+            </div>
+        </div>
+        <div id="categories-settings" class="tab-content">
+            <div class="group-container">
+                <div class="cta-buttons sticky-container">
+                    <button id="add-category-btn">Add Category</button>
+                    <button id="add-subcategory-btn">Add New Subcategory</button>
+                </div>
+                <div id="categories-list" class="flex-container mapping-container"></div>
+            </div>
+            <div id="unmapped-subcategories" class="mapping-container">
+                <h3 id="unmapped-subcategories-heading">Unmapped Subcategories</h3>
+                <div id="subcategories-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals for Accounts -->
+    <div id="account-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-account-btn">&times;</span>
+            <h2 id="account-modal-title"></h2>
+            <form id="account-form">
+                <input type="hidden" id="account-id">
+                <div class="form-row">
+                    <label for="account-name">Account Name</label>
+                    <input type="text" id="account-name" name="account-name" class="field" required>
+                </div>
+                <div class="form-row">
+                    <label for="account-group-select">Account Group</label>
+                    <select id="account-group-select" name="account-group-select" class="field" required></select>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="submit-btn save-account-btn">Save</button>
+                    <button type="button" class="delete-btn delete-account-btn">Delete Account</button>
+                    <button type="button" class="cancel-btn cancel-account-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="group-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-group-btn">&times;</span>
+            <h2 id="modal-title"></h2>
+            <form id="group-form">
+                <input type="hidden" id="group-id">
+                <div class="form-row">
+                    <label for="group-name">Group Name</label>
+                    <input type="text" id="group-name" name="group-name" class="field" required>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="submit-btn save-group-btn">Save</button>
+                    <button type="button" class="delete-btn delete-group-btn">Delete Group</button>
+                    <button type="button" class="cancel-btn cancel-group-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modals for Categories -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-category-btn">&times;</span>
+            <h2 id="category-modal-title"></h2>
+            <form id="category-form">
+                <input type="hidden" id="category-id">
+                <div class="form-row">
+                    <label for="category-name">Category Name</label>
+                    <input type="text" id="category-name" name="category-name" class="field" required>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="submit-btn save-category-btn">Save</button>
+                    <button type="button" class="delete-btn delete-category-btn">Delete Category</button>
+                    <button type="button" class="cancel-btn cancel-category-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="subcategory-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-subcategory-btn">&times;</span>
+            <h2 id="subcategory-modal-title"></h2>
+            <form id="subcategory-form">
+                <input type="hidden" id="subcategory-id">
+                <div class="form-row">
+                    <label for="subcategory-name">Subcategory Name</label>
+                    <input type="text" id="subcategory-name" name="subcategory-name" class="field" required>
+                </div>
+                <div class="form-row">
+                    <label for="parent-category-select">Select Category</label>
+                    <select id="parent-category-select" name="parent-category-select" class="field" required>
+                        <option value="" disabled selected>Select Category</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="submit-btn save-subcategory-btn">Save</button>
+                    <button type="button" class="delete-btn delete-subcategory-btn">Delete Subcategory</button>
+                    <button type="button" class="cancel-btn cancel-subcategory-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for selecting categories -->
+    <div id="group-select-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-group-select-btn">&times;</span>
+            <h3>Select Category</h3>
+            <ul id="group-select-list"></ul>
+        </div>
+    </div>
+
+    <!-- Unmapped Subcategory Select Modal -->
+    <div id="unmapped-subcategory-select-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-unmapped-subcategory-select-btn">&times;</span>
+            <h3 id="unmapped-subcategory-title"></h3>
+            <button id="delete-unmapped-subcategory-btn" class="delete-btn"></button>
+            <p>Do you want to move <span id="unmapped-subcategory-name"></span> to</p>
+            <ul id="unmapped-subcategory-select-list"></ul>
+        </div>
+    </div>
+
+    <!-- Update for unmapped account select modal -->
+    <div id="unmapped-account-select-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button close-unmapped-account-select-btn">&times;</span>
+            <h3 id="unmapped-account-title"></h3>
+            <button id="delete-unmapped-account-btn" class="delete-btn"></button>
+            <p>Do you want to move <span id="unmapped-account-name"></span> to</p>
+            <ul id="unmapped-account-select-list"></ul>
+        </div>
+    </div>
+
+    <script src="scripts/settings.js"></script>
+</body>
+
+</html>
