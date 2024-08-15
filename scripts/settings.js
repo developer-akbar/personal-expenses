@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const masterExpenses = JSON.parse(localStorage.getItem('masterExpenses'));
+    const masterExpenses = JSON.parse(localStorage.getItem('masterExpenses')) || [];
 
     const addAccountGroupBtn = document.getElementById('add-account-group-btn');
     const addAccountBtn = document.getElementById('add-account-btn');
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closeGroupBtn = groupModal.querySelector('.close-group-btn');
     const cancelGroupBtn = groupForm.querySelector('.cancel-group-btn');
     const deleteGroupBtn = groupForm.querySelector('.delete-group-btn');
-    const unmappedHeading = document.getElementById('unmapped-heading');
+    const unmappedHeading = document.getElementById('unmapped-accounts-heading');
 
     const accountModal = document.getElementById('account-modal');
     const accountModalTitle = document.getElementById('account-modal-title');
@@ -25,17 +25,93 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cancelAccountBtn = accountForm.querySelector('.cancel-account-btn');
     const deleteAccountBtn = accountForm.querySelector('.delete-account-btn');
 
-    const groupSelectModal = document.getElementById('group-select-modal');
-    const groupSelectList = document.getElementById('group-select-list');
-    const closeGroupSelectBtn = groupSelectModal.querySelector('.close-group-select-btn');
+    const categoriesList = document.getElementById('categories-list');
+    const categoryModal = document.getElementById('category-modal');
+    const categoryForm = document.getElementById('category-form');
+    const categoryNameInput = document.getElementById('category-name');
+    const subcategoryModal = document.getElementById('subcategory-modal');
+    const subcategoryForm = document.getElementById('subcategory-form');
+    const subcategoryNameInput = document.getElementById('subcategory-name');
+    const closeCategoryBtn = categoryModal.querySelector('.close-category-btn');
+    const closeSubcategoryBtn = subcategoryModal.querySelector('.close-subcategory-btn');
+    const cancelCategoryBtn = categoryForm.querySelector('.cancel-category-btn');
+    const cancelSubcategoryBtn = subcategoryForm.querySelector('.cancel-subcategory-btn');
+    const deleteCategoryBtn = categoryModal.querySelector('.delete-category-btn');
+    const deleteSubcategoryBtn = subcategoryModal.querySelector('.delete-subcategory-btn');
+    const parentCategorySelect = document.getElementById('parent-category-select');
+    const unmappedSubcategoriesHeading = document.getElementById('unmapped-subcategories-heading');
+    const subcategoriesList = document.getElementById('subcategories-list');
+
+    const unmappedSubcategorySelectModal = document.getElementById('unmapped-subcategory-select-modal');
+    const closeUnmappedSubcategorySelectBtn = unmappedSubcategorySelectModal.querySelector('.close-unmapped-subcategory-select-btn');
+    const unmappedSubcategoryTitle = document.getElementById('unmapped-subcategory-title');
+    const deleteUnmappedSubcategoryBtn = document.getElementById('delete-unmapped-subcategory-btn');
+    const unmappedSubcategoryNameSpan = document.getElementById('unmapped-subcategory-name');
+    const unmappedSubcategorySelectList = document.getElementById('unmapped-subcategory-select-list');
+
+    const unmappedAccountSelectModal = document.getElementById('unmapped-account-select-modal');
+    const closeUnmappedAccountSelectBtn = unmappedAccountSelectModal.querySelector('.close-unmapped-account-select-btn');
+    const unmappedAccountTitle = document.getElementById('unmapped-account-title');
+    const deleteUnmappedAccountBtn = document.getElementById('delete-unmapped-account-btn');
+    const unmappedAccountNameSpan = document.getElementById('unmapped-account-name');
+    const unmappedAccountSelectList = document.getElementById('unmapped-account-select-list');
+
+    const tabs = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+    });
 
     let selectedAccount = null;
+    let selectedSubcategory = null;
 
-    let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [{"id":1,"name":"Cash"},{"id":2,"name":"Bank Accounts"},{"id":3,"name":"Credit Cards"},{"id":4,"name":"Electronic Cash"},{"id":5,"name":"Loans"}];
-    let accounts = JSON.parse(localStorage.getItem('accounts')) || getAccounts();
+    let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [];
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || getAccountsFromMasterExpenses();
     let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || {};
+    let categoriesWithSubcategories = JSON.parse(localStorage.getItem('categories')) || getCategoriesFromMasterExpenses();
 
     localStorage.setItem('accounts', JSON.stringify(accounts));
+    localStorage.setItem('categories', JSON.stringify(categoriesWithSubcategories));
+
+    function getAccountsFromMasterExpenses() {
+        const accountBalances = masterExpenses.reduce((acc, expense) => {
+            const account = expense.Account;
+            if (!acc.includes(account)) {
+                acc.push(account);
+            }
+            if (expense["Income/Expense"] === "Transfer-Out") {
+                const targetAccount = expense.Category;
+                if (!acc.includes(targetAccount)) {
+                    acc.push(targetAccount);
+                }
+            }
+            return acc;
+        }, []);
+
+        return accountBalances;
+    }
+
+    function getCategoriesFromMasterExpenses() {
+        const categories = {};
+        masterExpenses.forEach(expense => {
+            if (expense["Income/Expense"] === 'Expense') {
+                if (!categories[expense.Category]) {
+                    categories[expense.Category] = { subcategories: [] };
+                }
+                if (expense.Subcategory && !categories[expense.Category].subcategories.includes(expense.Subcategory)) {
+                    categories[expense.Category].subcategories.push(expense.Subcategory);
+                }
+            }
+        });
+        return categories;
+    }
 
     function renderGroups() {
         accountGroupsList.innerHTML = '';
@@ -213,7 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountMappings[groupName] = [];
         }
 
-        if(!accounts.includes(account)) accounts.push(account);
+        if (!accounts.includes(account)) accounts.push(account);
         localStorage.setItem('accounts', JSON.stringify(accounts));
 
         accountMappings[groupName].push(account);
@@ -224,22 +300,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function handleAccountClick(event) {
         selectedAccount = event.target.dataset.account;
-        openGroupSelectModal();
+        openUnmappedAccountSelectModal();
     }
 
-    function openGroupSelectModal() {
-        groupSelectList.innerHTML = '';
+    function openUnmappedAccountSelectModal() {
+        unmappedAccountSelectList.innerHTML = '';
+        unmappedAccountTitle.textContent = 'Move or Delete Account';
+        unmappedAccountNameSpan.textContent = selectedAccount;
+        deleteUnmappedAccountBtn.innerHTML = `Delete <i>${selectedAccount}</i>`;
+
         accountGroups.forEach(group => {
             const li = document.createElement('li');
             li.textContent = group.name;
             li.addEventListener('click', () => selectGroupForAccount(group.name));
-            groupSelectList.appendChild(li);
+            unmappedAccountSelectList.appendChild(li);
         });
-        groupSelectModal.style.display = 'flex';
-    }
-
-    function closeGroupSelectModal() {
-        groupSelectModal.style.display = 'none';
+        unmappedAccountSelectModal.style.display = 'flex';
     }
 
     function selectGroupForAccount(groupName) {
@@ -257,13 +333,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountMappings[groupName] = [];
         }
 
-        if(!accounts.includes(selectedAccount)) accounts.push(selectedAccount);
+        if (!accounts.includes(selectedAccount)) accounts.push(selectedAccount);
         localStorage.setItem('accounts', JSON.stringify(accounts));
 
         accountMappings[groupName].push(selectedAccount);
         localStorage.setItem('accountMappings', JSON.stringify(accountMappings));
         selectedAccount = null;
-        closeGroupSelectModal();
+        closeUnmappedAccountSelectModal();
         renderGroups();
     }
 
@@ -404,25 +480,335 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeGroupBtn.addEventListener('click', () => closeModal(groupModal, groupForm));
     cancelGroupBtn.addEventListener('click', () => closeModal(groupModal, groupForm));
     accountGroupsList.addEventListener('click', handleGroupClick);
-    closeGroupSelectBtn.addEventListener('click', closeGroupSelectModal);
 
     renderGroups();
-    
-    function getAccounts() {
-        const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
-            const account = expense.Account;
-            if (!acc.includes(account)) {
-                acc.push(account);
-            }
-            if (expense["Income/Expense"] === "Transfer-Out") {
-                const targetAccount = expense.Category;
-                if (!acc.includes(targetAccount)) {
-                    acc.push(targetAccount);
-                }
-            }
-            return acc;
-        }, []);
 
-        return accountBalances;
+    function renderCategories() {
+        categoriesList.innerHTML = '';
+        const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
+
+        Object.keys(storedCategories).forEach(category => {
+            if (category === 'Unmapped Subcategories') return; // Skip Unmapped Subcategories as a group-box
+
+            const categoryBox = document.createElement('div');
+            categoryBox.classList.add('group-box');
+            categoryBox.dataset.id = category;
+            categoryBox.innerHTML = `<h3>${category}<span class="edit-group edit-category">&#9997;</span></h3><ul class="mapped-subcategories" id="category-${category.replace(' ', '-').toLowerCase()}"></ul>`;
+            // categoriesList.appendChild(categoryBox);
+
+            const subcategoryBox = categoryBox.querySelector('.mapped-subcategories');
+
+            storedCategories[category].subcategories && storedCategories[category].subcategories.forEach(subcategory => {
+                const li = document.createElement('li');
+                li.classList.add('subcategory-item');
+                li.innerHTML = `<span class="subcategory-name">${subcategory}</span>`;
+                li.dataset.subcategory = subcategory;
+
+                li.addEventListener('click', () => openSubcategoryModal('edit', category, subcategory));
+                categoryBox.querySelector('.mapped-subcategories').appendChild(li);
+            });
+
+            categoriesList.appendChild(categoryBox);
+
+            new Sortable(subcategoryBox, {
+                group: {
+                    name: 'mapped-subcategories',
+                    pull: false,
+                },
+                onEnd: function (evt) {
+                    const targetElement = evt.to;
+                    const items = Array.from(targetElement.children);
+                    storedCategories[category].subcategories = items.map(item => item.dataset.subcategory);
+                    localStorage.setItem('categories', JSON.stringify(storedCategories));
+                    renderCategories();
+                },
+                delay: 300,
+                delayOnTouchOnly: true,
+                touchStartThreshold: 3
+            });
+
+            categoryBox.querySelector('.edit-category').addEventListener('click', () => {
+                openCategoryModal('edit', category);
+            });
+        });
+
+        renderUnmappedSubcategories();
     }
+
+    function renderUnmappedSubcategories() {
+
+        subcategoriesList.innerHTML = '';
+
+        const mappedSubcategories = Object.values(JSON.parse(localStorage.getItem('categories'))).flatMap(cat => cat.subcategories);
+        const unmappedSubcategories = JSON.parse(localStorage.getItem('categories'))['Unmapped Subcategories'] || [];
+
+        if (document.getElementById('unmapped-subcategories-heading')) {
+            if (unmappedSubcategories.length === 0) {
+                document.getElementById('unmapped-subcategories-heading').style.display = 'none';
+                return;
+            }
+            document.getElementById('unmapped-subcategories-heading').style.display = 'block';
+        }
+
+        unmappedSubcategories.forEach(subcategory => {
+            const div = document.createElement('div');
+            div.textContent = subcategory;
+            div.classList.add('subcategory-item');
+            div.dataset.subcategory = subcategory;
+            div.setAttribute('draggable', true);
+            div.addEventListener('dragstart', handleDragStartSubcategory);
+            div.addEventListener('click', handleSubcategoryClick);
+            subcategoriesList.appendChild(div);
+        });
+
+        unmappedSubcategoriesHeading.style.display = unmappedSubcategories.length ? 'block' : 'none';
+
+        new Sortable(subcategoriesList, {
+            group: {
+                name: 'unmapped-subcategories',
+                pull: 'clone',
+                put: false,
+            },
+            sort: false
+        });
+    }
+
+    function openCategoryModal(mode, categoryName = '') {
+        if (mode === 'edit') {
+            categoryModal.querySelector('h2').textContent = 'Edit Category';
+            categoryModal.dataset.category = categoryName;
+            categoryNameInput.value = categoryName;
+            deleteCategoryBtn.style.display = 'inline';
+            document.querySelector('.save-category-btn').style.display = 'none';
+            categoryForm.querySelectorAll('.field').forEach(field => {
+                field.addEventListener('input', () => {
+                    deleteCategoryBtn.style.display = 'none';
+                    document.querySelector('.save-category-btn').style.display = 'inline';
+                });
+            });
+        } else {
+            categoryModal.querySelector('h2').textContent = 'Add Category';
+            categoryNameInput.value = '';
+            deleteCategoryBtn.style.display = 'none';
+        }
+        categoryModal.style.display = 'flex';
+    }
+
+    function openSubcategoryModal(mode, categoryName = '', subcategoryName = '') {
+        if (mode === 'edit') {
+            subcategoryModal.querySelector('h2').textContent = 'Edit Subcategory';
+            subcategoryNameInput.value = subcategoryName;
+            deleteSubcategoryBtn.style.display = 'inline';
+            document.querySelector('.save-subcategory-btn').style.display = 'none';
+            subcategoryForm.querySelectorAll('.field').forEach(field => {
+                field.addEventListener('input', () => {
+                    deleteSubcategoryBtn.style.display = 'none';
+                    document.querySelector('.save-subcategory-btn').style.display = 'inline';
+                });
+            });
+        } else {
+            subcategoryModal.querySelector('h2').textContent = 'Add Subcategory';
+            subcategoryNameInput.value = '';
+            deleteSubcategoryBtn.style.display = 'none';
+        }
+        subcategoryModal.dataset.category = categoryName;
+        subcategoryModal.dataset.subcategory = subcategoryName;
+        subcategoryModal.style.display = 'flex';
+        parentCategorySelect.innerHTML = '<option value="" disabled selected>Select Category</option>';
+        Object.keys(JSON.parse(localStorage.getItem('categories'))).forEach(category => {
+            const option = document.createElement('option');
+            if (category === 'Unmapped Subcategories') return;
+            option.value = category;
+            option.textContent = category;
+            if (category === categoryName) {
+                option.selected = true;
+            }
+            parentCategorySelect.appendChild(option);
+        });
+    }
+
+    function handleDragStartSubcategory(event) {
+        if (event.target.closest('#subcategories-list')) {
+            event.dataTransfer.setData('text/plain', event.target.dataset.subcategory);
+        } else {
+            event.preventDefault();
+        }
+    }
+
+    function handleSubcategoryClick(event) {
+        selectedSubcategory = event.target.dataset.subcategory;
+        openUnmappedSubcategorySelectModal();
+    }
+
+    function openUnmappedSubcategorySelectModal() {
+        
+        unmappedSubcategorySelectList.innerHTML = '';
+        unmappedSubcategoryTitle.textContent = 'Move or Delete Subcategory';
+        unmappedSubcategoryNameSpan.textContent = selectedSubcategory;
+
+        Object.keys(JSON.parse(localStorage.getItem('categories'))).forEach(category => {
+            const li = document.createElement('li');
+            li.textContent = category;
+            li.addEventListener('click', () => selectCategoryForSubcategory(category));
+            unmappedSubcategorySelectList.appendChild(li);
+        });
+        
+        deleteUnmappedSubcategoryBtn.innerHTML = `Delete <i>${selectedSubcategory}</i>`;
+        deleteUnmappedSubcategoryBtn.addEventListener('click', () => deleteUnmappedSubcategory());
+        unmappedSubcategorySelectModal.style.display = 'flex';
+    }
+
+    function deleteUnmappedAccount() {
+        const storedAccounts = JSON.parse(localStorage.getItem('accounts')) || [];
+        const unmappedAccounts = accountMappings['Unmapped Accounts'] || [];
+        const accountIndex = unmappedAccounts.indexOf(selectedAccount);
+        if (accountIndex > -1) {
+            unmappedAccounts.splice(accountIndex, 1);
+        }
+
+        const accountIndexInAccounts = storedAccounts.indexOf(selectedAccount);
+        if (accountIndexInAccounts > -1) {
+            storedAccounts.splice(accountIndexInAccounts, 1);
+        }
+
+        localStorage.setItem('accounts', JSON.stringify(storedAccounts));
+        localStorage.setItem('accountMappings', JSON.stringify(accountMappings));
+        renderGroups();
+        closeUnmappedAccountSelectModal();
+    }
+
+    function deleteUnmappedSubcategory() {
+        const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
+        const index = storedCategories['Unmapped Subcategories'].indexOf(selectedSubcategory);
+        if (index > -1) {
+            storedCategories['Unmapped Subcategories'].splice(index, 1);
+            localStorage.setItem('categories', JSON.stringify(storedCategories));
+            renderCategories();
+            closeUnmappedSubcategorySelectModal();
+        }
+    }
+
+    function selectCategoryForSubcategory(categoryName) {
+        const subcategoryName = selectedSubcategory;
+
+        let unmappedSubcategories = JSON.parse(localStorage.getItem('unmappedSubcategories')) || [];
+        let categories = JSON.parse(localStorage.getItem('categories')) || {};
+
+        // Add subcategory to the selected category
+        if (!categories[categoryName]) {
+            categories[categoryName] = [];
+        }
+        categories[categoryName].subcategories.push(subcategoryName);
+        localStorage.setItem('categories', JSON.stringify(categories));
+
+        // Remove from unmapped subcategories
+        deleteUnmappedSubcategory();
+
+        selectedSubcategory = null;
+        closeUnmappedSubcategorySelectModal();
+        renderUnmappedSubcategories();
+        renderCategories();
+    }
+
+    function closeUnmappedSubcategorySelectModal() {
+        unmappedSubcategorySelectModal.style.display = 'none';
+    }
+
+    function closeUnmappedAccountSelectModal() {
+        unmappedAccountSelectModal.style.display = 'none';
+    }
+
+    function saveCategory(event) {
+        event.preventDefault();
+        const categoryName = categoryNameInput.value.trim();
+        const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
+
+        if (categoryModal.querySelector('h2').textContent === 'Add Category') {
+            storedCategories[categoryName] = { subcategories: [] };
+        } else {
+            const oldCategoryName = categoryModal.dataset.category;
+            if (oldCategoryName !== categoryName) {
+                storedCategories[categoryName] = storedCategories[oldCategoryName];
+                delete storedCategories[oldCategoryName];
+            }
+        }
+
+        localStorage.setItem('categories', JSON.stringify(storedCategories));
+        renderCategories();
+        closeModal(categoryModal, categoryForm);
+    }
+
+    function saveSubcategory(event) {
+        event.preventDefault();
+        const categoryName = parentCategorySelect.value;
+        const subcategoryName = subcategoryNameInput.value.trim();
+        const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
+
+        if (subcategoryModal.querySelector('h2').textContent === 'Add Subcategory') {
+            if (!storedCategories[categoryName].subcategories.includes(subcategoryName)) {
+                storedCategories[categoryName].subcategories.push(subcategoryName);
+            }
+        } else {
+            const oldCategoryName = subcategoryModal.dataset.category;
+            const oldSubcategoryName = subcategoryModal.dataset.subcategory;
+            const subcategoryIndex = storedCategories[oldCategoryName].subcategories.indexOf(oldSubcategoryName);
+            if (subcategoryIndex > -1) {
+                storedCategories[oldCategoryName].subcategories.splice(subcategoryIndex, 1);
+            }
+
+            if (!storedCategories[categoryName].subcategories.includes(subcategoryName)) {
+                storedCategories[categoryName].subcategories.push(subcategoryName);
+            }
+        }
+
+        localStorage.setItem('categories', JSON.stringify(storedCategories));
+        renderCategories();
+        closeModal(subcategoryModal, subcategoryForm);
+    }
+
+    function deleteCategory() {
+        const categoryName = categoryNameInput.value.trim();
+        const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
+        delete storedCategories[categoryName];
+        localStorage.setItem('categories', JSON.stringify(storedCategories));
+        renderCategories();
+        closeModal(categoryModal, categoryForm);
+    }
+
+    function deleteSubcategory() {
+        const categoryName = subcategoryModal.dataset.category;
+        const subcategoryName = subcategoryNameInput.value.trim();
+        const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
+
+        const subcategoryIndex = storedCategories[categoryName].subcategories.indexOf(subcategoryName);
+        if (subcategoryIndex > -1) {
+            storedCategories[categoryName].subcategories.splice(subcategoryIndex, 1);
+        }
+
+        if (!storedCategories['Unmapped Subcategories']) {
+            storedCategories['Unmapped Subcategories'] = [];
+        }
+        storedCategories['Unmapped Subcategories'].push(subcategoryName);
+
+        localStorage.setItem('categories', JSON.stringify(storedCategories));
+        renderCategories();
+        closeModal(subcategoryModal, subcategoryForm);
+    }
+
+    categoryForm.addEventListener('submit', saveCategory);
+    subcategoryForm.addEventListener('submit', saveSubcategory);
+    deleteCategoryBtn.addEventListener('click', deleteCategory);
+    deleteSubcategoryBtn.addEventListener('click', deleteSubcategory);
+    closeCategoryBtn.addEventListener('click', () => closeModal(categoryModal, categoryForm));
+    closeSubcategoryBtn.addEventListener('click', () => closeModal(subcategoryModal, subcategoryForm));
+    cancelCategoryBtn.addEventListener('click', () => closeModal(categoryModal, categoryForm));
+    cancelSubcategoryBtn.addEventListener('click', () => closeModal(subcategoryModal, subcategoryForm));
+    closeUnmappedSubcategorySelectBtn.addEventListener('click', closeUnmappedSubcategorySelectModal);
+    closeUnmappedAccountSelectBtn.addEventListener('click', closeUnmappedAccountSelectModal);
+    deleteUnmappedAccountBtn.addEventListener('click', deleteUnmappedAccount);
+
+    document.getElementById('add-category-btn').addEventListener('click', () => openCategoryModal('add'));
+    document.getElementById('add-subcategory-btn').addEventListener('click', () => openSubcategoryModal('add'));
+
+    renderCategories();
 });
