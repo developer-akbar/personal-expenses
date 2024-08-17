@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    const masterExpenses = await utility.initializeMasterData();
+    const masterExpenses = JSON.parse(localStorage.getItem('masterExpenses')) || [];
 
     const addTransactionBtn = document.getElementById('add-transaction-btn');
     const transactionModal = document.getElementById('transaction-modal');
@@ -68,11 +68,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             appendGridSpan(toAccountGrid, account);
         });
 
-        const filteredCategories = categories.filter(category =>
-            masterExpenses.some(expense => expense.Category === category && expense['Income/Expense'] === type)
-        );
-
-        filteredCategories.sort().forEach(category => appendGridSpan(categoryGrid, category));
+        Object.keys(categories).flat().sort().forEach(category => appendGridSpan(categoryGrid, category));
         populateSubcategories();
     }
 
@@ -104,12 +100,27 @@ document.addEventListener('DOMContentLoaded', async function () {
         grid.appendChild(span);
     }
 
-    function getAccountsOrCategories(data, key) {
-        return [...new Set(data.map(item => item[key]))];
+    function getCategories() {
+        const categories = JSON.parse(localStorage.getItem('categories'));
+        if (categories && categories.length > 0) {
+            return categories;
+        } else {
+            masterExpenses.forEach(expense => {
+                if (expense["Income/Expense"] === 'Expense') {
+                    if (!categories[expense.Category]) {
+                        categories[expense.Category] = { subcategories: [] };
+                    }
+                    if (expense.Subcategory && !categories[expense.Category].subcategories.includes(expense.Subcategory)) {
+                        categories[expense.Category].subcategories.push(expense.Subcategory);
+                    }
+                }
+            });
+            return categories;
+        }
     }
 
     function getSubcategories(category) {
-        return [...new Set(masterExpenses.filter(expense => expense.Category === category && expense.Subcategory).map(expense => expense.Subcategory))];
+        return [...new Set(categories[category]?.subcategories)];
     }
 
     addTransactionBtn.addEventListener('click', () => {
@@ -217,8 +228,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             document.querySelector('.submit-btn').style.display = 'none';
             document.querySelector('.delete-button').style.display = 'block';
-            document.querySelector('.delete-button').setAttribute('onclick',  'deleteTransaction('+id+')');
-            
+            document.querySelector('.delete-button').setAttribute('onclick', 'deleteTransaction(' + id + ')');
+
             transactionModal.style.display = 'block';
             transactionModal.querySelectorAll('form .field').forEach(field => {
                 field.addEventListener('click', () => {
@@ -278,7 +289,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function fetchDropdowns() {
         accounts = getStoredAccounts();
-        categories = getAccountsOrCategories(masterExpenses, 'Category');
+        categories = getCategories();
         populateDropdowns();
     }
 
@@ -300,7 +311,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
                 return acc;
             }, []);
-    
+
             return accountBalances;
         }
     }
