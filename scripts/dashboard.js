@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return acc;
     }, {});
 
-    for (let i = 5; i >= 0; i--) {
+    for (let i = (new Date().getMonth()); i > (new Date().getMonth() - 6); i--) {
         const totals = transactionsByMonth[i] ? calculateTotals(transactionsByMonth[i]) : { income: 0, expenses: 0 };
         const listItem = document.createElement('li');
         listItem.classList.add('recent-transaction');
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const incomeTrends = [];
     const expenseTrends = [];
 
-    for (let i = 5; i >= 0; i--) {
+    for (let i = (new Date().getMonth()); i > (new Date().getMonth() - 6); i--) {
         const date = new Date();
         date.setMonth(i);
         months.push(date.toLocaleString('default', { month: 'short' }));
