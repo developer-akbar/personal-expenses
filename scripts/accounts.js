@@ -202,6 +202,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Display transactions grouped by day
         for (const [date, transactions] of Object.entries(transactionsByDay)) {
+            const dayWrapper = tableElement.insertRow();
+            dayWrapper.className = 'transaction-day-wrapper';
+
             const dayContainer = document.createElement('tr');
             dayContainer.className = 'transaction-day';
 
@@ -220,11 +223,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             dayContent.appendChild(dayTotals);
             dayHeader.appendChild(dayContent);
             dayContainer.appendChild(dayHeader);
-            tableBodyElement.appendChild(dayContainer);
+            dayWrapper.appendChild(dayContainer);
 
             transactions.forEach(expense => {
                 const row = createTransactionRow(expense);
-                tableBodyElement.appendChild(row);
+                dayWrapper.appendChild(row);
+                tableBodyElement.appendChild(dayWrapper);
             });
         }
 

@@ -276,6 +276,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (Object.entries(transactionsByDay).length > 0) {
             categoriesContainer.style.display = 'flex';
             for (const [date, transactions] of Object.entries(transactionsByDay)) {
+                const dayWrapper = tableElement.insertRow();
+                dayWrapper.className = 'transaction-day-wrapper';
+
                 const dayContainer = tableElement.insertRow();
                 dayContainer.className = 'transaction-day';
 
@@ -294,11 +297,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 dayContent.appendChild(dayTotals);
                 dayHeader.appendChild(dayContent);
                 dayContainer.appendChild(dayHeader);
-                tableBodyElement.appendChild(dayContainer);
+                dayWrapper.appendChild(dayContainer);
 
                 transactions.forEach(expense => {
                     const transactionRow = createTransactionRow(expense);
-                    tableBodyElement.appendChild(transactionRow);
+                    dayWrapper.appendChild(transactionRow);
+                    tableBodyElement.appendChild(dayWrapper);
                 });
             }
         } else {
