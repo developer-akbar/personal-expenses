@@ -21,7 +21,7 @@
                 <li><a href="accounts.html" id="accounts-link">Accounts</a></li>
                 <li><a href="categories.html">Categories</a></li>
                 <li><a href="#">Expenses</a></li>
-                <li><a href="#">Settings</a></li>
+                <li><a href="settings.html">Settings</a></li>
                 <li><a href="search.html" id="search-link">Search</a></li>
                 <li><a href="#" id="logoutButton" style="display: none;">Logout</a></li>
             </ul>
@@ -119,11 +119,42 @@
 
     <!-- Mobile Bottom Navigation -->
     <div class="mobile-nav" style="display: none;">
-        <button class="mobile-nav-button" data-page="transactions.html">Trans</button>
-        <button class="mobile-nav-button" data-page="statistics.html">Stats</button>
-        <button class="mobile-nav-button" data-page="accounts.html">Accounts</button>
-        <button class="mobile-nav-button" data-page="categories.html">Categories</button>
-        <button class="mobile-nav-button search" style="display: none;"><a href="search.html" id="search-link">&#128269</a></button>
+        <button class="mobile-nav-button" data-page="transactions.html">
+            <div class="icon-text">
+                &#128195;
+                <span>Trans</span>
+            </div>
+        </button>
+        <button class="mobile-nav-button" data-page="statistics.html">
+            <div class="icon-text">
+                &#128200;
+                <span>Stats</span>
+            </div>
+        </button>
+        <button class="mobile-nav-button" data-page="categories.html">
+            <div class="icon-text">
+                &#128179;
+                <span>Categories</span>
+            </div>
+        </button>
+        <button class="mobile-nav-button" data-page="accounts.html">
+            <div class="icon-text">
+                &#x1F4B0;
+                <span>Accounts</span>
+            </div>
+        </button>
+        <button class="mobile-nav-button search" data-page="search.html">
+            <div class="icon-text">
+                &#128269;
+                <span>Search</span>
+            </div>
+        </button>
+        <button class="mobile-nav-button" data-page="settings.html">
+            <div class="icon-text">
+                &#9881;
+                <span>Settings</span>
+            </div>
+        </button>
     </div>
 
     <script src="scripts/common.js"></script>

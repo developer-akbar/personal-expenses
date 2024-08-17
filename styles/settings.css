@@ -103,6 +103,12 @@
     gap: 0.5rem;
 }
 
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
 #accounts-list,
 #subcategories-list {
     display: flex;
@@ -246,6 +252,10 @@
 @media (max-width: 768px) {
     .flex-container {
         flex-direction: column;
+    }
+
+    .grid-container {
+        grid-template-columns: repeat(1, 1fr);
     }
 
     .group-box {

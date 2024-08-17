@@ -9,7 +9,8 @@
     --box-shadow: 0px 6px 6px 0 rgba(0, 0, 0, 0.2), 0 6px 6px 0 rgba(0, 0, 0, 0.19);
 }
 
-html, body {
+html,
+body {
     height: 100dvh;
     scroll-behavior: smooth;
 }
@@ -37,6 +38,10 @@ main {
     border-radius: 8px;
     width: 100%;
     padding-bottom: 56px;
+}
+
+ul {
+    list-style: none;
 }
 
 .line-clamp {
@@ -153,7 +158,8 @@ form label {
 form input[type="text"],
 form input[type="number"],
 form input[type="date"],
-form select, form textarea {
+form select,
+form textarea {
     outline: 0;
     border-width: 0 0 1px;
     border-color: #ccc;
@@ -166,7 +172,8 @@ form select, form textarea {
 form input[type="text"]:focus,
 form input[type="number"]:focus,
 form input[type="date"]:focus,
-form select:focus, form textarea:focus {
+form select:focus,
+form textarea:focus {
     border-color: #004080;
 }
 
@@ -175,7 +182,8 @@ table {
     border-collapse: collapse;
 }
 
-table th, table td {
+table th,
+table td {
     padding: 8px;
     text-align: left;
     border-bottom: 1px solid #ddd;
@@ -210,10 +218,12 @@ table td:nth-child(4) {
 /* Setting a maximum width for the description cell and enabling word wrapping */
 table td.description {
     width: 35%;
-    max-width: 0; /* Ensures content doesn't stretch beyond width */
+    max-width: 0;
+    /* Ensures content doesn't stretch beyond width */
     word-wrap: break-word;
     overflow-wrap: break-word;
-    white-space: normal; /* Ensures long text breaks to new lines */
+    white-space: normal;
+    /* Ensures long text breaks to new lines */
 }
 
 .transaction-row:hover {
@@ -263,11 +273,15 @@ footer {
     padding-bottom: 20px;
 }
 
-.income, .deposits, .positive{
+.income,
+.deposits,
+.positive {
     color: blue;
 }
 
-.expense, .withdrawal, .negative {
+.expense,
+.withdrawal,
+.negative {
     color: red;
 }
 
@@ -295,7 +309,7 @@ button {
     color: white;
     padding: 10px 18px;
     border: none;
-    border-radius: 5px; 
+    border-radius: 5px;
     cursor: pointer;
 }
 
@@ -314,7 +328,7 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     background-color: #e0e0e0;
-    padding-inline: 5px;   
+    padding-inline: 5px;
     border-radius: 5px;
 }
 
@@ -359,7 +373,8 @@ button:hover {
     overflow: scroll;
 }
 
-.modal-content h2, .modal-content .delete-button {
+.modal-content h2,
+.modal-content .delete-button {
     text-align: center;
 }
 
@@ -392,7 +407,8 @@ button:hover {
     transition: background 0.3s ease;
 }
 
-.tab-button.active, .main-tab-button.active {
+.tab-button.active,
+.main-tab-button.active {
     background: #0a58a5;
     font-weight: bold;
     border-bottom: 2px solid yellow;
@@ -461,7 +477,8 @@ button:hover {
     background: lightsalmon;
 }
 
-.edit-button, .delete-button {
+.edit-button,
+.delete-button {
     /* margin-top: 0.75rem; */
     flex: 1;
 }
@@ -474,7 +491,8 @@ button:hover {
     background-color: rgba(255, 0, 0, 0.723);
 }
 
-#monthly-transactions .transaction-row, #total-transactions .transaction-row {
+#monthly-transactions .transaction-row,
+#total-transactions .transaction-row {
     display: flex;
     justify-content: space-between;
     padding: 5px 0;
@@ -487,11 +505,13 @@ button:hover {
     border-bottom: none;
 }
 
-.transaction-row, .transaction-day-wrapper {
+.transaction-row,
+.transaction-day-wrapper {
     transition: all 0.15s ease-out;
 }
 
-.transaction-row.deleting, .transaction-day-wrapper.deleting {
+.transaction-row.deleting,
+.transaction-day-wrapper.deleting {
     opacity: 0;
     height: 0;
     margin: 0;
@@ -499,11 +519,17 @@ button:hover {
     border: none;
 }
 
-.amount.income, #daily-income, #monthly-income, #total-income {
+.amount.income,
+#daily-income,
+#monthly-income,
+#total-income {
     color: blue;
 }
 
-.amount.expense, #daily-expenses, #monthly-expenses, #total-expenses {
+.amount.expense,
+#daily-expenses,
+#monthly-expenses,
+#total-expenses {
     color: red;
 }
 
@@ -517,7 +543,7 @@ button:hover {
     border: none;
 }
 
-#suggestions {    
+#suggestions {
     position: absolute;
     width: 100%;
 }
@@ -584,15 +610,16 @@ button:hover {
         bottom: 0;
         width: 100%;
         display: flex;
-        justify-content: space-between;
+        justify-content: space-around;
         background: #004080;
         z-index: 999;
-        height: 56px; /* Set the height to match the padding-bottom value */
+        height: 56px;
+        /* Set the height to match the padding-bottom value */
     }
-    
+
     .mobile-nav-button {
+        flex: 1;
         text-align: center;
-        padding: 1rem;
         margin: unset;
         color: #fff;
         border: none;
@@ -601,15 +628,35 @@ button:hover {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
-        font-size: 14px;
+        font-size: 20px;
     }
-    
+
     .mobile-nav-button.active {
-        background: #003366;
+        border-radius: 0px;
+        background: #004080;
+        box-shadow: inset 0px 0px 20px 4px #001a33, inset 25px 25px 45px 4px #cd0000;
     }
-    
+
+    .mobile-nav-button.active span {
+        /* color: red; */
+        filter: drop-shadow(2px 4px 6px black);
+    }
+
     .mobile-nav-button:hover {
         background: #002244;
+    }
+
+    .icon-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .icon-text span {
+        font-size: 0.75rem;
+        /* Adjust text size */
+        margin-top: 0.2rem;
     }
 
     .modal .modal-content {
@@ -627,7 +674,8 @@ button:hover {
         margin-bottom: 10px;
     }
 
-    .transaction-row .date, .transaction-row .description {
+    .transaction-row .date,
+    .transaction-row .description {
         display: none;
     }
 
@@ -644,7 +692,7 @@ button:hover {
     .tab-button {
         flex: 1;
     }
-    
+
     .transaction-list {
         gap: unset;
     }
