@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     });
 
     window.editTransaction = function (id) {
-        document.getElementById('rowPopup').style.display = 'none';
+        document.getElementById('transaction-modal').style.display = 'none';
         const transaction = JSON.parse(localStorage.getItem('masterExpenses')).find(expense => expense.ID == id);
         if (transaction) {
             document.getElementById('transaction-id').value = transaction.ID;
@@ -229,6 +229,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.querySelector('.submit-btn').style.display = 'none';
             document.querySelector('.delete-button').style.display = 'block';
             document.querySelector('.delete-button').setAttribute('onclick', 'deleteTransaction(' + id + ')');
+
+            nonTransferFields.style.display = transaction['Income/Expense'] === 'Transfer-Out' ? 'none' : 'block';
+            transferFields.style.display = transaction['Income/Expense'] === 'Transfer-Out' ? 'block' : 'none';
 
             transactionModal.style.display = 'block';
             transactionModal.querySelectorAll('form .field').forEach(field => {

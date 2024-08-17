@@ -2,7 +2,7 @@
 
 const AMOUNT_COLUMN_NAME = "INR";
 
-const rowPopup = document.getElementById('rowPopup');
+const transactionModal = document.getElementById('transaction-modal');
 const closeButtons = document.querySelectorAll('.close-button');
 const mobileNavButtons = document.querySelectorAll('.mobile-nav-button');
 const rowDetails = document.querySelector('.row-details');
@@ -11,7 +11,7 @@ const rowDetails = document.querySelector('.row-details');
 if (closeButtons.length > 0) {
     closeButtons.forEach(closeButton => {
         closeButton.addEventListener('click', () => {
-            rowPopup.style.display = 'none';
+            transactionModal.style.display = 'none';
         });
     });
 }
@@ -173,8 +173,7 @@ function createTransactionRow(expense) {
 
     noteCell.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
-            // showTransactionDetails(expense);
-            editTransaction(expense.ID);
+            typeof editTransaction === 'undefined' ? showTransactionDetails(expense) : editTransaction(expense.ID);
         }
     });
 
@@ -194,11 +193,11 @@ function showTransactionDetails(expense) {
             <tr><td>Description</td> <td>${expense.Description}</td></tr>
         </table>
         <div class="cta-buttons flex">
-            <button class="edit-button" onClick="editTransaction(${expense.ID})">Edit</button>
+            <!--<button class="edit-button" onClick="editTransaction(${expense.ID})">Edit</button>-->
             <button class="delete-button" onClick="deleteTransaction(${expense.ID})">Delete</button>
         </div>
     `;
-    rowPopup.style.display = 'flex';
+    transactionModal.style.display = 'flex';
 }
 
 function deleteTransaction(ids) {
@@ -242,8 +241,8 @@ function deleteTransaction(ids) {
         }
     });
 
-    if (ids.length === 1) {
-        document.getElementById('transaction-modal').style.display = 'none'; // Close modal popup if a single transaction was deleted
+    if (ids.length === 1 && transactionModal != undefined) {
+        transactionModal.style.display = 'none'; // Close modal popup if a single transaction was deleted
     }
 }
 
