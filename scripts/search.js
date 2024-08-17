@@ -266,6 +266,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const note = expense.Note.toLowerCase();
             return description.includes(searchInput) || note.includes(searchInput);
         });
+
+        // sort results by latest transaction date
+        searchResults.sort((a, b) => new Date(convertDateFormat(b.Date)) - new Date(convertDateFormat(a.Date)));
     
         if (period !== 'all') {
             searchResults = searchResults.filter(expense => {

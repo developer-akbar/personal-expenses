@@ -614,7 +614,6 @@ button:hover {
         background: #004080;
         z-index: 999;
         height: 56px;
-        /* Set the height to match the padding-bottom value */
     }
 
     .mobile-nav-button {
@@ -634,11 +633,10 @@ button:hover {
     .mobile-nav-button.active {
         border-radius: 0px;
         background: #004080;
-        box-shadow: inset 0px 0px 20px 4px #001a33, inset 25px 25px 45px 4px #cd0000;
+        box-shadow: inset 0px 0px 20px 4px #001a33, inset 25px 25px 45px 4px #645050;
     }
 
     .mobile-nav-button.active span {
-        /* color: red; */
         filter: drop-shadow(2px 4px 6px black);
     }
 
