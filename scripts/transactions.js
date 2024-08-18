@@ -90,41 +90,45 @@ document.addEventListener('DOMContentLoaded', async function () {
         }, {});
 
         const tableElement = document.createElement('table');
-        const tableBodyElement = document.createElement('tbody');
 
         // Display transactions grouped by day
-        for (const [date, transactions] of Object.entries(transactionsByDay)) {
-            const dayWrapper = tableElement.insertRow();
-            dayWrapper.className = 'transaction-day-wrapper';
+        if (Object.entries(transactionsByDay).length > 0) {
+            for (const [date, transactions] of Object.entries(transactionsByDay)) {
+                const tableBodyElement = document.createElement('tbody');
+                tableBodyElement.className = 'transaction-day-wrapper';
 
-            const dayContainer = tableElement.insertRow();
-            dayContainer.className = 'transaction-day';
+                const dayContainer = tableElement.insertRow();
+                dayContainer.className = 'transaction-day';
 
-            const dayHeader = dayContainer.insertCell();
-            dayHeader.classList.add('day-header');
-            dayHeader.setAttribute('colspan', '5'); // Adjusted for mobile view
+                const dayHeader = dayContainer.insertCell();
+                dayHeader.classList.add('day-header');
+                dayHeader.setAttribute('colspan', '5'); // Adjusted for mobile view
 
-            const dayContent = document.createElement('h3');
-            dayContent.classList.add('day-content');
-            dayContent.textContent = date;
+                const dayContent = document.createElement('h3');
+                dayContent.classList.add('day-content');
+                dayContent.textContent = date;
 
-            const totals = calculateTotals(transactions);
-            const dayTotals = document.createElement('div');
-            dayTotals.classList.add('day-totals');
-            dayTotals.innerHTML = `<p class="income">${formatIndianCurrency(totals.income)}</p><p class="expense">${formatIndianCurrency(totals.expense)}</p>`;
-            dayContent.appendChild(dayTotals);
-            dayHeader.appendChild(dayContent);
-            dayContainer.appendChild(dayHeader);
-            dayWrapper.appendChild(dayContainer);
+                const totals = calculateTotals(transactions);
+                const dayTotals = document.createElement('div');
+                dayTotals.classList.add('day-totals');
+                dayTotals.innerHTML = `<p class="income">${formatIndianCurrency(totals.income)}</p><p class="expense">${formatIndianCurrency(totals.expense)}</p>`;
+                dayContent.appendChild(dayTotals);
+                dayHeader.appendChild(dayContent);
+                dayContainer.appendChild(dayHeader);
+                tableBodyElement.appendChild(dayContainer);
 
-            transactions.forEach(expense => {
-                const transactionRow = createTransactionRow(expense);
-                dayWrapper.appendChild(transactionRow);
-                tableBodyElement.appendChild(dayWrapper);
-            });
+                transactions.forEach(expense => {
+                    const transactionRow = createTransactionRow(expense);
+                    tableBodyElement.appendChild(transactionRow);
+                    tableElement.appendChild(tableBodyElement);
+                });
+            }
+        } else {
+            const tableColumn = document.createElement('td');
+            tableColumn.className = 'no-transactions-msg';
+            tableColumn.textContent = 'No transactions';
+            tableElement.appendChild(tableColumn);
         }
-
-        tableElement.appendChild(tableBodyElement);
         dailyTransactionsContainer.appendChild(tableElement);
 
         const monthlyTotals = calculateTotals(filteredTransactions);

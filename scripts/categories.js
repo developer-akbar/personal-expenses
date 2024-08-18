@@ -271,13 +271,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, {});
 
         const tableElement = document.createElement('table');
-        const tableBodyElement = document.createElement('tbody');
 
         if (Object.entries(transactionsByDay).length > 0) {
             categoriesContainer.style.display = 'flex';
             for (const [date, transactions] of Object.entries(transactionsByDay)) {
-                const dayWrapper = tableElement.insertRow();
-                dayWrapper.className = 'transaction-day-wrapper';
+                const tableBodyElement = document.createElement('tbody');
+                tableBodyElement.className = 'transaction-day-wrapper';
 
                 const dayContainer = tableElement.insertRow();
                 dayContainer.className = 'transaction-day';
@@ -297,20 +296,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 dayContent.appendChild(dayTotals);
                 dayHeader.appendChild(dayContent);
                 dayContainer.appendChild(dayHeader);
-                dayWrapper.appendChild(dayContainer);
+                tableBodyElement.appendChild(dayContainer);
 
                 transactions.forEach(expense => {
                     const transactionRow = createTransactionRow(expense);
-                    dayWrapper.appendChild(transactionRow);
-                    tableBodyElement.appendChild(dayWrapper);
+                    tableBodyElement.appendChild(transactionRow);
+                    tableElement.appendChild(tableBodyElement);
                 });
             }
-        } else {
+        } else {            
             categoriesContainer.style.display = 'none';
-            tableBodyElement.innerHTML = `<tr>No transactions for <b>${selectedCategory} ${selectedSubcategory != null ? '- ' + selectedSubcategory : ''}</b> in <b>${formatDate(currentMonthlyDate)}</b></tr>`;
+            
+            const tableColumn = document.createElement('td');
+            tableColumn.className = 'no-transactions-msg';
+            tableColumn.innerHTML = `No transactions for <b>${selectedCategory} ${selectedSubcategory != null ? "- " + selectedSubcategory : ""}</b> in <b>${formatDate(currentMonthlyDate)}</b>`;
+            tableElement.appendChild(tableColumn);
         }
-
-        tableElement.appendChild(tableBodyElement);
         transactionsContainer.appendChild(tableElement);
 
         const monthlyTotals = calculateTotals(filteredTransactions);

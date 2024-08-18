@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentPeriod.textContent = formatDate(currentDailyDate);
     updateAccountBalances();
 
-	// hiding account group container if there are not accounts mapped.
+    // hiding account group container if there are not accounts mapped.
     document.querySelectorAll('.group-container').forEach(groupContainer => {
         if (groupContainer.querySelectorAll('.account-row').length <= 0) {
             groupContainer.style.display = 'none'
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateAccountBalances() {
         const accountsBalancesContainer = document.getElementById('accounts-balances');
         accountsBalancesContainer.innerHTML = ''; // Clear previous balances
-    
+
         // Calculate account balances
         const accountBalances = masterData.reduce((acc, expense) => {
             const account = expense.Account;
@@ -50,10 +50,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             return acc;
         }, {});
-    
+
         let assets = 0;
         let liabilities = 0;
-    
+
         // Display accounts group-wise if groups are available
         if (accountGroups.length > 0 && Object.keys(accountMappings).length > 0) {
             accountGroups.forEach(group => {
@@ -62,19 +62,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const groupTitle = document.createElement('h3');
                 groupTitle.textContent = group.name;
                 groupContainer.appendChild(groupTitle);
-    
+
                 const groupAccounts = accountMappings[group.name] || [];
-    
+
                 groupAccounts.forEach(account => {
                     const balance = accountBalances[account] || 0;
                     const accountContainer = document.createElement('div');
                     accountContainer.className = 'account-row';
                     accountContainer.dataset.account = account;
-    
+
                     const accountName = document.createElement('span');
                     accountName.title = account;
                     accountName.textContent = account;
-    
+
                     const accountBalance = document.createElement('span');
                     accountBalance.className = 'amount';
                     accountBalance.textContent = formatIndianCurrency(balance);
@@ -85,37 +85,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                         accountBalance.classList.add('negative');
                         liabilities += Math.abs(balance);
                     }
-    
+
                     accountContainer.appendChild(accountName);
                     accountContainer.appendChild(accountBalance);
                     groupContainer.appendChild(accountContainer);
                 });
-    
+
                 accountsBalancesContainer.appendChild(groupContainer);
             });
         }
-    
+
         // Display unmapped accounts
         const mappedAccounts = Object.values(accountMappings).flat();
         const unmappedAccounts = accounts.filter(account => !mappedAccounts.includes(account));
-    
+
         if (unmappedAccounts.length > 0) {
             const unmappedGroupContainer = document.createElement('div');
             unmappedGroupContainer.className = 'group-container';
             const unmappedGroupTitle = document.createElement('h3');
             // unmappedGroupTitle.textContent = 'Unmapped Accounts';
             unmappedGroupContainer.appendChild(unmappedGroupTitle);
-    
+
             unmappedAccounts.forEach(account => {
                 const balance = accountBalances[account] || 0;
                 const accountContainer = document.createElement('div');
                 accountContainer.className = 'account-row';
                 accountContainer.dataset.account = account;
-    
+
                 const accountName = document.createElement('span');
                 accountName.title = account;
                 accountName.textContent = account;
-    
+
                 const accountBalance = document.createElement('span');
                 accountBalance.className = 'amount';
                 accountBalance.textContent = formatIndianCurrency(balance);
@@ -126,21 +126,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     accountBalance.classList.add('negative');
                     liabilities += Math.abs(balance);
                 }
-    
+
                 accountContainer.appendChild(accountName);
                 accountContainer.appendChild(accountBalance);
                 unmappedGroupContainer.appendChild(accountContainer);
             });
-    
+
             accountsBalancesContainer.appendChild(unmappedGroupContainer);
         }
-    
+
         const balance = assets - liabilities;
-    
+
         document.getElementById('assets').innerHTML = `<p>Assets</p><p>${formatIndianCurrency(assets)}</p>`;
         document.getElementById('liabilities').innerHTML = `<p>Liabilities</p><p>${formatIndianCurrency(liabilities)}</p>`;
         document.getElementById('balance').innerHTML = `<p>Balance</p><p>${formatIndianCurrency(balance)}</p>`;
-    
+
         // Add click event listener for each account row to switch to Daily tab with filtered transactions
         const accountRows = document.querySelectorAll('.account-row');
         accountRows.forEach(row => {
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
     }
-    
+
     function getAccounts() {
         const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
             const account = expense.Account;
@@ -198,41 +198,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, {});
 
         const tableElement = document.createElement('table');
-        const tableBodyElement = document.createElement('tbody');
 
         // Display transactions grouped by day
-        for (const [date, transactions] of Object.entries(transactionsByDay)) {
-            const dayWrapper = tableElement.insertRow();
-            dayWrapper.className = 'transaction-day-wrapper';
+        if (Object.entries(transactionsByDay).length > 0) {
+            for (const [date, transactions] of Object.entries(transactionsByDay)) {
+                const tableBodyElement = document.createElement('tbody');
+                tableBodyElement.className = 'transaction-day-wrapper';
 
-            const dayContainer = document.createElement('tr');
-            dayContainer.className = 'transaction-day';
+                const dayContainer = document.createElement('tr');
+                dayContainer.className = 'transaction-day';
 
-            const dayHeader = dayContainer.insertCell();
-            dayHeader.classList.add('day-header');
-            dayHeader.setAttribute('colspan', '5');
+                const dayHeader = dayContainer.insertCell();
+                dayHeader.classList.add('day-header');
+                dayHeader.setAttribute('colspan', '5');
 
-            const dayContent = document.createElement('h3');
-            dayContent.classList.add('day-content');
-            dayContent.textContent = date;
+                const dayContent = document.createElement('h3');
+                dayContent.classList.add('day-content');
+                dayContent.textContent = date;
 
-            const totals = calculateAccountTotals(transactions);
-            const dayTotals = document.createElement('div');
-            dayTotals.classList.add('day-totals');
-            dayTotals.innerHTML = `<p class="deposits">${formatIndianCurrency(totals.deposits)}</p> <p class="withdrawal">${formatIndianCurrency(totals.withdrawal)}</p>`;
-            dayContent.appendChild(dayTotals);
-            dayHeader.appendChild(dayContent);
-            dayContainer.appendChild(dayHeader);
-            dayWrapper.appendChild(dayContainer);
+                const totals = calculateAccountTotals(transactions);
+                const dayTotals = document.createElement('div');
+                dayTotals.classList.add('day-totals');
+                dayTotals.innerHTML = `<p class="deposits">${formatIndianCurrency(totals.deposits)}</p> <p class="withdrawal">${formatIndianCurrency(totals.withdrawal)}</p>`;
+                dayContent.appendChild(dayTotals);
+                dayHeader.appendChild(dayContent);
+                dayContainer.appendChild(dayHeader);
+                tableBodyElement.appendChild(dayContainer);
 
-            transactions.forEach(expense => {
-                const row = createTransactionRow(expense);
-                dayWrapper.appendChild(row);
-                tableBodyElement.appendChild(dayWrapper);
-            });
+                transactions.forEach(expense => {
+                    const transactionRow = createTransactionRow(expense);
+                    tableBodyElement.appendChild(transactionRow);
+                    tableElement.appendChild(tableBodyElement);
+                });
+            }
+        } else {
+            const tableColumn = document.createElement('td');
+            tableColumn.className = 'no-transactions-msg';
+            tableColumn.textContent = 'No transactions';
+            tableElement.appendChild(tableColumn);
         }
-
-        tableElement.appendChild(tableBodyElement);
         accountTransactionsContainer.appendChild(tableElement);
 
         const monthlyTotals = calculateAccountTotals(filteredTransactions);

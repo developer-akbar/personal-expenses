@@ -226,6 +226,11 @@ table td.description {
     /* Ensures long text breaks to new lines */
 }
 
+.no-transactions-msg {
+    text-align: center;
+    font-weight: bold;
+}
+
 .transaction-row:hover {
     background-color: #e6e6e6;
     cursor: pointer;
