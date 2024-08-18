@@ -480,6 +480,7 @@ button:hover {
     right: 0.75rem;
     top: 0;
     background: lightsalmon;
+    cursor: pointer;
 }
 
 .edit-button,
