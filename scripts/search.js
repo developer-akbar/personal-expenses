@@ -431,21 +431,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             noteCell.textContent = expense.Note;
             noteCell.classList.add('note');
 
-            // Only include note and description in the popup for mobile view
-            noteCell.addEventListener('click', () => {
-                if (window.innerWidth <= 768) { // Mobile view
-                    showTransactionDetails(expense);
+            row.addEventListener('click', (event) => {
+                // Check if the clicked element is not a checkbox
+                if (!event.target.matches('input[type="checkbox"]')) {
+                    typeof editTransaction === 'undefined' ? showTransactionDetails(expense) : editTransaction(expense.ID);
                 }
             });
+
+            const descriptionCell = row.insertCell();
+            descriptionCell.textContent = expense.Description;
+            descriptionCell.classList.add('description');
 
             const amountCell = row.insertCell();
             amountCell.textContent = formatIndianCurrency(parseFloat(expense.INR));
             const type = expense['Income/Expense'] === 'Expense' ? 'expense' : expense['Income/Expense'] === 'Income' ? 'income' : 'transfer-out';
             amountCell.classList.add('amount', type);
-
-            const descriptionCell = row.insertCell();
-            descriptionCell.textContent = expense.Description;
-            descriptionCell.classList.add('description');
         });
 
         searchResultsDiv.appendChild(table);

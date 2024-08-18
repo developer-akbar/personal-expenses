@@ -168,11 +168,12 @@ function createTransactionRow(expense) {
     row.appendChild(checkboxCell);
     row.appendChild(dateElement);
     row.appendChild(noteCell);
-    row.appendChild(amountCell);
     row.appendChild(descriptionCell);
+    row.appendChild(amountCell);
 
-    noteCell.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
+    row.addEventListener('click', (event) => {
+        // Check if the clicked element is not a checkbox
+        if (!event.target.matches('input[type="checkbox"]')) {
             typeof editTransaction === 'undefined' ? showTransactionDetails(expense) : editTransaction(expense.ID);
         }
     });
@@ -238,6 +239,8 @@ function deleteTransaction(ids) {
             if (window.showModifiedTransactionPeriod) {
                 window.showModifiedTransactionPeriod(deletedTransaction);
             }
+
+            document.querySelector('.selected-total-wrapper').style.display = 'none';
         }
     });
 
