@@ -120,6 +120,13 @@
                         <input type="text" id="category-name" name="category-name" class="field" required>
                     </div>
                     <div class="form-row">
+                        <label for="category-type">Category Type</label>
+                        <select id="category-type" name="category-type" class="field" required>
+                            <option value="Expense" selected>Expense</option>
+                            <option value="Income">Income</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
                         <button type="submit" class="submit-btn save-category-btn">Save</button>
                         <button type="button" class="delete-btn delete-category-btn">Delete Category</button>
                         <button type="button" class="cancel-btn cancel-category-btn">Cancel</button>

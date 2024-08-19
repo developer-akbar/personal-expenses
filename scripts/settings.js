@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const categoryModal = document.getElementById('category-modal');
     const categoryForm = document.getElementById('category-form');
     const categoryNameInput = document.getElementById('category-name');
+    const categoryType = document.getElementById('category-type');
     const subcategoryModal = document.getElementById('subcategory-modal');
     const subcategoryForm = document.getElementById('subcategory-form');
     const subcategoryNameInput = document.getElementById('subcategory-name');
@@ -101,9 +102,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function getCategoriesFromMasterExpenses() {
         const categories = {};
         masterExpenses.forEach(expense => {
-            if (expense["Income/Expense"] === 'Expense') {
+            if (expense["Income/Expense"] !== 'Transfer-Out') {
                 if (!categories[expense.Category]) {
-                    categories[expense.Category] = { subcategories: [] };
+                    categories[expense.Category] = {type: expense["Income/Expense"], subcategories: [] };
                 }
                 if (expense.Subcategory && !categories[expense.Category].subcategories.includes(expense.Subcategory)) {
                     categories[expense.Category].subcategories.push(expense.Subcategory);
@@ -528,7 +529,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             categoryBox.querySelector('.edit-category').addEventListener('click', () => {
-                openCategoryModal('edit', category);
+                openCategoryModal('edit', category, storedCategories[category].type);
             });
         });
 
@@ -573,11 +574,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    function openCategoryModal(mode, categoryName = '') {
+    function openCategoryModal(mode, categoryName = '',  type = '') {
         if (mode === 'edit') {
             categoryModal.querySelector('h2').textContent = 'Edit Category';
             categoryModal.dataset.category = categoryName;
+            categoryModal.dataset.categoryType = type;
             categoryNameInput.value = categoryName;
+            categoryType.value = type;
+            categoryType.disabled = true;
             deleteCategoryBtn.style.display = 'inline';
             document.querySelector('.save-category-btn').style.display = 'none';
             categoryForm.querySelectorAll('.field').forEach(field => {
@@ -589,6 +593,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             categoryModal.querySelector('h2').textContent = 'Add Category';
             categoryNameInput.value = '';
+            categoryType.value = '';
+            categoryType.disabled = false;
             deleteCategoryBtn.style.display = 'none';
         }
         categoryModal.style.display = 'flex';
@@ -721,15 +727,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     function saveCategory(event) {
         event.preventDefault();
         const categoryName = categoryNameInput.value.trim();
+        const type = categoryType.value;
         const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
 
         if (categoryModal.querySelector('h2').textContent === 'Add Category') {
-            storedCategories[categoryName] = { subcategories: [] };
+            storedCategories[categoryName] = {type: type, subcategories: [] };
         } else {
             const oldCategoryName = categoryModal.dataset.category;
-            if (oldCategoryName !== categoryName) {
-                storedCategories[categoryName] = storedCategories[oldCategoryName];
+            const oldType = categoryModal.dataset.categoryType;
+            const oldSubcategories = storedCategories[oldCategoryName].subcategories
+            if (oldCategoryName !== categoryName || oldType !== type) {
                 delete storedCategories[oldCategoryName];
+                storedCategories[categoryName] = {type: type, subcategories: oldSubcategories };
             }
         }
 

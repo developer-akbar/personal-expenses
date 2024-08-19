@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         suggestionsDiv.innerHTML = '';
         document.getElementById('description').value = '';
         document.getElementById('amount').value = '';
+
+        nonTransferFields.style.display = 'block';
+        transferFields.style.display = 'none';
     }
 
     function toggleGrid(grid) {
@@ -83,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             document.getElementById('subcategory-row').style.display = 'flex';
         } else {
             document.getElementById('subcategory-row').style.display = 'none';
-            document.getElementById('amount').focus(); // Automatically focus on the amount field if no subcategories
+            // document.getElementById('amount').focus(); // Automatically focus on the amount field if no subcategories
         }
     }
 
@@ -101,12 +104,23 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function getCategories() {
-        const categories = JSON.parse(localStorage.getItem('categories'));
-        if (categories && categories.length > 0) {
+        const typeValue = document.querySelector('.type-option.active').dataset.value;
+
+        const storedCategories = JSON.parse(localStorage.getItem('categories'));
+        if (storedCategories) {
+            const categories = Object.entries(storedCategories).reduce((acc, [key, value]) => {
+                if (value.type === typeValue) {
+                    acc[key] = {
+                        subcategories: value.subcategories
+                    };
+                }
+                return acc;
+            }, {});
             return categories;
         } else {
+            const categories = {};
             masterExpenses.forEach(expense => {
-                if (expense["Income/Expense"] === 'Expense') {
+                if (expense["Income/Expense"] === typeValue) {
                     if (!categories[expense.Category]) {
                         categories[expense.Category] = { subcategories: [] };
                     }
@@ -124,11 +138,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     addTransactionBtn.addEventListener('click', () => {
+        transactionModal.style.display = 'block';
+        resetTransactionForm();
+
         document.querySelector('.submit-btn').style.display = 'block';
         document.querySelector('.delete-button').style.display = 'none';
-        resetTransactionForm();
         populateDropdowns();
-        transactionModal.style.display = 'block';
         document.querySelector('.type-option[data-value="Expense"]').classList.add('active');
         toggleGrid(accountGrid);
     });
@@ -154,6 +169,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 toggleGrid(accountGrid);
                 populateDropdowns();
             }
+            fetchDropdowns(); // update account, category dropdown values on change of type
         }
     });
 
@@ -257,7 +273,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const amount = parseFloat(document.getElementById('amount').value);
         const description = document.getElementById('description').value;
 
-        if (!date || !account || (type !== 'Transfer-Out' && !category) || (type === 'Transfer-Out' && !category) || !amount) {
+        if (!date || !account || (type !== 'Transfer-Out' && !category) || (type === 'Transfer-Out' && !category) || isNaN(amount)) {
             alert('Please fill all mandatory fields.');
             return;
         }
