@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const groupBox = document.createElement('div');
             groupBox.classList.add('group-box');
             groupBox.dataset.id = group.id;
-            groupBox.innerHTML = `<h3>${group.name}<span class="edit-group">&#9997;</span></h3><ul class="mapped-accounts" id="group-${group.id}"></ul>`;
+            groupBox.innerHTML = `<h3>${group.name}<span class="edit-group">&#9997;</span></h3><ul class="mapped-accounts" id="account-${group.name.replace(' ', '-').toLowerCase()}"></ul>`;
             accountGroupsList.appendChild(groupBox);
 
             if (accountMappings[group.name]) {
@@ -492,9 +492,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (category === 'Unmapped Subcategories') return; // Skip Unmapped Subcategories as a group-box
 
             const categoryBox = document.createElement('div');
-            categoryBox.classList.add('group-box');
-            categoryBox.dataset.id = category;
-            categoryBox.innerHTML = `<h3>${category}<span class="edit-group edit-category">&#9997;</span></h3><ul class="mapped-subcategories" id="category-${category.replace(' ', '-').toLowerCase()}"></ul>`;
+            categoryBox.classList.add('group-box', `${storedCategories[category].type.toLowerCase()}-box`);
+            categoryBox.dataset.id = category.replace(' ', '-').toLowerCase();
+            categoryBox.innerHTML = `<h3 class="${storedCategories[category].type.toLowerCase()}">${category}<span class="edit-group edit-category">&#9997;</span></h3><ul class="mapped-subcategories" id="category-${category.replace(' ', '-').toLowerCase()}"></ul>`;
             // categoriesList.appendChild(categoryBox);
 
             const subcategoryBox = categoryBox.querySelector('.mapped-subcategories');
