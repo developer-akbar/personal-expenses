@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const notesSet = new Set();
         const regex = /^[a-zA-Z\s]+$/; // Only letters and spaces
 
-        masterData.forEach(expense => {
+        masterData && masterData.forEach(expense => {
             if (regex.test(expense.Note) && expense.Note.toLowerCase().includes(searchInput)) {
                 notesSet.add(expense.Note);
             }
@@ -261,6 +261,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const maxAmount = document.getElementById('max-amount').value;
     
         const masterData = await utility.initializeMasterData();
+        if (masterData === null) return;
+        
         let searchResults = masterData.filter(expense => {
             const description = expense.Description.toLowerCase();
             const note = expense.Note.toLowerCase();

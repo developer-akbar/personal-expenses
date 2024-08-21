@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateCategoryTotals() {
         const categories = {};
 
-        masterExpenses.forEach(expense => {
+        masterExpenses && masterExpenses.forEach(expense => {
             if (expense["Income/Expense"] === (currentMainTab === 'expense' ? 'Expense' : 'Income')) {
                 const { Category, Subcategory, INR } = expense;
                 const expenseDate = new Date(convertDateFormat(expense.Date));

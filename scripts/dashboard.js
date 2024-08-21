@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const yearToShow = isFirst10Days && currentMonth === 0 ? currentYear - 1 : currentYear;
 
     const masterData = await utility.initializeMasterData();
+    if (masterData === null) return;
 
     const displayMonth = new Date(yearToShow, monthToShow);
 

@@ -155,9 +155,7 @@ form label {
     font-weight: bold;
 }
 
-form input[type="text"],
-form input[type="number"],
-form input[type="date"],
+form input,
 form select,
 form textarea {
     outline: 0;
@@ -169,9 +167,7 @@ form textarea {
     transition: border-color 0.3s ease;
 }
 
-form input[type="text"]:focus,
-form input[type="number"]:focus,
-form input[type="date"]:focus,
+form input:focus,
 form select:focus,
 form textarea:focus {
     border-color: #004080;

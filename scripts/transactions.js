@@ -10,12 +10,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     currentPeriod.textContent = formatDate(currentDailyDate);
     currentYear.textContent = formatYear(currentMonthlyDate);
 
-    const masterData = await utility.initializeMasterData();
+    const masterData = await utility.initializeMasterData() || [];
     updateDailyTransactions();
 
     window.addTransaction = function (newTransaction) { // Define addTransaction globally
 
-        const existingIndex = masterData.findIndex(expense => expense.ID == newTransaction.ID);
+        const existingIndex = masterData.length > 0 ? masterData.findIndex(expense => expense.ID == newTransaction.ID) : -1;
 
         if (existingIndex > -1) {
             masterData[existingIndex] = newTransaction;
@@ -69,6 +69,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         const dailyTransactionsContainer = document.getElementById('daily-transactions');
         dailyTransactionsContainer.innerHTML = ''; // Clear previous transactions
+
+        if (localStorage.getItem('masterExpenses') === null) return;
 
         // Filter transactions for the current month and year
         const filteredTransactions = JSON.parse(localStorage.getItem('masterExpenses')).filter(expense => {
@@ -138,6 +140,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function updateMonthlyTransactions() {
+        if (masterData.length == 0) return;
+
         const monthlyTransactionsContainer = document.getElementById('monthly-transactions');
         monthlyTransactionsContainer.innerHTML = ''; // Clear previous transactions
 
@@ -205,6 +209,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function updateTotalTransactions() {
+        if (masterData.length == 0) return;
+
         const totalTransactionsContainer = document.getElementById('total-transactions');
         totalTransactionsContainer.innerHTML = ''; // Clear previous transactions
 

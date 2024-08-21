@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const accountsBalancesContainer = document.getElementById('accounts-balances');
         accountsBalancesContainer.innerHTML = ''; // Clear previous balances
 
+        if (masterData === null) return;
+
         // Calculate account balances
         const accountBalances = masterData.reduce((acc, expense) => {
             const account = expense.Account;
@@ -156,6 +158,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function getAccounts() {
+        if (localStorage.getItem('masterExpenses') === null) return;
+        
         const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
             const account = expense.Account;
             if (!acc.includes(account)) {
