@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         categoryGrid.innerHTML = createGridHeader('Category');
         subcategoryGrid.innerHTML = '';
 
-        accounts.sort().forEach(account => {
+        accounts && accounts.sort().forEach(account => {
             appendGridSpan(accountGrid, account);
             appendGridSpan(fromAccountGrid, account);
             appendGridSpan(toAccountGrid, account);
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         grid.appendChild(span);
     }
 
-    function getCategories() {
+    function getStoredCategories() {
         const typeValue = document.querySelector('.type-option.active').dataset.value;
 
         const storedCategories = JSON.parse(localStorage.getItem('categories'));
@@ -119,16 +119,24 @@ document.addEventListener('DOMContentLoaded', async function () {
             return categories;
         } else {
             const categories = {};
-            masterExpenses.forEach(expense => {
-                if (expense["Income/Expense"] === typeValue) {
-                    if (!categories[expense.Category]) {
-                        categories[expense.Category] = { subcategories: [] };
+
+            if (masterExpenses.length === 0) {
+                // Defining default categories initially
+                const defaultCategories = '{"Housing":{"type":"Expense","subcategories":["Rent","Groceries","Electricity","Gas"]},"Travel":{"type":"Expense","subcategories":[]},"Utilities":{"type":"Expense","subcategories":["Recharge","DTH","Water"]},"Shopping":{"type":"Expense","subcategories":[]},"Health":{"type":"Expense","subcategories":["Medicines","Hospital"]},"Subscriptions":{"type":"Expense","subcategories":["Netflix","Prime"]},"Entertainment":{"type":"Expense","subcategories":["Cinema","Outing"]},"Groceries":{"type":"Expense","subcategories":[]},"Dining":{"type":"Expense","subcategories":[]},"Salary":{"type":"Income","subcategories":[]},"Bonus":{"type":"Income","subcategories":[]},"Petty Cash":{"type":"Income","subcategories":[]}}';
+                localStorage.setItem('categories', JSON.stringify(JSON.parse(defaultCategories)));
+                return JSON.parse(defaultCategories);
+            } else {
+                masterExpenses.forEach(expense => {
+                    if (expense["Income/Expense"] === typeValue) {
+                        if (!categories[expense.Category]) {
+                            categories[expense.Category] = { subcategories: [] };
+                        }
+                        if (expense.Subcategory && !categories[expense.Category].subcategories.includes(expense.Subcategory)) {
+                            categories[expense.Category].subcategories.push(expense.Subcategory);
+                        }
                     }
-                    if (expense.Subcategory && !categories[expense.Category].subcategories.includes(expense.Subcategory)) {
-                        categories[expense.Category].subcategories.push(expense.Subcategory);
-                    }
-                }
-            });
+                });
+            }
             return categories;
         }
     }
@@ -224,6 +232,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     window.editTransaction = function (id) {
         document.getElementById('transaction-modal').style.display = 'none';
+
+        if (localStorage.getItem('masterExpenses') === null) return;
         const transaction = JSON.parse(localStorage.getItem('masterExpenses')).find(expense => expense.ID == id);
         if (transaction) {
             document.getElementById('transaction-id').value = transaction.ID;
@@ -308,7 +318,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function fetchDropdowns() {
         accounts = getStoredAccounts();
-        categories = getCategories();
+        categories = getStoredCategories();
+
         populateDropdowns();
     }
 
@@ -317,21 +328,28 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (storedAccounts && storedAccounts.length > 0) {
             return storedAccounts;
         } else {
-            const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
-                const account = expense.Account;
-                if (!acc.includes(account)) {
-                    acc.push(account);
-                }
-                if (expense["Income/Expense"] === "Transfer-Out") {
-                    const targetAccount = expense.Category;
-                    if (!acc.includes(targetAccount)) {
-                        acc.push(targetAccount);
+            if (masterExpenses.length === 0) {
+                // Defining default acccounts initially
+                const defaultAccounts = ["Cash", "Bank Accounts", "Credit Cards"];
+                localStorage.setItem('accounts', JSON.stringify(defaultAccounts));
+                return defaultAccounts;
+            } else {
+                const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
+                    const account = expense.Account;
+                    if (!acc.includes(account)) {
+                        acc.push(account);
                     }
-                }
-                return acc;
-            }, []);
+                    if (expense["Income/Expense"] === "Transfer-Out") {
+                        const targetAccount = expense.Category;
+                        if (!acc.includes(targetAccount)) {
+                            acc.push(targetAccount);
+                        }
+                    }
+                    return acc;
+                }, []);
 
-            return accountBalances;
+                return accountBalances;
+            }
         }
     }
 

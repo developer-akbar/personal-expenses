@@ -73,45 +73,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedAccount = null;
     let selectedSubcategory = null;
 
-    let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [];
-    let accounts = JSON.parse(localStorage.getItem('accounts')) || getAccountsFromMasterExpenses();
-    let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || {};
-    let categoriesWithSubcategories = JSON.parse(localStorage.getItem('categories')) || getCategoriesFromMasterExpenses();
+    let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [{"id":1,"name":"Cash"},{"id":2,"name":"Bank Accounts"},{"id":3,"name":"Credit Cards"}];
+    let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || {"Cash":["Cash"],"Bank Accounts":["Bank Accounts"],"Credit Cards":["Credit Cards"]};
+    let accounts = getStoredAccounts();
+    let categories = getStoredCategories();
 
     localStorage.setItem('accounts', JSON.stringify(accounts));
-    localStorage.setItem('categories', JSON.stringify(categoriesWithSubcategories));
+    localStorage.setItem('categories', JSON.stringify(categories));
+    localStorage.setItem('accountGroups', JSON.stringify(accountGroups));
+    localStorage.setItem('accountMappings', JSON.stringify(accountMappings));
 
-    function getAccountsFromMasterExpenses() {
-        const accountBalances = masterExpenses.reduce((acc, expense) => {
-            const account = expense.Account;
-            if (!acc.includes(account)) {
-                acc.push(account);
-            }
-            if (expense["Income/Expense"] === "Transfer-Out") {
-                const targetAccount = expense.Category;
-                if (!acc.includes(targetAccount)) {
-                    acc.push(targetAccount);
-                }
-            }
-            return acc;
-        }, []);
+    function getStoredAccounts() {
+        const storedAccounts = JSON.parse(localStorage.getItem('accounts'));
+        if (storedAccounts && storedAccounts.length > 0) {
+            return storedAccounts;
+        } else {
+            if (masterExpenses.length === 0) {
+                // Defining default acccounts initially
+                const defaultAccounts = ["Cash", "Bank Accounts", "Credit Cards"];
+                localStorage.setItem('accounts', JSON.stringify(defaultAccounts));
+                return defaultAccounts;
+            } else {
+                const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
+                    const account = expense.Account;
+                    if (!acc.includes(account)) {
+                        acc.push(account);
+                    }
+                    if (expense["Income/Expense"] === "Transfer-Out") {
+                        const targetAccount = expense.Category;
+                        if (!acc.includes(targetAccount)) {
+                            acc.push(targetAccount);
+                        }
+                    }
+                    return acc;
+                }, []);
 
-        return accountBalances;
+                return accountBalances;
+            }
+        }
     }
 
-    function getCategoriesFromMasterExpenses() {
-        const categories = {};
-        masterExpenses.forEach(expense => {
-            if (expense["Income/Expense"] !== 'Transfer-Out') {
-                if (!categories[expense.Category]) {
-                    categories[expense.Category] = {type: expense["Income/Expense"], subcategories: [] };
-                }
-                if (expense.Subcategory && !categories[expense.Category].subcategories.includes(expense.Subcategory)) {
-                    categories[expense.Category].subcategories.push(expense.Subcategory);
-                }
+    function getStoredCategories() {
+        const storedCategories = JSON.parse(localStorage.getItem('categories'));
+        if (storedCategories && Object.entries(storedCategories).length > 0) {
+            return storedCategories;
+        } else {
+            const categories = {};
+
+            if (masterExpenses.length === 0) {
+                // Defining default categories initially
+                const defaultCategories = '{"Housing":{"type":"Expense","subcategories":["Rent","Groceries","Electricity","Gas"]},"Travel":{"type":"Expense","subcategories":[]},"Utilities":{"type":"Expense","subcategories":["Recharge","DTH","Water"]},"Shopping":{"type":"Expense","subcategories":[]},"Health":{"type":"Expense","subcategories":["Medicines","Hospital"]},"Subscriptions":{"type":"Expense","subcategories":["Netflix","Prime"]},"Entertainment":{"type":"Expense","subcategories":["Cinema","Outing"]},"Groceries":{"type":"Expense","subcategories":[]},"Dining":{"type":"Expense","subcategories":[]},"Salary":{"type":"Income","subcategories":[]},"Bonus":{"type":"Income","subcategories":[]},"Petty Cash":{"type":"Income","subcategories":[]}}';
+                localStorage.setItem('categories', JSON.stringify(JSON.parse(defaultCategories)));
+                return JSON.parse(defaultCategories);
+            } else {
+                masterExpenses.forEach(expense => {
+                    if (expense["Income/Expense"] !== 'Transfer-Out') {
+                        if (!categories[expense.Category]) {
+                            categories[expense.Category] = {type: expense["Income/Expense"], subcategories: [] };
+                        }
+                        if (expense.Subcategory && !categories[expense.Category].subcategories.includes(expense.Subcategory)) {
+                            categories[expense.Category].subcategories.push(expense.Subcategory);
+                        }
+                    }
+                });
             }
-        });
-        return categories;
+            return categories;
+        }
     }
 
     function renderGroups() {
