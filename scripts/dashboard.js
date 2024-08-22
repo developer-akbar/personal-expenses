@@ -45,11 +45,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const previousMonthExpenses = previousMonthData.filter(expense => expense["Income/Expense"] === "Expense")
         .reduce((acc, expense) => acc + parseFloat(expense.INR), 0);
 
-    const expenseChange = ((totalExpenses - previousMonthExpenses) / previousMonthExpenses) * 100;
-    expenseChangeElem.innerHTML = `<b class="${Math.sign(expenseChange) > 0 ? 'negative' : 'positive'}">
+    if (previousMonthExpenses > 0) {
+        const expenseChange = ((totalExpenses - previousMonthExpenses) / previousMonthExpenses) * 100;
+        expenseChangeElem.innerHTML = `<b class="${Math.sign(expenseChange) > 0 ? 'negative' : 'positive'}">
         You have spent 
         ${Math.sign(expenseChange) > 0 ? 'more' : 'less'} 
         than ${Math.abs(expenseChange.toFixed(2))}% from previous month.</b>`;
+    }
 
     // Determine the most spending category
     const categoryTotals = monthData.reduce((acc, expense) => {

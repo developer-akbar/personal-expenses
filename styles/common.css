@@ -112,13 +112,18 @@ nav ul {
     display: flex;
     justify-content: center;
     background: #004080;
-    padding: 10px 0;
+    padding: 1em;
     border-radius: 0 0 8px 8px;
     position: relative;
 }
 
 nav ul li {
-    margin: 0 15px;
+    padding: 0 1em;
+}
+
+nav ul li.active {
+    background: limegreen;
+    border-radius: 5px;
 }
 
 nav ul li a {
@@ -347,6 +352,11 @@ button:hover {
     min-width: fit-content
 }
 
+#loginModal .modal-content {
+    width: 400px;
+    max-width: 80%;
+}
+
 .modal {
     display: none;
     justify-content: center;
@@ -360,8 +370,8 @@ button:hover {
     overflow: auto;
     background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.4);
-    padding-top: 60px;
-    transform: translate(0%, -56px);
+    /* padding-top: 60px;
+    transform: translate(0%, -56px); */
 }
 
 .modal-content {
@@ -370,12 +380,12 @@ button:hover {
     margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 80%;
-    max-width: 80dvw;
-    /* border-radius: 8px; */
+    width: 400px;
+    max-width: 80%;
+    border-radius: 8px;
     position: relative;
     max-height: 50dvh;
-    overflow: scroll;
+    overflow: auto;
 }
 
 .modal-content h2,

@@ -16,6 +16,13 @@ if (closeButtons.length > 0) {
     });
 }
 
+// Highlighting current page navigation item
+document.querySelectorAll('.navigation ul>li a').forEach(navItem => {
+    if(navItem.getAttribute('href') === location.pathname.replace('/', '')) {
+        navItem.parentElement.classList.add('active');
+    }
+});
+
 window.onload = () => {
     // adding minHeight for viewable-content so that swiping can be done on the container.
     if (!document.querySelector('body') && !document.querySelector('.sticky-container') && document.querySelector('.sticky-container').getClientRects().length > 0 && !document.querySelector('.mobile-nav')) {
