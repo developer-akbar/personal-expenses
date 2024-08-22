@@ -87,7 +87,7 @@
     height: 60px;
     font-size: 30px;
     cursor: pointer;
-    z-index: 900;
+    z-index: 1000;
 }
 
 @keyframes flash {
