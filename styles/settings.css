@@ -62,6 +62,17 @@
     margin: 0;
     padding-bottom: 2rem;
     border: 1px solid #a5a5a5;
+    position: relative;
+    background-color: gray;
+}
+
+.add-account-btn::after, .add-subcategory-btn::after {
+    content: "\2795";
+    position: absolute;
+    bottom: 0.5rem;
+    width: 100%;
+    cursor: pointer;
+    text-align: center;
 }
 
 .group-container .group-box .mapped-accounts li,
@@ -73,10 +84,6 @@
     background: #fff;
     gap: 0.5rem;
     align-items: center;
-}
-
-.group-container .group-box .mapped-accounts li span,
-.group-container .group-box .mapped-subcategories li span {
     cursor: pointer;
 }
 
@@ -89,6 +96,10 @@
 .group-container .group-box .mapped-subcategories li .edit-subcategory {
     margin-left: 1rem;
     cursor: pointer;
+}
+
+.group-box li:hover {
+    background-color: rgb(172, 222, 247) !important;
 }
 
 .mapped-accounts:not(:has(li)),

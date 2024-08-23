@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedAccount = null;
     let selectedSubcategory = null;
 
-    let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [{"id":1,"name":"Cash"},{"id":2,"name":"Bank Accounts"},{"id":3,"name":"Credit Cards"}];
-    let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || {"Cash":["Cash"],"Bank Accounts":["Bank Accounts"],"Credit Cards":["Credit Cards"]};
+    let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [{ "id": 1, "name": "Cash" }, { "id": 2, "name": "Bank Accounts" }, { "id": 3, "name": "Credit Cards" }];
+    let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || { "Cash": ["Cash"], "Bank Accounts": ["Bank Accounts"], "Credit Cards": ["Credit Cards"] };
     let accounts = getStoredAccounts();
     let categories = getStoredCategories();
 
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 masterExpenses.forEach(expense => {
                     if (expense["Income/Expense"] !== 'Transfer-Out') {
                         if (!categories[expense.Category]) {
-                            categories[expense.Category] = {type: expense["Income/Expense"], subcategories: [] };
+                            categories[expense.Category] = { type: expense["Income/Expense"], subcategories: [] };
                         }
                         if (expense.Subcategory && !categories[expense.Category].subcategories.includes(expense.Subcategory)) {
                             categories[expense.Category].subcategories.push(expense.Subcategory);
@@ -147,7 +147,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             const groupBox = document.createElement('div');
             groupBox.classList.add('group-box');
             groupBox.dataset.id = group.id;
-            groupBox.innerHTML = `<h3>${group.name}<span class="edit-group">&#9997;</span></h3><ul class="mapped-accounts" id="account-${group.name.replace(' ', '-').toLowerCase()}"></ul>`;
+            groupBox.innerHTML = `<h3>${group.name}<span class="edit-group"> &#9997;</span></h3><ul class="mapped-accounts" id="account-${group.name.replace(' ', '-').toLowerCase()}"></ul>`;
+
+            const spanElem = document.createElement('span');
+            spanElem.classList.add('add-account-btn');
+            groupBox.appendChild(spanElem);
+
+            // Add account directly in the specific account group
+            groupBox.querySelector('.add-account-btn').addEventListener('click', () => {
+                const groupName = groupBox.querySelector('.add-account-btn').parentElement.querySelector('h3').textContent.split(' ');
+                groupName.pop();
+                openAccountModal('add', groupName.join(' '));
+            });
+            
             accountGroupsList.appendChild(groupBox);
 
             if (accountMappings[group.name]) {
@@ -383,6 +395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountModalTitle.textContent = 'Edit Account';
             accountNameInput.value = account;
             accountIdInput.value = account;
+            accountGroupSelect.disabled = true;
             deleteAccountBtn.style.display = 'inline';
             document.querySelector('.save-account-btn').style.display = 'none';
 
@@ -396,6 +409,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountModalTitle.textContent = 'Add New Account';
             accountNameInput.value = '';
             accountIdInput.value = '';
+            accountGroupSelect.disabled = false;
             deleteAccountBtn.style.display = 'none';
             document.querySelector('.save-account-btn').style.display = 'inline';
         }
@@ -424,6 +438,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const accountId = accountIdInput.value.trim();
         const accountName = accountNameInput.value.trim();
         const selectedGroup = accountGroupSelect.value;
+
+        // Update masterExpenses if the account name is being edited
+        if (accountId) {
+            updateMasterExpensesAccountName(accountId, accountName);
+        }
 
         // Remove account from old group if editing
         if (accountId) {
@@ -457,6 +476,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         closeModal(accountModal, accountForm);
         renderGroups();
     });
+
+    // Function to update account name in masterExpenses
+    function updateMasterExpensesAccountName(oldName, newName) {
+        const masterExpenses = JSON.parse(localStorage.getItem('masterExpenses')) || [];
+
+        // Update the account and category fields
+        masterExpenses.forEach(transaction => {
+            if (transaction.Account === oldName) {
+                transaction.Account = newName;
+            }
+            if (transaction.Category === oldName) {
+                transaction.Category = newName;
+            }
+        });
+
+        // Save the updated masterExpenses back to localStorage
+        localStorage.setItem('masterExpenses', JSON.stringify(masterExpenses));
+    }
 
     // Delete group and move accounts to unmapped
     function deleteGroup() {
@@ -521,7 +558,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const categoryBox = document.createElement('div');
             categoryBox.classList.add('group-box', `${storedCategories[category].type.toLowerCase()}-box`);
             categoryBox.dataset.id = category.replace(' ', '-').toLowerCase();
-            categoryBox.innerHTML = `<h3 class="${storedCategories[category].type.toLowerCase()}">${category}<span class="edit-group edit-category">&#9997;</span></h3><ul class="mapped-subcategories" id="category-${category.replace(' ', '-').toLowerCase()}"></ul>`;
+            categoryBox.innerHTML = `<h3 class="${storedCategories[category].type.toLowerCase()}">${category}<span class="edit-group edit-category"> &#9997;</span></h3><ul class="mapped-subcategories" id="category-${category.replace(' ', '-').toLowerCase()}"></ul>`;
             // categoriesList.appendChild(categoryBox);
 
             const subcategoryBox = categoryBox.querySelector('.mapped-subcategories');
@@ -534,6 +571,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 li.addEventListener('click', () => openSubcategoryModal('edit', category, subcategory));
                 categoryBox.querySelector('.mapped-subcategories').appendChild(li);
+            });
+
+            const spanElem = document.createElement('span');
+            spanElem.classList.add('add-subcategory-btn');
+            categoryBox.appendChild(spanElem);
+
+            // Add subcategory directly in the specific category
+            categoryBox.querySelector('.add-subcategory-btn').addEventListener('click', () => {
+                const categoryName = categoryBox.querySelector('.add-subcategory-btn').parentElement.querySelector('h3').textContent.split(' ');
+                categoryName.pop();
+                openSubcategoryModal('add', categoryName.join(' '));
             });
 
             categoriesList.appendChild(categoryBox);
@@ -601,7 +649,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    function openCategoryModal(mode, categoryName = '',  type = '') {
+    function openCategoryModal(mode, categoryName = '', type = '') {
         if (mode === 'edit') {
             categoryModal.querySelector('h2').textContent = 'Edit Category';
             categoryModal.dataset.category = categoryName;
@@ -620,7 +668,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             categoryModal.querySelector('h2').textContent = 'Add Category';
             categoryNameInput.value = '';
-            categoryType.value = '';
             categoryType.disabled = false;
             deleteCategoryBtn.style.display = 'none';
         }
@@ -632,6 +679,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             subcategoryModal.querySelector('h2').textContent = 'Edit Subcategory';
             subcategoryNameInput.value = subcategoryName;
             deleteSubcategoryBtn.style.display = 'inline';
+            parentCategorySelect.disabled = true;
             document.querySelector('.save-subcategory-btn').style.display = 'none';
             subcategoryForm.querySelectorAll('.field').forEach(field => {
                 field.addEventListener('input', () => {
@@ -642,6 +690,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             subcategoryModal.querySelector('h2').textContent = 'Add Subcategory';
             subcategoryNameInput.value = '';
+            parentCategorySelect.disabled = false;
             deleteSubcategoryBtn.style.display = 'none';
         }
         subcategoryModal.dataset.category = categoryName;
@@ -674,7 +723,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function openUnmappedSubcategorySelectModal() {
-        
+
         unmappedSubcategorySelectList.innerHTML = '';
         unmappedSubcategoryTitle.textContent = 'Move or Delete Subcategory';
         unmappedSubcategoryNameSpan.textContent = selectedSubcategory;
@@ -685,7 +734,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             li.addEventListener('click', () => selectCategoryForSubcategory(category));
             unmappedSubcategorySelectList.appendChild(li);
         });
-        
+
         deleteUnmappedSubcategoryBtn.innerHTML = `Delete <i>${selectedSubcategory}</i>`;
         deleteUnmappedSubcategoryBtn.addEventListener('click', () => deleteUnmappedSubcategory());
         unmappedSubcategorySelectModal.style.display = 'flex';
@@ -757,15 +806,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         const type = categoryType.value;
         const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
 
+        const oldCategoryName = categoryModal.dataset.category;
+
         if (categoryModal.querySelector('h2').textContent === 'Add Category') {
-            storedCategories[categoryName] = {type: type, subcategories: [] };
+            storedCategories[categoryName] = { type: type, subcategories: [] };
         } else {
-            const oldCategoryName = categoryModal.dataset.category;
             const oldType = categoryModal.dataset.categoryType;
-            const oldSubcategories = storedCategories[oldCategoryName].subcategories
+            const oldSubcategories = storedCategories[oldCategoryName].subcategories;
             if (oldCategoryName !== categoryName || oldType !== type) {
                 delete storedCategories[oldCategoryName];
-                storedCategories[categoryName] = {type: type, subcategories: oldSubcategories };
+                storedCategories[categoryName] = { type: type, subcategories: oldSubcategories };
+
+                // Update masterExpenses if the category name has changed
+                updateMasterExpensesCategory(oldCategoryName, categoryName);
             }
         }
 
@@ -780,13 +833,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const subcategoryName = subcategoryNameInput.value.trim();
         const storedCategories = JSON.parse(localStorage.getItem('categories')) || {};
 
+        const oldCategoryName = subcategoryModal.dataset.category;
+        const oldSubcategoryName = subcategoryModal.dataset.subcategory;
+
         if (subcategoryModal.querySelector('h2').textContent === 'Add Subcategory') {
             if (!storedCategories[categoryName].subcategories.includes(subcategoryName)) {
                 storedCategories[categoryName].subcategories.push(subcategoryName);
             }
         } else {
-            const oldCategoryName = subcategoryModal.dataset.category;
-            const oldSubcategoryName = subcategoryModal.dataset.subcategory;
             const subcategoryIndex = storedCategories[oldCategoryName].subcategories.indexOf(oldSubcategoryName);
             if (subcategoryIndex > -1) {
                 storedCategories[oldCategoryName].subcategories.splice(subcategoryIndex, 1);
@@ -795,11 +849,44 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!storedCategories[categoryName].subcategories.includes(subcategoryName)) {
                 storedCategories[categoryName].subcategories.push(subcategoryName);
             }
+
+            // Update masterExpenses if the subcategory name has changed
+            if (oldSubcategoryName !== subcategoryName) {
+                updateMasterExpensesSubcategory(oldCategoryName, oldSubcategoryName, subcategoryName);
+            }
         }
 
         localStorage.setItem('categories', JSON.stringify(storedCategories));
         renderCategories();
         closeModal(subcategoryModal, subcategoryForm);
+    }
+
+    // Function to update category name in masterExpenses
+    function updateMasterExpensesCategory(oldCategory, newCategory) {
+        const masterExpenses = JSON.parse(localStorage.getItem('masterExpenses')) || [];
+
+        masterExpenses.forEach(transaction => {
+            if (transaction.Category === oldCategory) {
+                transaction.Category = newCategory;
+            }
+        });
+
+        // Save the updated masterExpenses back to localStorage
+        localStorage.setItem('masterExpenses', JSON.stringify(masterExpenses));
+    }
+
+    // Function to update subcategory name in masterExpenses
+    function updateMasterExpensesSubcategory(category, oldSubcategory, newSubcategory) {
+        const masterExpenses = JSON.parse(localStorage.getItem('masterExpenses')) || [];
+
+        masterExpenses.forEach(transaction => {
+            if (transaction.Category === category && transaction.Subcategory === oldSubcategory) {
+                transaction.Subcategory = newSubcategory;
+            }
+        });
+
+        // Save the updated masterExpenses back to localStorage
+        localStorage.setItem('masterExpenses', JSON.stringify(masterExpenses));
     }
 
     function deleteCategory() {
