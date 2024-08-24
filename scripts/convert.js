@@ -24,12 +24,25 @@ document.addEventListener('DOMContentLoaded', function () {
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js';
         script.onload = () => {
-            convertToCSV(file);
+            if (existingMasterExpenses.length > 0) {
+                const userConsent = confirm('There are already transactions available. Do you want to Merge or Override with new data? Click OK to Merge or Cancel to Override.');
+                if (userConsent) {
+                    convertToCSV(file, 'merge');
+                } else {
+                    convertToCSV(file, 'override');
+                }
+            } else {
+                convertToCSV(file, 'override');
+            }
         };
         document.body.appendChild(script);
+
+        const existingMasterExpenses = JSON.parse(localStorage.getItem('masterExpenses')) || [];
+
+
     });
 
-    async function convertToCSV(file) {
+    async function convertToCSV(file, mode) {
         const reader = new FileReader();
         reader.onload = async function (e) {
             const data = new Uint8Array(e.target.result);
@@ -41,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const csv = XLSX.utils.sheet_to_csv(worksheet, { FS: ',', RS: '\n', strip: false })
                 .split('\n')
                 .map((row, index) =>
-                row.length > 0 ? transformString(row, index).split(',')
+                    row.length > 0 ? transformString(row, index).split(',')
                         .map(cell => `${cell.replace(/,/g, ';')}`) // replace commas within cell data and quote the cell
                         .join(',') : ''
                 ).join('\n');
@@ -66,8 +79,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     updated_at: new Date().toLocaleString(),
                     isCSVProcessed: false
                 };
-                const jsonData = JSON.stringify(csvConversionDetails);
-                localStorage.setItem('csvConversionDetails', jsonData);
+                localStorage.setItem('csvConversionDetails', JSON.stringify(csvConversionDetails));
+
+                // Process the CSV data according to the selected mode
+                utility.updateMasterExpensesFromCSV(mode);
 
                 await writable.close();
                 alert('File successfully saved as CSV.');
@@ -87,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let transformedText = p1.replace(/,/g, ';');
             return ',' + transformedText;
         });
-        outputString = outputString + ',' + (index === 0 ? 'ID' : ''+index);
+        outputString = outputString + ',' + (index === 0 ? 'ID' : '' + index);
         return outputString;
     }
 

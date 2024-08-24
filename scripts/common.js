@@ -273,8 +273,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (document.querySelector('.search')) document.querySelector('.search').style.display = 'block';
     }
 
-    // Function to load CSV data
     const utility = (function () {
+        // Function to load CSV data
         function loadCSV() {
             return new Promise((resolve, reject) => {
                 var xhr = new XMLHttpRequest();
@@ -346,13 +346,25 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        async function updateMasterExpensesFromCSV() {
+        async function updateMasterExpensesFromCSV(mode) {
             try {
                 const csv = await loadCSV();
-                const parsedData = parseCSV(csv);
-                if (parsedData) {
-                    storeDataInLocalStorage(parsedData);
+                const newParsedData = parseCSV(csv);
+    
+                let masterExpenses = getDataFromLocalStorage() || [];
+    
+                if (mode === 'merge') {
+                    masterExpenses = masterExpenses.concat(newParsedData);
+                } else if (mode === 'override') {
+                    masterExpenses = newParsedData;
                 }
+    
+                storeDataInLocalStorage(masterExpenses);
+    
+                // Update CSV conversion status in localStorage
+                const csvConversionDetails = JSON.parse(localStorage.getItem('csvConversionDetails'));
+                csvConversionDetails.isCSVProcessed = true;
+                localStorage.setItem('csvConversionDetails', JSON.stringify(csvConversionDetails));
             } catch (error) {
                 console.error(error);
             }
@@ -364,15 +376,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Check if csv file processed already. if not, procss csv and update latest masterExpenses object into localStorage
             const csvConversionDetails = JSON.parse(localStorage.getItem('csvConversionDetails'));
-            if (csvConversionDetails != undefined && !csvConversionDetails.isCSVProcessed) {
-                await updateMasterExpensesFromCSV();
+            if (csvConversionDetails && !csvConversionDetails.isCSVProcessed) {
+                await updateMasterExpensesFromCSV('override');
                 masterExpenses = getDataFromLocalStorage();
                 csvConversionDetails.isCSVProcessed = true;
                 localStorage.setItem('csvConversionDetails', JSON.stringify(csvConversionDetails));
             } else { // else get masterExpenses object from localstorage
                 masterExpenses = getDataFromLocalStorage();
                 if (!masterExpenses) { // still if not found, update masterExpenses object from csv file (here we may get outdated data).
-                    await updateMasterExpensesFromCSV();
+                    await updateMasterExpensesFromCSV('override');
                     masterExpenses = getDataFromLocalStorage();
                 }
             }
@@ -381,7 +393,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Expose the utility functions to use in other files
         return {
-            initializeMasterData
+            initializeMasterData,
+            updateMasterExpensesFromCSV
         };
     })();
 
