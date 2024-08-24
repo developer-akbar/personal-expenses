@@ -8,7 +8,7 @@ const mobileNavButtons = document.querySelectorAll('.mobile-nav-button');
 const rowDetails = document.querySelector('.row-details');
 
 // Close the popup
-if (closeButtons.length > 0) {
+if (closeButtons.length > 0 && transactionModal) {
     closeButtons.forEach(closeButton => {
         closeButton.addEventListener('click', () => {
             transactionModal.style.display = 'none';
@@ -18,7 +18,7 @@ if (closeButtons.length > 0) {
 
 // Highlighting current page navigation item
 document.querySelectorAll('.navigation ul>li a').forEach(navItem => {
-    if(navItem.getAttribute('href') === location.pathname.replace('/', '')) {
+    if (navItem.getAttribute('href') === location.pathname.replace('/', '')) {
         navItem.parentElement.classList.add('active');
     }
 });
@@ -274,23 +274,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const utility = (function () {
-        // Function to load CSV data
-        function loadCSV() {
-            return new Promise((resolve, reject) => {
-                var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === XMLHttpRequest.DONE) {
-                        if (xhr.status === 200) {
-                            resolve(xhr.responseText);
-                        } else {
-                            reject('Failed to load CSV file');
-                        }
-                    }
-                };
-                xhr.open('GET', 'data/personal-expenses.csv', true); // provide csv file path
-                xhr.send(null);
-            });
-        }
 
         // Function to parse CSV data
         function parseCSV(csv) {
@@ -310,8 +293,8 @@ document.addEventListener('DOMContentLoaded', function () {
             var expenses = data.map(function (row) {
                 var obj = {};
                 for (var i = 0; i < headers.length; i++) {
-                    // Map each header to its corresponding value in the row
-                    if (!Array.from(Object.keys(obj)).includes(headers[i])) {
+					// Map each header to its corresponding value in the row
+                    if (!Object.keys(obj).includes(headers[i])) {
                         obj[headers[i]] = row[i];
                     }
                 }
@@ -346,57 +329,40 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        async function updateMasterExpensesFromCSV(mode) {
-            try {
-                const csv = await loadCSV();
-                const newParsedData = parseCSV(csv);
-    
-                let masterExpenses = getDataFromLocalStorage() || [];
-    
-                if (mode === 'merge') {
-                    masterExpenses = masterExpenses.concat(newParsedData);
-                } else if (mode === 'override') {
-                    masterExpenses = newParsedData;
-                }
-    
-                storeDataInLocalStorage(masterExpenses);
-    
-                // Update CSV conversion status in localStorage
-                const csvConversionDetails = JSON.parse(localStorage.getItem('csvConversionDetails'));
-                csvConversionDetails.isCSVProcessed = true;
-                localStorage.setItem('csvConversionDetails', JSON.stringify(csvConversionDetails));
-            } catch (error) {
-                console.error(error);
+        async function updateMasterExpensesFromCSV(csvData = null, mode = 'override') {
+            let newExpenses = [];
+
+            if (csvData) {
+                newExpenses = parseCSV(csvData);
             }
+
+            let existingExpenses = getDataFromLocalStorage() || [];
+
+            if (mode === 'merge') {
+                existingExpenses = [...existingExpenses, ...newExpenses];
+            } else if (csvData) { // Only override if new csvData is provided
+                existingExpenses = newExpenses;
+            }
+
+            storeDataInLocalStorage(existingExpenses);
         }
 
-        // Initialize masterExpenses
         async function initializeMasterData() {
-            let masterExpenses;
-
-            // Check if csv file processed already. if not, procss csv and update latest masterExpenses object into localStorage
-            const csvConversionDetails = JSON.parse(localStorage.getItem('csvConversionDetails'));
-            if (csvConversionDetails && !csvConversionDetails.isCSVProcessed) {
-                await updateMasterExpensesFromCSV('override');
-                masterExpenses = getDataFromLocalStorage();
-                csvConversionDetails.isCSVProcessed = true;
-                localStorage.setItem('csvConversionDetails', JSON.stringify(csvConversionDetails));
-            } else { // else get masterExpenses object from localstorage
-                masterExpenses = getDataFromLocalStorage();
-                if (!masterExpenses) { // still if not found, update masterExpenses object from csv file (here we may get outdated data).
-                    await updateMasterExpensesFromCSV('override');
-                    masterExpenses = getDataFromLocalStorage();
-                }
+            let masterExpenses = getDataFromLocalStorage();
+            if (!masterExpenses) {
+                console.warn('No masterExpenses found and no CSV data provided.');
             }
             return masterExpenses;
         }
 
-        // Expose the utility functions to use in other files
         return {
             initializeMasterData,
             updateMasterExpensesFromCSV
         };
     })();
+
+    window.utility = utility;
+
 
     // This makes `utility` available globally
     window.utility = utility;

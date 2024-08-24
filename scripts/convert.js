@@ -20,29 +20,59 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Show loader
+        document.getElementById('loader').style.display = 'block';
+
         // Load XLSX library dynamically
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js';
         script.onload = () => {
-            if (existingMasterExpenses.length > 0) {
-                const userConsent = confirm('There are already transactions available. Do you want to Merge or Override with new data? Click OK to Merge or Cancel to Override.');
-                if (userConsent) {
-                    convertToCSV(file, 'merge');
-                } else {
-                    convertToCSV(file, 'override');
-                }
-            } else {
-                convertToCSV(file, 'override');
-            }
+            checkForExistingData(file);
         };
         document.body.appendChild(script);
-
-        const existingMasterExpenses = JSON.parse(localStorage.getItem('masterExpenses')) || [];
-
-
     });
 
-    async function convertToCSV(file, mode) {
+    function checkForExistingData(file) {
+        const existingData = localStorage.getItem('masterExpenses');
+        if (existingData) {
+            // Show modal if data already exists
+            showConsentModal(file);
+        } else {
+            // No existing data, proceed to convert
+            convertToCSV(file);
+        }
+    }
+
+    function showConsentModal(file) {
+        const modal = document.getElementById('consent-modal');
+        const closeButton = modal.querySelector('.close-button');
+        const mergeButton = document.getElementById('mergeButton');
+        const overrideButton = document.getElementById('overrideButton');
+
+        // Show the modal
+        modal.style.display = 'flex';
+
+        // Close the modal
+        closeButton.onclick = () => {
+            modal.style.display = 'none';
+            // Hide loader if the modal is closed without action
+            document.getElementById('loader').style.display = 'none';
+        };
+
+        // When user clicks merge
+        mergeButton.onclick = () => {
+            modal.style.display = 'none';
+            convertToCSV(file, 'merge');
+        };
+
+        // When user clicks override
+        overrideButton.onclick = () => {
+            modal.style.display = 'none';
+            convertToCSV(file, 'override');
+        };
+    }
+
+    async function convertToCSV(file, mode = 'override') {
         const reader = new FileReader();
         reader.onload = async function (e) {
             const data = new Uint8Array(e.target.result);
@@ -50,48 +80,38 @@ document.addEventListener('DOMContentLoaded', function () {
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
 
-            // Convert worksheet to CSV and replace commas within cell data
-            const csv = XLSX.utils.sheet_to_csv(worksheet, { FS: ',', RS: '\n', strip: false })
+            const csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: ',', RS: '\n', strip: false })
                 .split('\n')
                 .map((row, index) =>
                     row.length > 0 ? transformString(row, index).split(',')
-                        .map(cell => `${cell.replace(/,/g, ';')}`) // replace commas within cell data and quote the cell
+                        .map(cell => `${cell.replace(/,/g, ';')}`)
                         .join(',') : ''
                 ).join('\n');
 
-            // Save the CSV file using the File System Access API
             try {
-                const handle = await window.showSaveFilePicker({
-                    suggestedName: 'personal-expenses.csv',
-                    types: [
-                        {
-                            description: 'CSV File',
-                            accept: { 'text/csv': ['.csv'] },
-                        },
-                    ],
-                });
+                // Directly process the CSV data without saving it
+                await utility.updateMasterExpensesFromCSV(csvData, mode);
 
-                const writable = await handle.createWritable();
-                await writable.write(csv);
-
+                
                 // Add csv conversion status and updated time in localstorage
                 const csvConversionDetails = {
                     updated_at: new Date().toLocaleString(),
                     isCSVProcessed: false
                 };
                 localStorage.setItem('csvConversionDetails', JSON.stringify(csvConversionDetails));
-
-                // Process the CSV data according to the selected mode
-                utility.updateMasterExpensesFromCSV(mode);
-
-                await writable.close();
-                alert('File successfully saved as CSV.');
+                
+                alert('Data processed successfully.');
+                location.reload();
             } catch (err) {
-                alert('Error saving file:', err.message);
+                alert('Error processing data:', err.message);
+            } finally {
+                // Hide loader after processing is done
+                document.getElementById('loader').style.display = 'none';
             }
         };
         reader.readAsArrayBuffer(file);
     }
+
 
     // This function helps to replace commas(,) which are delimiter in csv conversion.
     // Not to break the excel file structure when converting to csv

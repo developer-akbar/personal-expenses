@@ -368,10 +368,7 @@ button:hover {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgb(0, 0, 0);
-    background-color: rgba(0, 0, 0, 0.4);
-    /* padding-top: 60px;
-    transform: translate(0%, -56px); */
+    background-color: rgba(0, 0, 0, 0.8);
 }
 
 .modal-content {

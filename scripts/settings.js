@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 localStorage.setItem('accounts', JSON.stringify(defaultAccounts));
                 return defaultAccounts;
             } else {
-                const accountBalances = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
+                const accounts = JSON.parse(localStorage.getItem('masterExpenses')).reduce((acc, expense) => {
                     const account = expense.Account;
                     if (!acc.includes(account)) {
                         acc.push(account);
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return acc;
                 }, []);
 
-                return accountBalances;
+                return accounts;
             }
         }
     }
