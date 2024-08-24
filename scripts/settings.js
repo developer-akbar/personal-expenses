@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const spanElem = document.createElement('span');
             spanElem.classList.add('add-account-btn');
+            spanElem.setAttribute('title', 'Click to add new account');
             groupBox.appendChild(spanElem);
 
             // Add account directly in the specific account group
@@ -395,7 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountModalTitle.textContent = 'Edit Account';
             accountNameInput.value = account;
             accountIdInput.value = account;
-            accountGroupSelect.disabled = true;
+            // accountGroupSelect.disabled = true;
             deleteAccountBtn.style.display = 'inline';
             document.querySelector('.save-account-btn').style.display = 'none';
 
@@ -409,7 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             accountModalTitle.textContent = 'Add New Account';
             accountNameInput.value = '';
             accountIdInput.value = '';
-            accountGroupSelect.disabled = false;
+            // accountGroupSelect.disabled = false;
             deleteAccountBtn.style.display = 'none';
             document.querySelector('.save-account-btn').style.display = 'inline';
         }
@@ -575,6 +576,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const spanElem = document.createElement('span');
             spanElem.classList.add('add-subcategory-btn');
+            spanElem.setAttribute('title', 'Click to add new subcategory');
             categoryBox.appendChild(spanElem);
 
             // Add subcategory directly in the specific category

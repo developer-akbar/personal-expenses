@@ -69,10 +69,11 @@
 .add-account-btn::after, .add-subcategory-btn::after {
     content: "\2795";
     position: absolute;
-    bottom: 0.5rem;
+    bottom: 0.25rem;
     width: 100%;
     cursor: pointer;
     text-align: center;
+    font-size: 1rem;
 }
 
 .group-container .group-box .mapped-accounts li,
