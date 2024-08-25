@@ -306,16 +306,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return expenses;
         }
 
-        function storeDataInLocalStorage(data) {
-            try {
-                const jsonData = JSON.stringify(data);
-                localStorage.setItem('masterExpenses', jsonData);
-                console.log('Data stored in localStorage:', data);
-            } catch (e) {
-                console.error('Error storing data in localStorage', e);
-            }
-        }
-
         function getDataFromLocalStorage() {
             try {
                 const jsonData = localStorage.getItem('masterExpenses');
@@ -329,99 +319,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        async function updateMasterExpensesFromCSV(csvData = null, mode = 'override') {
-            let newExpenses = [];
-
-            if (csvData) {
-                newExpenses = parseCSV(csvData);
-            }
-
-            let existingExpenses = getDataFromLocalStorage() || [];
-
-            if (mode === 'merge') {
-                existingExpenses = [...existingExpenses, ...newExpenses];
-            } else if (csvData) { // Only override if new csvData is provided
-                existingExpenses = newExpenses;
-            }
-
-            storeDataInLocalStorage(existingExpenses);
-
-            // Update accounts
-            const newAccounts = newExpenses.reduce((acc, expense) => {
-                const account = expense.Account;
-                if (!acc.includes(account)) {
-                    acc.push(account);
-                }
-                if (expense["Income/Expense"] === "Transfer-Out") {
-                    const targetAccount = expense.Category;
-                    if (!acc.includes(targetAccount)) {
-                        acc.push(targetAccount);
-                    }
-                }
-                return acc;
-            }, []);
-
-            let existingAccounts = JSON.parse(localStorage.getItem('accounts')) || [];
-            if (mode === 'merge') {
-                existingAccounts = [...new Set([...existingAccounts, ...newAccounts])]; // Avoid duplicates
-            } else {
-                existingAccounts = newAccounts;
-            }
-            localStorage.setItem('accounts', JSON.stringify(existingAccounts));
-
-            // Update categories
-            const newCategories = newExpenses.reduce((acc, expense) => {
-                if (expense["Income/Expense"] !== 'Transfer-Out') {
-                    if (!acc[expense.Category]) {
-                        acc[expense.Category] = { type: expense["Income/Expense"], subcategories: [] };
-                    }
-                    if (expense.Subcategory && !acc[expense.Category].subcategories.includes(expense.Subcategory)) {
-                        acc[expense.Category].subcategories.push(expense.Subcategory);
-                    }
-                }
-                return acc;
-            }, {});
-
-            let existingCategories = JSON.parse(localStorage.getItem('categories')) || {};
-            if (mode === 'merge') {
-                for (let category in newCategories) {
-                    if (existingCategories[category]) {
-                        const existingSubcategories = existingCategories[category].subcategories;
-                        const newSubcategories = newCategories[category].subcategories;
-                        existingCategories[category].subcategories = [...new Set([...existingSubcategories, ...newSubcategories])]; // Avoid duplicates
-                    } else {
-                        existingCategories[category] = newCategories[category];
-                    }
-                }
-            } else {
-                existingCategories = newCategories;
-            }
-            localStorage.setItem('categories', JSON.stringify(existingCategories));
-
-            // Update accountMappings (similar approach as above)
-            let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || { "Cash": ["Cash"], "Bank Accounts": ["Bank Accounts"], "Credit Cards": ["Credit Cards"] };
-            if (mode === 'merge') {
-                newAccounts.forEach(account => {
-                    if (!accountMappings['Unmapped Accounts']) {
-                        accountMappings['Unmapped Accounts'] = [];
-                    }
-                    if (!existingAccounts.includes(account) && !accountMappings['Unmapped Accounts'].includes(account)) {
-                        accountMappings['Unmapped Accounts'].push(account);
-                    }
-                });
-            } else {
-                accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || { "Cash": ["Cash"], "Bank Accounts": ["Bank Accounts"], "Credit Cards": ["Credit Cards"] };
-            }
-            localStorage.setItem('accountMappings', JSON.stringify(accountMappings));
-
-            // Update accountGroups (use similar approach as categories if needed)
-            let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [{ "id": 1, "name": "Cash" }, { "id": 2, "name": "Bank Accounts" }, { "id": 3, "name": "Credit Cards" }];
-            if (mode === 'merge') {
-                // Logic to merge new account groups, if needed
-            }
-            localStorage.setItem('accountGroups', JSON.stringify(accountGroups));
-        }
-
         async function initializeMasterData() {
             let masterExpenses = getDataFromLocalStorage();
             if (!masterExpenses) {
@@ -432,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return {
             initializeMasterData,
-            updateMasterExpensesFromCSV
+            parseCSV
         };
     })();
 

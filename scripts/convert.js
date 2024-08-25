@@ -96,8 +96,67 @@ document.addEventListener('DOMContentLoaded', function () {
                         : '';
                 }).join('\n');
 
-                // Process the CSV data without saving it
-                await utility.updateMasterExpensesFromCSV(rows, mode);
+                let newTransactions = utility.parseCSV(rows);
+
+                // Fetch existing transactions from storage
+                let existingTransactions = JSON.parse(localStorage.getItem('masterExpenses'));
+
+                // Find duplicates
+                // const duplicates = findDuplicates(existingTransactions, newTransactions);
+
+                if (mode === 'merge' && newTransactions.length > 0) {
+                    const duplicates = [];
+                    const nonDuplicates = [];
+
+                    newTransactions.forEach(newTransaction => {
+                        const isDuplicate = existingTransactions.some(existingTransaction =>
+                            isDuplicateTransaction(existingTransaction, newTransaction)
+                        );
+
+                        if (isDuplicate) {
+                            duplicates.push(newTransaction);
+                        } else {
+                            nonDuplicates.push(newTransaction);
+                        }
+                    });
+
+                    if (duplicates.length > 0) {
+                        // Show duplicate summary and get user's decision
+                        const userDecision = await showDuplicateSummary(duplicates);
+
+                        switch (userDecision) {
+                            case 'skip':
+                                // Keep non-duplicates only
+                                existingTransactions = [...existingTransactions, ...nonDuplicates];
+                                break;
+
+                            case 'override':
+                                // Remove duplicates from existing transactions and add all new transactions
+                                existingTransactions = existingTransactions.filter(existingTxn =>
+                                    !duplicates.some(dup => isDuplicateTransaction(dup, existingTxn))
+                                );
+                                existingTransactions = [...existingTransactions, ...duplicates, ...nonDuplicates];
+                                break;
+
+                            case 'manual':
+                                // Handle manually based on user input
+                                duplicates.forEach(expense => {
+                                    const transactionRow = createTransactionRow(expense);
+                                    document.getElementById('duplicate-table').querySelector('tbody').appendChild(transactionRow);
+                                });
+                                document.getElementById('duplicate-list').style.display = 'block';
+                                break;
+                        }
+                    } else {
+                        existingTransactions = [...existingTransactions, ...newTransactions];
+                    }
+                } else if (csvData) { // Only override if new csvData is provided
+                    existingTransactions = newTransactions;
+                }
+
+                localStorage.setItem('masterExpenses', JSON.stringify(existingTransactions));
+
+                updateAccountsAndCategories(newTransactions, mode);
 
                 // Save CSV conversion status and update time in local storage
                 const csvConversionDetails = {
@@ -163,5 +222,111 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             return `${years} year${years === 1 ? '' : 's'} ago`;
         }
+    }
+
+    // Function to check if two transactions are duplicates
+    function isDuplicateTransaction(txn1, txn2) {
+        return txn1.Date === txn2.Date &&
+            txn1.Account === txn2.Account &&
+            txn1.Category === txn2.Category &&
+            txn1.Subcategory === txn2.Subcategory &&
+            txn1.Note === txn2.Note &&
+            txn1.INR === txn2.INR &&
+            txn1["Income/Expense"] === txn2["Income/Expense"];
+    }
+
+    // Function to show duplicate summary and get user decision
+    async function showDuplicateSummary(duplicates) {
+        return new Promise((resolve) => {
+            // Display summary modal to the user
+            const modal = document.getElementById('duplicate-modal');
+            const skipButton = document.getElementById('skipButton');
+            const overrideDuplicates = document.getElementById('override-duplicates');
+            const manualButton = document.getElementById('manualButton');
+
+            modal.querySelector('.duplicate-count').textContent = duplicates.length;
+            modal.style.display = 'flex';
+
+            skipButton.onclick = () => resolve('skip');
+            overrideDuplicates.onclick = () => resolve('override');
+            manualButton.onclick = () => resolve('manual');
+        });
+    }
+
+    function updateAccountsAndCategories(newExpenses, mode) {
+        // Update accounts
+        const newAccounts = newExpenses.reduce((acc, expense) => {
+            const account = expense.Account;
+            if (!acc.includes(account)) {
+                acc.push(account);
+            }
+            if (expense["Income/Expense"] === "Transfer-Out") {
+                const targetAccount = expense.Category;
+                if (!acc.includes(targetAccount)) {
+                    acc.push(targetAccount);
+                }
+            }
+            return acc;
+        }, []);
+
+        let existingAccounts = JSON.parse(localStorage.getItem('accounts')) || [];
+        if (mode === 'merge') {
+            existingAccounts = [...new Set([...existingAccounts, ...newAccounts])]; // Avoid duplicates
+        } else {
+            existingAccounts = newAccounts;
+        }
+        localStorage.setItem('accounts', JSON.stringify(existingAccounts));
+
+        // Update categories
+        const newCategories = newExpenses.reduce((acc, expense) => {
+            if (expense["Income/Expense"] !== 'Transfer-Out') {
+                if (!acc[expense.Category]) {
+                    acc[expense.Category] = { type: expense["Income/Expense"], subcategories: [] };
+                }
+                if (expense.Subcategory && !acc[expense.Category].subcategories.includes(expense.Subcategory)) {
+                    acc[expense.Category].subcategories.push(expense.Subcategory);
+                }
+            }
+            return acc;
+        }, {});
+
+        let existingCategories = JSON.parse(localStorage.getItem('categories')) || {};
+        if (mode === 'merge') {
+            for (let category in newCategories) {
+                if (existingCategories[category]) {
+                    const existingSubcategories = existingCategories[category].subcategories;
+                    const newSubcategories = newCategories[category].subcategories;
+                    existingCategories[category].subcategories = [...new Set([...existingSubcategories, ...newSubcategories])]; // Avoid duplicates
+                } else {
+                    existingCategories[category] = newCategories[category];
+                }
+            }
+        } else {
+            existingCategories = newCategories;
+        }
+        localStorage.setItem('categories', JSON.stringify(existingCategories));
+
+        // Update accountMappings (similar approach as above)
+        let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || { "Cash": ["Cash"], "Bank Accounts": ["Bank Accounts"], "Credit Cards": ["Credit Cards"] };
+        if (mode === 'merge') {
+            newAccounts.forEach(account => {
+                if (!accountMappings['Unmapped Accounts']) {
+                    accountMappings['Unmapped Accounts'] = [];
+                }
+                if (!existingAccounts.includes(account) && !accountMappings['Unmapped Accounts'].includes(account)) {
+                    accountMappings['Unmapped Accounts'].push(account);
+                }
+            });
+        } else {
+            accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || { "Cash": ["Cash"], "Bank Accounts": ["Bank Accounts"], "Credit Cards": ["Credit Cards"] };
+        }
+        localStorage.setItem('accountMappings', JSON.stringify(accountMappings));
+
+        // Update accountGroups (use similar approach as categories if needed)
+        let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [{ "id": 1, "name": "Cash" }, { "id": 2, "name": "Bank Accounts" }, { "id": 3, "name": "Credit Cards" }];
+        if (mode === 'merge') {
+            // Logic to merge new account groups, if needed
+        }
+        localStorage.setItem('accountGroups', JSON.stringify(accountGroups));
     }
 });

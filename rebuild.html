@@ -32,6 +32,29 @@
         </div>
     </div>
 
+    <!-- Modal for Duplicate Record Handling -->
+    <div id="duplicate-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Duplicate Records Found</h2>
+            <p><span class="duplicate-count">0</span> duplicate transactions were found. What would you like to do?</p>
+            <div class="duplicate-options">
+                <button id="skipButton" class="modal-btn">Skip Duplicates</button>
+                <button id="override-duplicates" class="modal-btn">Override Duplicates</button>
+                <button id="manualButton" class="modal-btn" disabled>Manual Review</button>
+            </div>
+            <!-- Area to display duplicate records for manual review (if needed) -->
+            <div id="duplicate-list" style="display: none;">
+                <h3>Review Duplicates:</h3>
+                <table id="duplicate-table">
+                    <tbody>
+                        <!-- Duplicate records will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script src="scripts/common.js"></script>
     <script src="scripts/convert.js"></script>
 </body>

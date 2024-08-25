@@ -327,6 +327,11 @@ button:hover {
     background-color: #003366;
 }
 
+button:disabled, button:disabled:hover {
+    background-color: #4e4949;
+    cursor: not-allowed;
+}
+
 .transaction-day {
     border-radius: 5px;
     padding: 10px;
