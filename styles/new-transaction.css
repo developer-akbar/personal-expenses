@@ -38,6 +38,10 @@
     margin-bottom: 0.5em;
 }
 
+.form-row:has(#description) {
+    height: 80px;
+}
+
 .form-row label {
     flex-basis: 15ch;
 }

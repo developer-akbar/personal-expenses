@@ -80,30 +80,37 @@ document.addEventListener('DOMContentLoaded', function () {
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
 
-            const csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: ',', RS: '\n', strip: false })
-                .split('\n')
-                .map((row, index) =>
-                    row.length > 0 ? transformString(row, index).split(',')
-                        .map(cell => `${cell.replace(/,/g, ';')}`)
-                        .join(',') : ''
-                ).join('\n');
-
             try {
-                // Directly process the CSV data without saving it
-                await utility.updateMasterExpensesFromCSV(csvData, mode);
+                // Convert worksheet to CSV data, replacing line breaks in cells
+                let csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: ',', RS: '\n', strip: false });
 
-                
-                // Add csv conversion status and updated time in localstorage
+                // Handle line breaks within cells
+                csvData = csvData.replace(/"([^"]*)"/g, function (match, p1) {
+                    return p1.replace(/\n/g, '|new-line|').replace(/,/g, '|comma|');
+                });
+
+                // Now split the CSV into rows
+                const rows = csvData.split('\n').map((row, index) => {
+                    return row.length > 0
+                        ? transformString(row, index).split(',').map(cell => `${cell.replace(/,/g, ';')}`).join(',')
+                        : '';
+                }).join('\n');
+
+                // Process the CSV data without saving it
+                await utility.updateMasterExpensesFromCSV(rows, mode);
+
+                // Save CSV conversion status and update time in local storage
                 const csvConversionDetails = {
                     updated_at: new Date().toLocaleString(),
                     isCSVProcessed: false
                 };
                 localStorage.setItem('csvConversionDetails', JSON.stringify(csvConversionDetails));
-                
+
                 alert('Data processed successfully.');
                 location.reload();
             } catch (err) {
                 alert('Error processing data:', err.message);
+                console.error('Error processing data:', err);
             } finally {
                 // Hide loader after processing is done
                 document.getElementById('loader').style.display = 'none';
@@ -115,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // This function helps to replace commas(,) which are delimiter in csv conversion.
     // Not to break the excel file structure when converting to csv
+    // Replace line breaks inside the quoted text with a pipe symbol
     function transformString(inputString, index) {
         // Find all quoted texts after commas and replace them accordingly
         let outputString = inputString.replace(/,"([^"]*)"/g, function (match, p1) {

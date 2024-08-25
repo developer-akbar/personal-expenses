@@ -381,7 +381,7 @@ button:hover {
     max-width: 80%;
     border-radius: 8px;
     position: relative;
-    max-height: 50dvh;
+    max-height: 80dvh;
     overflow: auto;
 }
 

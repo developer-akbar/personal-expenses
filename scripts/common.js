@@ -169,7 +169,7 @@ function createTransactionRow(expense) {
     noteCell.textContent = expense.Note;
     noteCell.className = 'note';
     const descriptionCell = row.insertCell();
-    descriptionCell.textContent = expense.Description;
+    descriptionCell.textContent = expense.Description.replaceAll('|new-line|', '\n').replaceAll('|comma|', ',');
     descriptionCell.className = 'description';
 
     row.appendChild(checkboxCell);
@@ -198,7 +198,7 @@ function showTransactionDetails(expense) {
             <tr><td>Category</td> <td>${expense.Category}</td></tr>
             <tr><td>Amount</td> <td>${formatIndianCurrency(parseFloat(expense.INR))}</td></tr>
             <tr><td>Note</td> <td>${expense.Note}</td></tr>
-            <tr><td>Description</td> <td>${expense.Description}</td></tr>
+            <tr><td>Description</td> <td>${expense.Description.replaceAll('|new-line|', '<br/>').replaceAll('|comma|', ',')}</td></tr>
         </table>
         <div class="cta-buttons flex">
             <!--<button class="edit-button" onClick="editTransaction(${expense.ID})">Edit</button>-->
@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var expenses = data.map(function (row) {
                 var obj = {};
                 for (var i = 0; i < headers.length; i++) {
-					// Map each header to its corresponding value in the row
+                    // Map each header to its corresponding value in the row
                     if (!Object.keys(obj).includes(headers[i])) {
                         obj[headers[i]] = row[i];
                     }
@@ -345,6 +345,81 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             storeDataInLocalStorage(existingExpenses);
+
+            // Update accounts
+            const newAccounts = newExpenses.reduce((acc, expense) => {
+                const account = expense.Account;
+                if (!acc.includes(account)) {
+                    acc.push(account);
+                }
+                if (expense["Income/Expense"] === "Transfer-Out") {
+                    const targetAccount = expense.Category;
+                    if (!acc.includes(targetAccount)) {
+                        acc.push(targetAccount);
+                    }
+                }
+                return acc;
+            }, []);
+
+            let existingAccounts = JSON.parse(localStorage.getItem('accounts')) || [];
+            if (mode === 'merge') {
+                existingAccounts = [...new Set([...existingAccounts, ...newAccounts])]; // Avoid duplicates
+            } else {
+                existingAccounts = newAccounts;
+            }
+            localStorage.setItem('accounts', JSON.stringify(existingAccounts));
+
+            // Update categories
+            const newCategories = newExpenses.reduce((acc, expense) => {
+                if (expense["Income/Expense"] !== 'Transfer-Out') {
+                    if (!acc[expense.Category]) {
+                        acc[expense.Category] = { type: expense["Income/Expense"], subcategories: [] };
+                    }
+                    if (expense.Subcategory && !acc[expense.Category].subcategories.includes(expense.Subcategory)) {
+                        acc[expense.Category].subcategories.push(expense.Subcategory);
+                    }
+                }
+                return acc;
+            }, {});
+
+            let existingCategories = JSON.parse(localStorage.getItem('categories')) || {};
+            if (mode === 'merge') {
+                for (let category in newCategories) {
+                    if (existingCategories[category]) {
+                        const existingSubcategories = existingCategories[category].subcategories;
+                        const newSubcategories = newCategories[category].subcategories;
+                        existingCategories[category].subcategories = [...new Set([...existingSubcategories, ...newSubcategories])]; // Avoid duplicates
+                    } else {
+                        existingCategories[category] = newCategories[category];
+                    }
+                }
+            } else {
+                existingCategories = newCategories;
+            }
+            localStorage.setItem('categories', JSON.stringify(existingCategories));
+
+            // Update accountMappings (similar approach as above)
+            let accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || { "Cash": ["Cash"], "Bank Accounts": ["Bank Accounts"], "Credit Cards": ["Credit Cards"] };
+            if (mode === 'merge') {
+                newAccounts.forEach(account => {
+                    if (!accountMappings['Unmapped Accounts']) {
+                        accountMappings['Unmapped Accounts'] = [];
+                    }
+                    if (!existingAccounts.includes(account) && !accountMappings['Unmapped Accounts'].includes(account)) {
+                        accountMappings['Unmapped Accounts'].push(account);
+                    }
+                });
+            } else {
+                accountMappings = JSON.parse(localStorage.getItem('accountMappings')) || { "Cash": ["Cash"], "Bank Accounts": ["Bank Accounts"], "Credit Cards": ["Credit Cards"] };
+            }
+            localStorage.setItem('accountMappings', JSON.stringify(accountMappings));
+
+            // Update accountGroups (use similar approach as categories if needed)
+            let accountGroups = JSON.parse(localStorage.getItem('accountGroups')) || [{ "id": 1, "name": "Cash" }, { "id": 2, "name": "Bank Accounts" }, { "id": 3, "name": "Credit Cards" }];
+            if (mode === 'merge') {
+                // Logic to merge new account groups, if needed
+            }
+            localStorage.setItem('accountGroups', JSON.stringify(accountGroups));
         }
 
         async function initializeMasterData() {

@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }
             document.getElementById('note').value = transaction.Note;
             document.getElementById('amount').value = transaction.INR;
-            document.getElementById('description').value = transaction.Description;
+            document.getElementById('description').value = transaction.Description.replaceAll('|new-line|', '\n').replaceAll('|comma|', ',');
 
             document.querySelector('.submit-btn').style.display = 'none';
             document.querySelector('.delete-button').style.display = 'block';

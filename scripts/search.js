@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
         const masterData = await utility.initializeMasterData();
         if (masterData === null) return;
-        
+
         let searchResults = masterData.filter(expense => {
             const description = expense.Description.toLowerCase();
             const note = expense.Note.toLowerCase();
@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             const descriptionCell = row.insertCell();
-            descriptionCell.textContent = expense.Description;
+            descriptionCell.textContent = expense.Description.replaceAll('|new-line|', '\n').replaceAll('|comma|', ',');
             descriptionCell.classList.add('description');
 
             const amountCell = row.insertCell();
